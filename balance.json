@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "stageScale": {
+    "hp": 0.075,
+    "power": 0.25,
+    "bossPower": 0.25,
+    "chapterPowerExp": 0,
+    "elitePowerMul": 0.8,
+    "earlyPowerMul": 0.62,
+    "earlyPowerChapters": 2
+  },
+  "stageWave": {
+    "thirdFoeChapter": 999
+  },
+  "chapterScale": {
+    "start": 6,
+    "step": 0.03,
+    "cap": 1.5
+  },
+  "bossBase": {
+    "hp": 1020,
+    "power": 34
+  },
+  "monsterBaseHp": {
+    "heavy": 300,
+    "light": 225
+  },
+  "monsterBasePower": {
+    "heavy": 44,
+    "light": 31
+  },
+  "monsterInterval": {
+    "heavy": 6.6,
+    "swift": 4.8,
+    "light": 5.5
+  },
+  "enemyModifiers": {
+    "eliteHp": 1.5,
+    "elitePower": 1.25,
+    "conditionEliteHp": 1.5,
+    "conditionElitePower": 1.2,
+    "slowInterval": 1.3,
+    "slowPower": 1.25
+  },
+  "expeditionReward": {
+    "base": 68,
+    "perFloor": 6,
+    "bossBonus": 120,
+    "cap": 5000
+  }
+}
