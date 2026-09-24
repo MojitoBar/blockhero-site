@@ -47,5 +47,31 @@
     "perFloor": 6,
     "bossBonus": 120,
     "cap": 5000
+  },
+  "heroPriceGold": {
+    "normal": 600,
+    "rare": 12000
+  },
+  "heroPriceTokens": {
+    "normal": 25,
+    "rare": 90,
+    "legendary": 250
+  },
+  "tokenRewards": {
+    "dailyAllClear": 3,
+    "streakBonus": 10,
+    "expeditionMilestone": 2,
+    "campaignBoss": 5,
+    "achievement": 10,
+    "heroLevel": 3
+  },
+  "gachaCostTokens": {
+    "normal": 5,
+    "rare": 18,
+    "legendary": 50
+  },
+  "gachaRules": {
+    "refundPct": 0.4,
+    "pityLimit": 3
   }
 }
