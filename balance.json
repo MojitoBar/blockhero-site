@@ -73,5 +73,12 @@
   "gachaRules": {
     "refundPct": 0.4,
     "pityLimit": 3
+  },
+  "heroRelease": {
+    "releasedBatch": 0
+  },
+  "tierPower": {
+    "rare": 1.1,
+    "legendary": 1
   }
 }
