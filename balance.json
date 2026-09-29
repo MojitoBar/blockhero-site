@@ -55,7 +55,7 @@
   "heroPriceTokens": {
     "normal": 25,
     "rare": 90,
-    "legendary": 250
+    "legendary": 375
   },
   "tokenRewards": {
     "dailyAllClear": 3,
@@ -68,17 +68,24 @@
   "gachaCostTokens": {
     "normal": 5,
     "rare": 18,
-    "legendary": 50
+    "legendary": 75
   },
   "gachaRules": {
     "refundPct": 0.4,
     "pityLimit": 3
   },
   "heroRelease": {
-    "releasedBatch": 5
+    "releasedBatch": 6
   },
   "tierPower": {
     "rare": 1.15,
-    "legendary": 1
+    "legendary": 1.3
+  },
+  "tierHp": {
+    "rare": 1.05,
+    "legendary": 1.15
+  },
+  "tierOpeningCharge": {
+    "legendary": 4
   }
 }
