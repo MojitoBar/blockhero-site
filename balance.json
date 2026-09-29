@@ -77,6 +77,10 @@
   "heroRelease": {
     "releasedBatch": 6
   },
+  "campBase": {
+    "heal": 13,
+    "shield": 12
+  },
   "tierPower": {
     "rare": 1.15,
     "legendary": 1.3
