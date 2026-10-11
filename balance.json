@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "fxSpeed": 0.8,
   "stageScale": {
     "hp": 0.075,
     "power": 0.25,
@@ -7,7 +8,8 @@
     "chapterPowerExp": 0,
     "elitePowerMul": 0.8,
     "earlyPowerMul": 0.62,
-    "earlyPowerChapters": 2
+    "earlyPowerChapters": 2,
+    "earlyHpMul": 1
   },
   "stageWave": {
     "thirdFoeChapter": 999
@@ -91,5 +93,37 @@
   },
   "tierOpeningCharge": {
     "legendary": 4
-  }
+  },
+  "renown": {
+    "perLevel": 0.005,
+    "cap": 0.06
+  },
+  "trainingDiscount": {
+    "rate": 0.5,
+    "gap": 5
+  },
+  "featuredBonus": {
+    "rate": 0.3,
+    "dailyWinCap": 3,
+    "dailyGoldCap": 1000
+  },
+  "growthCurves": {
+    "frontHp": 0.10,
+    "frontPower": 0.05,
+    "dpsHp": 0.07,
+    "dpsPower": 0.06,
+    "supportHp": 0.08,
+    "supportPower": 0.06
+  },
+  "adRewards": {
+    "doubleRewardDailyCap": 2,
+    "freeRecruitDailyCap": 1
+  },
+  "welcomeRewards": {
+    "day2Ticket": 1,
+    "day3Tokens": 20
+  },
+  "firstSession": 0,
+  "homeReturn": 1,
+  "welcomeGift": 1
 }
