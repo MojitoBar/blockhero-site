@@ -125,5 +125,11 @@
   },
   "firstSession": 0,
   "homeReturn": 1,
-  "welcomeGift": 1
+  "welcomeGift": 1,
+  "eventHalloween2026": {
+    "enabled": 1,
+    "extendDays": 0,
+    "startAt": 0
+  }
 }
+
