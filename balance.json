@@ -130,5 +130,23 @@
     "enabled": 1,
     "extendDays": 0,
     "startAt": 1792102670606
-  }
+  },
+  "operatorGifts": [
+    {
+      "id": "g-20261018-f00ff8",
+      "to": [
+        "BH-ZM43ZAGS"
+      ],
+      "reward": {
+        "gold": 5000,
+        "tokens": 30,
+        "tickets": {
+          "normal": 1,
+          "rare": 1
+        }
+      },
+      "message": "테스트 선물이에요! 모험을 응원해요.",
+      "expiresAt": "2026-10-21T10:46:47.536Z"
+    }
+  ]
 }
