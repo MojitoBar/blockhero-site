@@ -9,7 +9,7 @@
     "elitePowerMul": 0.8,
     "earlyPowerMul": 0.62,
     "earlyPowerChapters": 2,
-    "earlyHpMul": 1
+    "earlyHpMul": 0.55
   },
   "stageWave": {
     "thirdFoeChapter": 999
@@ -123,7 +123,7 @@
     "day2Ticket": 1,
     "day3Tokens": 20
   },
-  "firstSession": 0,
+  "firstSession": 1,
   "homeReturn": 1,
   "welcomeGift": 1,
   "eventHalloween2026": {
