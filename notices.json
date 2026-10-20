@@ -17,6 +17,10 @@
         "ko": {
           "title": "1.1.17 업데이트 — 무한 원정 개편·유물 도감",
           "body": "이번 업데이트로 모험이 한층 깊어졌어요.\n\n**무한 원정 개편**\n- 원정 안에서 모든 유물을 모아 보는 **유물 도감**이 생겼어요.\n- 유물이 발동하면 전투와 보드에서 바로 알 수 있게 효과가 보여요.\n- 원정이 끝나면 유물마다 얼마나 활약했는지 기록으로 보여 줘요.\n\n**전투**\n- 블럭을 한 번에 5개 이상 터뜨리면 필살기 블럭이 생겨요.\n- 연쇄가 이어지면 보드 테두리를 따라 빛이 돌아요.\n- 광고를 보고 부활이 안 되던 문제를 고쳤어요.\n\n**성장과 보상**\n- 일일 미션 보상이 크게 늘었어요.\n- 원정 결과에서도 광고를 보고 골드를 2배로 받을 수 있어요.\n- 중반 이후 훈련비와 고급 영웅 영입 가격이 올랐어요.\n\n**편의**\n- 특별 상품과 설정 화면을 새로 정리했어요.\n- 광장 왼쪽 위에서 공지사항을 볼 수 있어요.\n\n즐거운 모험 되세요!"
+        },
+        "en": {
+          "title": "1.1.17 — Expedition & Codex",
+          "body": "This update takes your adventure even deeper.\n\n**Endless Expedition Revamp**\n- The new **Relic Codex** lets you browse every relic you can find on an expedition.\n- When a relic activates, its effect now shows right on the battlefield and the board.\n- When an expedition ends, a record shows how much each relic helped.\n\n**Battle**\n- Clear 5 or more blocks at once to create a finisher block.\n- As a chain keeps going, light runs around the edge of the board.\n- Fixed an issue where watching an ad didn't revive your heroes.\n\n**Growth & Rewards**\n- Daily mission rewards have been greatly increased.\n- You can now watch an ad on expedition results to double your gold too.\n- Training costs and Rare hero recruit prices are higher from the mid-game on.\n\n**Convenience**\n- Special Offers and the Settings screen have been reorganized.\n- You can check notices at the top left of the plaza.\n\nEnjoy your adventure!"
         }
       }
     },
@@ -40,6 +44,10 @@
         "ko": {
           "title": "할로윈 축제 — 11/2(월)까지",
           "body": "쉼터 광장에 할로윈 축제가 열렸어요.\n\n**기간**\n지금부터 11/2(월) 23:59까지\n\n**축제 미션**\n- 전투 10번 이기기 → 증표 10개\n- 보스 3번 쓰러뜨리기 → 증표 30개\n- 3연쇄 20번 만들기 → 증표 20개\n- 무한 원정 5층 도달 → 증표 30개\n- 모든 미션 완료 → 증표 40개\n\n**할로윈 스킨**\n호박 기사(이그니스)·유령 망토(토토)·꼬마 마녀(벨)·뱀파이어(세라) 스킨을 [영웅 영입] › [구매] 탭에서 증표 50개씩에 살 수 있어요. 스킨을 입은 영웅은 블럭과 스킬도 할로윈으로 바뀌어요.\n\n미션은 광장의 [할로윈 축제] 카드에서 확인할 수 있어요."
+        },
+        "en": {
+          "title": "Halloween Fest — Until 11/2",
+          "body": "A Halloween festival has opened in the camp plaza.\n\n**Period**\nNow through Mon 11/2, 23:59\n\n**Festival Missions**\n- Win 10 battles → 10 tokens\n- Defeat 3 bosses → 30 tokens\n- Make 20 triple chains → 20 tokens\n- Reach floor 5 of the endless expedition → 30 tokens\n- Complete all missions → 40 tokens\n\n**Halloween Outfits**\nPumpkin (Ignis), Ghost Cloak (Toto), Little Witch (Bell), and Vampire (Sera) outfits are 50 tokens each in [Recruit] › [Buy]. Heroes wearing an outfit get Halloween blocks and skills too.\n\nCheck your missions on the [Halloween] card in the plaza."
         }
       }
     }
