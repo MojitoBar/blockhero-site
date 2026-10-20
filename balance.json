@@ -133,20 +133,20 @@
   },
   "operatorGifts": [
     {
-      "id": "g-20261018-f00ff8",
+      "id": "g-20261020-830713",
       "to": [
-        "BH-ZM43ZAGS"
+        "BH-68YQ38FD"
       ],
       "reward": {
-        "gold": 5000,
-        "tokens": 30,
+        "gold": 3000,
+        "tokens": 20,
         "tickets": {
-          "normal": 1,
-          "rare": 1
+          "normal": 0,
+          "rare": 0
         }
       },
-      "message": "테스트 선물이에요! 모험을 응원해요.",
-      "expiresAt": "2026-10-21T10:46:47.536Z"
+      "message": "광고 부활 오류로 불편을 드려 죄송해요. 작은 사과 선물이에요.",
+      "expiresAt": "2026-11-03T04:32:29.412Z"
     }
   ]
 }
