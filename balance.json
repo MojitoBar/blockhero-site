@@ -131,6 +131,9 @@
     "extendDays": 0,
     "startAt": 1792102670606
   },
+  "iapIos": {
+    "reviewOpen": 1
+  },
   "operatorGifts": [
     {
       "id": "g-20261020-830713",
