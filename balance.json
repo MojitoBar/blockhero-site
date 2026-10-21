@@ -167,5 +167,12 @@
       "message": "광고 부활 오류로 불편을 드려 죄송해요. 작은 사과 선물이에요.",
       "expiresAt": "2026-11-03T05:56:52.520Z"
     }
-  ]
+  ],
+  "i18n": {
+    "autoDetect": 1,
+    "enSelectable": 1,
+    "jaSelectable": 1,
+    "arSelectable": 1,
+    "zhSelectable": 1
+  }
 }
