@@ -174,5 +174,17 @@
     "jaSelectable": 1,
     "arSelectable": 1,
     "zhSelectable": 1
+  },
+  "heroLevel": {
+    "cap": 100
+  },
+  "levelCurve": {
+    "enabled": 1
+  },
+  "camp": {
+    "levelLink": 1
+  },
+  "campExt": {
+    "maxLevel": 12
   }
 }
