@@ -117,7 +117,12 @@
   },
   "adRewards": {
     "doubleRewardDailyCap": 3,
-    "freeRecruitDailyCap": 2
+    "freeRecruitDailyCap": 2,
+    "expeditionDoubleDailyCap": 1,
+    "continueDailyCap": 2,
+    "freeTrainDailyCap": 1,
+    "freeTrainGoldCap": 3000,
+    "dailyTotalCap": 8
   },
   "welcomeRewards": {
     "day2Ticket": 1,
