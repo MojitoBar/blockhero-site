@@ -116,8 +116,8 @@
     "supportPower": 0.06
   },
   "adRewards": {
-    "doubleRewardDailyCap": 2,
-    "freeRecruitDailyCap": 1
+    "doubleRewardDailyCap": 3,
+    "freeRecruitDailyCap": 2
   },
   "welcomeRewards": {
     "day2Ticket": 1,
