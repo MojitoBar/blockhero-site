@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "ios": {
-    "minBuild": 99,
-    "recommendedBuild": 99,
+    "minBuild": 100,
+    "recommendedBuild": 100,
     "storeUrl": "https://apps.apple.com/app/id6814163578"
   },
   "message": {
