@@ -191,5 +191,10 @@
   },
   "campExt": {
     "maxLevel": 12
+  },
+  "tossPromo": {
+    "testUser": ["BH-ZM43ZAGS"],
+    "tutorial": { "on": 1, "code": "TEST_01M5SHFEDCJ05K1QWZHXS1N1CM" },
+    "visit3": { "on": 1, "code": "TEST_01M5SHKB7BRDCBB69FV36JSHR5" }
   }
 }
