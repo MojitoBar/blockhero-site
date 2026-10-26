@@ -171,6 +171,38 @@
       },
       "message": "광고 부활 오류로 불편을 드려 죄송해요. 작은 사과 선물이에요.",
       "expiresAt": "2026-11-03T05:56:52.520Z"
+    },
+    {
+      "id": "g-20261026-op1",
+      "to": [
+        "BH-79TSHDCF"
+      ],
+      "reward": {
+        "gold": 62500,
+        "tokens": 400,
+        "tickets": {
+          "normal": 0,
+          "rare": 0
+        }
+      },
+      "message": "운영자 선물이에요",
+      "expiresAt": "2026-11-09T10:43:37.622Z"
+    },
+    {
+      "id": "g-20261026-op2",
+      "to": [
+        "BH-79TSHDCF"
+      ],
+      "reward": {
+        "gold": 62500,
+        "tokens": 0,
+        "tickets": {
+          "normal": 0,
+          "rare": 0
+        }
+      },
+      "message": "운영자 선물이에요",
+      "expiresAt": "2026-11-09T10:43:37.683Z"
     }
   ],
   "i18n": {
