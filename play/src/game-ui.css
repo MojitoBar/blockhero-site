@@ -1,0 +1,573 @@
+/* 도트 판타지 UI: 따뜻한 나무 프레임, 볼록한 룬 블럭, 갈무리 서체. */
+@font-face{font-family:Galmuri11;src:url('/blockhero-site/play/assets/final/fonts/Galmuri11.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:Galmuri11;src:url('/blockhero-site/play/assets/final/fonts/Galmuri11-Bold.woff2') format('woff2');font-weight:700 900;font-display:swap}
+/* ja(2026-10-21): Galmuri11-Bold.woff2는 한글·라틴만 있고 한자·가나가 0자다(docs/LOCALIZATION-PLAN.md §1-5).
+   bold(700~900) ja 글자(영웅 카드 이름·다이얼로그 제목 등 font:700 Galmuri11)가 위 Bold 얼굴에서 글리프를
+   못 찾으면 브라우저가 폰트 스택의 다음 글꼴(시스템 일본어 폰트)로 넘어가 픽셀 화풍이 깨진다 — 같은
+   family·weight에 한자·가나·전각 범위만 가리키는 레귤러 Galmuri11을 겹쳐 선언해 그 범위만 레귤러 굵기로
+   그린다(한글·라틴은 범위가 겹치지 않아 그대로 Bold를 쓴다). */
+@font-face{font-family:Galmuri11;src:url('/blockhero-site/play/assets/final/fonts/Galmuri11.woff2') format('woff2');font-weight:700 900;font-display:swap;unicode-range:U+3000-303F,U+3040-30FF,U+31F0-31FF,U+3400-4DBF,U+4E00-9FFF,U+F900-FAFF,U+FF00-FFEF}
+@font-face{font-family:Galmuri9;src:url('/blockhero-site/play/assets/final/fonts/Galmuri9.woff2') format('woff2');font-weight:400 900;font-display:swap}
+/* ar(2026-10-21, docs/i18n/AR-REVIEW.md §1 폰트·LOCALIZATION-PLAN D5): Galmuri에는 아랍 글자가 0자다. 같은 family 이름
+   (Galmuri11·Galmuri9)에 아랍 블록만 가리키는 unicode-range 얼굴을 겹쳐 선언해, DOM·캔버스(`700 13px Galmuri11` 등 글꼴
+   문자열을 고치지 않고) 모두 아랍 글자만 픽셀 아랍 폰트(BH Handjet Arabic — Handjet OFL-1.1 개작, scripts/build-arabic-font.py)로
+   그린다. 라틴·숫자·기호는 범위가 겹치지 않아 그대로 Galmuri다. 글자 연결(shaping)은 한 단어 안의 아랍 글자가 전부 같은
+   얼굴에 있어 브라우저가 그대로 한다. ko·en·ja 화면에는 아랍 글자가 없어 이 얼굴은 내려받지도 않는다(unicode-range 지연 로드). */
+@font-face{font-family:Galmuri11;src:url('/blockhero-site/play/assets/final/fonts/BHHandjetArabic-400.woff2') format('woff2');font-weight:400;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:Galmuri11;src:url('/blockhero-site/play/assets/final/fonts/BHHandjetArabic-700.woff2') format('woff2');font-weight:700 900;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+@font-face{font-family:Galmuri9;src:url('/blockhero-site/play/assets/final/fonts/BHHandjetArabic-400.woff2') format('woff2');font-weight:400 900;font-display:swap;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+/* zh(번체·간체, 2026-10-21, docs/LOCALIZATION-PLAN.md §3-2): ar과 달리 같은 family(Galmuri11/9)에 unicode-range로
+   겹쳐 선언하지 않는다 — 겹치는 코드포인트(한자 통합 영역)를 ko·ja도 Galmuri11/9로 쓰고 있어, 겹쳐 선언하면
+   ko·ja 화면의 한자·한글 자형까지 전부 중국어 자형으로 바뀐다(§1-4 "자형이 글리프 모양을 결정"). 대신 별도
+   family 이름(FusionPixel12 zh_tw·zh_cn)으로 두고, 아래 :lang(zh-*) 전역 오버라이드로 그 로케일 문서에서만
+   폰트 스택 맨 앞에 끼운다. 원본: Fusion Pixel Font(TakWolf/fusion-pixel-font, OFL-1.1) 12px 자형판을
+   사용 글자만 서브셋(scripts/build-font-subsets.py). 굵은체는 전용 파일 없이 font-weight:700의 브라우저
+   알고리즘 굵기로 그린다(§1-2 "굵은체에는 한자가 0자" 문제를 Fusion이 메우지만 굵은 마스터는 없다). */
+@font-face{font-family:'FusionPixel12 zh_tw';src:url('/blockhero-site/play/assets/final/fonts/FusionPixel12-zh_tw.woff2') format('woff2');font-weight:400 900;font-display:swap}
+@font-face{font-family:'FusionPixel12 zh_cn';src:url('/blockhero-site/play/assets/final/fonts/FusionPixel12-zh_cn.woff2') format('woff2');font-weight:400 900;font-display:swap}
+/* 이 저장소 CSS는 Galmuri9/11을 `font` 단축 속성으로 수백 곳에 직접 쓴다(개별 font-family 교체는 현실적이지
+   않다, 실측 ~300곳). `:lang(zh-*) *`로 모든 자손에 !important font-family를 덮어써 단축 속성이 정한 family를
+   통째로 이긴다(캐스케이드에서 !important는 특정도와 무관하게 우선한다) — 선택자별 수정 없이 전역 적용된다.
+   :lang(zh-Hant)는 zh-Hant-TW 같은 하위 태그도 BCP47 접두사 일치로 함께 잡는다(ja와 같은 :lang 동작). */
+:lang(zh-Hant) *{font-family:'FusionPixel12 zh_tw',Galmuri11,Galmuri9,"Apple SD Gothic Neo",sans-serif!important}
+:lang(zh-Hans) *{font-family:'FusionPixel12 zh_cn',Galmuri11,Galmuri9,"Apple SD Gothic Neo",sans-serif!important}
+:root {
+  --night:#443423; --panel:#56422d; --panel-raised:#695036; --inset:#443423;
+  --line:#896947; --line-soft:#6d5338; --gold:#dfbf78; --cream:#f4ebd4;
+  --muted:#94714d; --leaf:#abd098; --danger:#eea58d;
+  --surface:#56422d; --surface-line:#846545; --surface-ink:#f4ebd4; --surface-muted:#94714d;
+  font-family:Galmuri11,"Apple SD Gothic Neo",sans-serif;
+  color:var(--cream); background:var(--night); font-synthesis:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+/* WKWebView 더블탭/핀치 확대 방지. 보드·타일은 드래그를 위해 자체 touch-action:none을 유지한다(이 규칙보다 더 구체적이라 그대로 우선 적용됨). */
+html,body{touch-action:manipulation}
+/* iOS WKWebView의 롱프레스 텍스트 선택·돋보기·공유 콜아웃을 막는다. 한 번 뜨면 그 뒤로 터치가
+   먹통이 되는 문제(보드 드래그 추종 불능의 주 원인)라, 입력 요소를 뺀 전체 화면에서 끈다. */
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img,canvas{-webkit-user-drag:none}
+body{margin:0;min-height:100svh}
+button,a{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:default}
+/* 버튼에 의도치 않은 테두리가 남지 않도록 기본은 포커스 링을 끈다. (hover:hover)+(pointer:fine)
+   미디어쿼리는 "마우스가 있는 기기"만 볼 뿐 "지금 마우스/터치로 조작 중"인지는 구분하지 못해,
+   Aside 같은 데스크톱 브라우저에서는 다이얼로그가 열려 자동 포커스를 받을 때마다(포인터로 열었어도)
+   링이 떴다(2026-09-25 사용자 지적, artifacts/screenshots/6.9-v2/03-shop.png). 대신 실제 입력 방식을
+   추적하는 html[data-input-mode] 플래그(main.mjs 최상단, keydown Tab→keyboard·pointerdown→pointer)로
+   키보드 조작일 때만 보이게 한다. */
+button:focus,button:focus-visible,a:focus,a:focus-visible,[tabindex]:focus,[tabindex]:focus-visible{outline:none}
+html[data-input-mode="keyboard"] button:focus-visible,html[data-input-mode="keyboard"] a:focus-visible,html[data-input-mode="keyboard"] [tabindex]:focus-visible{outline:2px solid #ffe1a0;outline-offset:2px}
+/* 다이얼로그(재화 패널 등)는 열리면 자동으로 포커스를 받는다. 브라우저 기본 파란 포커스 링
+   대신 게임 톤의 금빛 링으로 바꾸되(키보드 접근성 유지), 포인터·터치로 열었을 때는 감춘다. */
+dialog:focus,dialog:focus-visible{outline:none}
+html[data-input-mode="keyboard"] dialog:focus-visible{outline:2px solid #ffe1a0;outline-offset:-4px}
+a{color:inherit;text-decoration:none}
+[hidden]{display:none!important}
+.icon-library{position:absolute;width:0;height:0;overflow:hidden}
+.icon{width:20px;height:20px;display:block;flex:none;fill:currentColor;shape-rendering:crispEdges}
+.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 55% 35%,#775b3e66,transparent 65%)}
+.ambient:after{content:"";position:absolute;inset:0;background-image:radial-gradient(#94714d15 1px,transparent 1px);background-size:24px 24px}
+.layout{max-width:1260px;margin:auto;min-height:100svh;display:grid;grid-template-columns:minmax(210px,1fr) 420px minmax(190px,.85fr);gap:64px;align-items:center;padding:28px 40px}
+.desktop-brand{display:flex;align-items:center;gap:12px;margin-bottom:40px;color:var(--gold);font:900 15px/1.2 Galmuri9,monospace;letter-spacing:3px}
+.desktop-brand .icon{width:28px;height:28px}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:1.4px;color:var(--gold)}
+.intro h1{font-size:39px;line-height:1.4;font-weight:800;letter-spacing:-2px;margin:17px 0 16px}
+.intro h1 span{color:var(--gold)}
+.intro>p{font-size:13px;line-height:1.9;color:var(--muted)}
+.intro-rule{width:32px;height:3px;background:var(--gold);margin:30px 0}
+.guide-item{display:flex;gap:13px;align-items:start;margin:0 0 21px}
+.guide-item>span{font:11px/1.8 Galmuri9,monospace;color:var(--gold)}
+.guide-item p{font-size:11px;line-height:1.9;color:var(--muted);margin:0}
+.guide-item b{font-size:12px;color:var(--cream);font-weight:600}
+.design-link{display:inline-block;font-size:10px;color:#a2b5a6;border-bottom:1px solid var(--line);padding-bottom:4px;margin:7px 0 36px}
+.intro-foot{font-size:10px;color:var(--muted);border-top:1px solid var(--line-soft);padding-top:20px}
+.intro-foot .pixel-star{color:var(--gold);margin-right:6px}.intro-foot>span:last-child{display:block;color:var(--cream);font-size:12px;margin-top:6px}
+.right-note{align-self:center;border-top:2px solid #b49c65;padding-top:24px}
+.right-note h2{font-size:24px;letter-spacing:-.8px;line-height:1.5;margin:16px 0 12px}
+.right-note>p{font-size:12px;line-height:1.9;color:var(--muted);margin-bottom:26px}
+.skill-guide{display:grid;gap:22px}
+.skill-guide>div{display:flex;gap:13px;align-items:center}
+.skill-guide b{width:31px;height:31px;display:grid;place-items:center;border:1px solid #8a835b;box-shadow:2px 2px #3e3020;color:var(--gold);font-size:18px;background:#55412c}
+.skill-guide span{font-size:12px}.skill-guide small{display:block;margin-top:5px;font-size:10px;color:var(--muted)}
+.note-tip{border-top:1px solid var(--line-soft);padding-top:19px;margin-top:29px;font-size:11px;line-height:1.9;color:var(--muted)}
+
+/* 게임 화면 */
+.game{width:100%;position:relative;overflow:hidden;background:var(--surface);border:3px solid #806242;box-shadow:0 0 0 2px #a39268,7px 9px 0 #392c1e,0 26px 65px #0004;display:flex;flex-direction:column;height:100svh;height:100dvh;padding-top:var(--safe-top,env(safe-area-inset-top));padding-bottom:var(--safe-bottom,env(safe-area-inset-bottom))}
+/* 원인: game-header/game-footer는 노치·홈 인디케이터만큼 자기 자신의 padding(=박스 높이)을 늘려 safe area를
+   확보했다. 그런데 두 바는 border-image(9분할, border-image-repeat:round)로 나무 에셋을 그리는데, 박스가
+   원본 자산 높이보다 커지면 라운드 반복이 못 장식 줄을 세로로 한 번 더 채워 넣어 "두 줄"로 겹쳐 보였다
+   (같은 간판 프레임을 쓰는 .app-top은 safe area를 부모 .app-chrome의 padding으로 처리해 자기 박스 높이가
+   고정돼 있어서 이 문제가 없다). 고쳐서 safe area는 .game 자신의 padding(아래 :before/:after 단색 띠)이
+   담당하고, game-header/game-footer는 항상 자산 원본 높이(44px/32px)만 유지해 에셋이 한 번만 그려지게 한다. */
+.game:before,.game:after{content:"";position:absolute;left:0;right:0;z-index:1;pointer-events:none}
+.game:before{top:0;height:var(--safe-top,env(safe-area-inset-top));background:#3b2314}
+.game:after{bottom:0;height:var(--safe-bottom,env(safe-area-inset-bottom));background:#4e3c29}
+/* 연습실 모드는 game-footer 아래에 practice-bar(스킬 선택 줄)가 더해져 .game의 고정 높이(100dvh)를
+   넘칠 수 있다. .game은 flex column에 overflow:hidden이라 넘친 하단(연습실 버튼·나가기)이 그대로
+   잘려 손댈 수 없었다. practice-bar가 보일 때만 .game 자체를 세로 스크롤 가능하게 열어 잘린 부분을
+   터치 스크롤로 볼 수 있게 한다. */
+.game:has(#practice-bar:not([hidden])){overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+.game-header{height:44px;flex:none;padding:0 12px;box-sizing:content-box;display:flex;align-items:center;gap:8px;border-bottom:1px solid #94714d;background:#59442f}
+.wordmark{display:none}
+.header-actions{display:flex;gap:2px;flex:none;margin-left:auto}
+/* H11: 히트 영역은 40px 유지. H7 결선: :before 박스를 28px(icon-square-sm 캔버스와 1:1)로 맞춰 inset을 7px→6px로 조정. */
+.header-actions button{width:40px;height:40px;padding:6px;display:grid;place-items:center;position:relative;border:0;background:transparent;color:#b6c8bb}
+.header-actions button:before{content:"";position:absolute;inset:6px;border:0;background:#6f553a;z-index:0;box-shadow:0 2px #403121}
+.header-actions .icon{position:relative;width:15px;height:15px}
+.header-actions button:hover:before{background:#856545}
+.header-actions button[aria-pressed="true"]{color:#f4d58d}
+.header-actions button[aria-pressed="true"]:before{border-color:#b7a16a;background:#7b5e40}
+.header-actions button[aria-pressed="false"]:after{content:"";position:absolute;bottom:6px;right:6px;width:4px;height:4px;background:#809990}
+.stage-name{display:flex;gap:6px;align-items:center;min-width:0;flex:1}
+.stage-number{display:grid;place-items:center;width:26px;height:26px;flex:none;background:#604932;color:#f2d596;border:0;font:700 12px Galmuri9,monospace;box-shadow:2px 2px #403121}
+.chapter{display:none}
+.game-header h2{font-size:13px;letter-spacing:-.2px;font-weight:700;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* en(2026-10-20): 폭 390 미만에서는 헤더에 제목 자리가 거의 없어 "Wave 1/3"이 말줄임으로 잘렸다 — 진행은 옆 웨이브 점이 보여 주므로 영어는 제목을 숨긴다. */
+@media (max-width:389px){:lang(en) .game-header #stage-title{display:none}}
+:lang(en) .game-header h2{font-size:12px;letter-spacing:-.4px}
+/* ja(ja 현지화 2차 2026-10-21): "ウェーブ 1/3"은 전각 글자라 같은 자리에서 en보다 더 넓게 잘렸다
+   (ja-longest.test.mjs 실측 — 320은 77px, 390도 12px 모자랐다) — en과 같은 해법이되 기준폭을 430까지
+   넓힌다(진행은 웨이브 점으로 충분). */
+@media (max-width:430px){:lang(ja) .game-header #stage-title{display:none}}
+/* zh(중국어 현지화 2026-10-21): "第 1/3"은 ja보다 짧지만, 컷인(필살기 이름판) 상태에서 헤더 폭이 더
+   줄어들어 같은 자리에서 말줄임으로 잘렸다(zh-hans-sweep-battle.test.mjs 320px 실측) — ja와 같은 해법. */
+@media (max-width:430px){:lang(zh) .game-header #stage-title{display:none}}
+.wave-dots{display:flex;align-items:center;gap:3px;flex:none}
+.wave-dots span{width:13px;height:13px;border:1px solid #58716b;color:#90a79d;display:grid;place-items:center;font:8px Galmuri9,monospace;background:#473625}
+.wave-dots i{width:5px;height:1px;background:#62756a}.wave-dots .active{color:#503d2a;background:#e4c57c;border-color:#f6dda2;box-shadow:1px 1px #463625}.wave-dots .done{color:#dbe9c7;background:#546f51;border-color:#94b17f}
+.battle-scene{flex:1 1 auto;min-height:120px;position:relative;background:#34594e var(--scene-bg,none) center/cover;display:flex;align-items:center;justify-content:center;overflow:hidden;border-bottom:2px solid #a68c59}
+.battle-scene:before{content:"";position:absolute;inset:0;pointer-events:none;background:#12241d4d}
+.battle-scene:after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 9px 12px -10px #413222,inset 0 -12px 12px -12px #413222}
+.battle-scene canvas{display:block;position:relative;z-index:1}
+/* [O1] 배경 정적 레이어: #battle과 같은 자리(위치는 resizeScene이 좌표를 맞춘다)에 겹쳐 깔리고,
+   지역·화면 높이·DPR이 바뀔 때만 다시 굽는다(src/main.mjs drawSceneBackgroundInto).
+   112-polish: transform-origin 기본값(50% 50%, 박스 중심)이면 main.mjs의 translate-scale-translate
+   피벗 공식(캔버스 ctx와 동일하게 "박스 좌상단 원점" 가정)이 틀어진다 — 합성 행렬에 center*(1-scale)만큼의
+   엇나간 평행이동이 더해져(전개하면 finalPoint = x*scale + pivot*(1-scale) + center*(1-scale)),
+   종료 비트 줌(z 최대 1.12)처럼 scale이 크게 움직일 때 중심 오프셋이 더 크게 증폭되며 배경이
+   BG_PAD 여유(흔들림 ±3px 논리용) 밖으로 밀려나 씬 영역을 벗어나 보인다(전투 승리 종료 연출 버그).
+   origin을 캔버스와 같은 좌상단(0 0)으로 맞추면 그 엇나간 항이 0이 되어 ctx 결과와 일치한다. */
+#battle-bg{position:absolute;pointer-events:none;top:0;left:0;transform-origin:0 0;will-change:transform}
+.scene-location{position:absolute;z-index:2;top:10px;left:12px;display:flex;gap:5px;align-items:center;background:#17382b99;padding:4px 6px;font-size:8px;color:#e0e9c7;letter-spacing:.4px;pointer-events:none}
+.scene-location span{width:4px;height:4px;background:#c2dc91}
+.cast-queue{position:absolute;z-index:2;right:12px;top:10px;background:#20352edb;padding:4px 6px;font-size:8px;color:#f4dfa6}.cast-queue:empty{display:none}
+.threat{position:absolute;z-index:2;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#19332ded;color:#e7e6c6;font-size:10px;padding:5px 10px;border:1px solid #b5b17b;box-shadow:2px 2px #17312988}
+.threat:before{content:"";display:inline-block;width:4px;height:4px;margin-right:6px;background:#e3c981;vertical-align:2px}
+.threat.danger{background:#593b32;color:#ffdfb6;border-color:#dd9675}.threat.danger:before{background:#ffb091}
+.skill-banner{position:absolute;top:32px;left:10px;right:10px;text-align:center;font-size:22px;font-weight:900;letter-spacing:-.8px;opacity:0;text-shadow:2px 2px #13312b,-1px -1px #13312b;transform:translateY(6px);transition:opacity .15s,transform .15s;pointer-events:none;z-index:2}
+.skill-banner.show{opacity:1;transform:translateY(0)}.skill-banner small{display:block;font-size:9px;font-weight:500;letter-spacing:1px;margin-top:3px;color:#fff0c6}
+.combo{position:absolute;right:13px;bottom:38px;color:#ffe39a;font:900 22px Galmuri9,monospace;text-shadow:2px 2px #173d30;pointer-events:none}
+.game.skill-focus .battle-scene{border-color:#e5cd81}
+
+/* 체력과 공격 충전을 분리한 원정대 카드 */
+.party-section{flex:none;padding:6px 12px;background:var(--surface);border-bottom:1px solid var(--surface-line);color:var(--surface-ink)}
+.heroes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;height:52px}
+.hero-card{display:grid;grid-template-columns:26px minmax(0,1fr);grid-template-rows:30px 12px;column-gap:5px;row-gap:3px;align-items:center;padding:5px;background:linear-gradient(#654e35,#513e2a);border:1px solid #94714d;position:relative;box-shadow:inset 0 1px #94714d44,inset 0 -2px #443423;border-radius:5px;transition:border-color .12s,background .12s}
+.hero-portrait{width:26px;height:30px;image-rendering:pixelated;background:#493826;border-bottom:2px solid #a68d57}
+.hero-info{min-width:0}.hero-name{display:flex;align-items:center;justify-content:space-between;gap:1px;font-size:10px;font-weight:700;white-space:nowrap;line-height:12px}
+.hero-name small{font-size:7px;color:#dfbc76}.hp-value{display:block;font-size:7px;color:#94714d;font-variant-numeric:tabular-nums;line-height:10px}
+.bar{height:3px;background:#453524;overflow:hidden;position:relative}.bar>i{display:block;height:100%;width:100%;background:#9fc56f;transform-origin:0 50%;transition:transform .15s}.bar.hp{margin-top:3px}
+.hero-energy{grid-column:1/-1;display:flex;align-items:center;gap:4px;min-width:0}
+.energy-label{font-size:7px;color:#94714d}.energy-value{font:8px Galmuri9,monospace;color:#e6d6af}
+.bar.charge{flex:1;height:6px;background:#453524}.bar.charge>i{background:var(--hero-color)}
+.bar.charge:after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(100% / 9 - 1px),#56422d calc(100% / 9 - 1px),#56422d calc(100% / 9));pointer-events:none}
+.hero-card.casting,.hero-card.charged{border-color:#deb976;background:#6c5238;box-shadow:0 2px #453524}
+.hero-card.casting:before{content:"";position:absolute;top:-3px;left:8px;right:8px;height:3px;background:var(--hero-color)}
+.hero-card.hit{border-color:#ec9b84;background:#553345}
+.hero-card.targeted:after{content:"";position:absolute;top:-3px;right:6px;width:5px;height:5px;background:#e9a67c;box-shadow:1px 1px #27332d}
+.hero-card.down .hero-portrait{filter:grayscale(1);opacity:.55}.hero-card.down .bar.charge>i{background:#d8c789}.hero-card.down .energy-label{color:#efd99a}
+/* 2026-10-04 §개선 3: 필살기(star)를 쓴 영웅이 누구인지 HP 카드에서도 보이게 짧게 반짝인다.
+   밝기 필터·그림자만 쓴다(CLAUDE.md의 "상태 표현" 허용 범위, .hero-card.casting/.hit와 같은 패턴).
+   정적 표시(연출 축소·저사양)에서도 애니메이션 없이 보이도록 ease-out으로 자연 감쇠시킨다. */
+.hero-card.ult-glow{animation:ult-glow-pulse .6s ease-out}
+.hero-card.ult-glow .hero-portrait{animation:ult-glow-scale .6s ease-out}
+@keyframes ult-glow-pulse{0%{box-shadow:0 0 0 2px var(--hero-color),0 0 14px 4px var(--hero-color);filter:brightness(1.35)}100%{box-shadow:inset 0 1px #94714d44,inset 0 -2px #443423;filter:brightness(1)}}
+@keyframes ult-glow-scale{0%{transform:scale(1.18)}100%{transform:scale(1)}}
+/* 상태 배지: 씬과 같은 글리프(⬟ ⚙ ● ◆ ★)를 카드 이름 옆에 붙인다. 2개까지만 넣지만
+   긴 수치에도 카드 폭을 넘지 않게 말줄임으로 가둔다. 중독 중에는 카드 테두리로도 알린다. */
+.hero-name small{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:0 1 auto}
+/* ja(ja 현지화 2차 2026-10-21): 영웅 이름(가타카나 5자 "ヴェイパー" 등)이 en·ko보다 넓어 이 좁은 카드에서
+   이름 span이 넘쳤다(ja-longest.test.mjs 실측) — 상태 배지(small)와 같은 방식으로 이름도 줄어들며
+   말줄임을 허용한다(완전한 이름은 영웅 상세 등 다른 화면에서 확인할 수 있다). */
+:lang(ja) .hero-name span{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;font-size:7px;letter-spacing:-.2px}
+:lang(ja) .hero-name small{font-size:6px}
+/* zh(중국어 현지화 2026-10-21): FusionPixel 영웅 이름(예: "伊格尼斯" 4자)이 같은 폭에서 Galmuri9 이름보다
+   advance가 넓어, 상태 배지(small, "⬟9" 등)가 들어갈 자리를 다 먹었다(zh-hant-sweep-battle.test.mjs 실측,
+   clientWidth 0). ja와 같은 해법 — 이름도 줄어들며 말줄임을 허용해 배지 자리를 돌려준다. */
+:lang(zh) .hero-name span{min-width:0;overflow:hidden;text-overflow:ellipsis;flex:1 1 auto;font-size:7px;letter-spacing:-.2px}
+:lang(zh) .hero-name small{font-size:6px}
+.hero-card.poisoned{border-color:#c48ab6}
+.hero-card.poisoned .hero-name small{color:#eab6d7}
+
+/* 블럭에 시선이 머무를 때도 전투 소식이 닿는 퍼즐 상단 */
+.puzzle-section{flex:none;padding:0 10px;background:var(--surface);color:var(--surface-ink);display:flex;justify-content:center}
+.board{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding:7px;width:100%;aspect-ratio:1;border:2px solid #94714d;background:#443423;box-shadow:inset 0 2px 5px #0009,0 2px #3c2e1f,0 -1px #94714d;border-radius:9px;touch-action:none;user-select:none;overflow:hidden;transition:filter .15s}
+.tile{position:relative;min-width:0;min-height:0;padding:0;aspect-ratio:1;display:grid;place-items:center;border:0;background:transparent;border-radius:0;overflow:visible;touch-action:none;will-change:transform;transition:filter .12s}
+.tile.special{outline:2px solid #ffe3a0;outline-offset:0;box-shadow:0 0 0 3px #b18b4a;z-index:1}
+.tile.selected,.tile.hinted{outline:2px solid #ffeba9;outline-offset:1px;filter:brightness(1.18);z-index:2}
+.tile.dragging{z-index:6;cursor:grabbing}
+.tile.hinted{animation:hint 1s ease-in-out 3}.board.busy .tile{cursor:default}
+.game.skill-focus .board{filter:brightness(.92) saturate(.98)}
+.game.boss-finale .board{filter:brightness(.78) saturate(.8)}
+.game.boss-finale .tile{cursor:default}
+/* HEROES-LEGENDARY-V37 §6-1(2026-09-30 개선): .board는 오버레이(#legend-cutin)를 담고 있지
+   않은 별개 섹션이라 filter로 어둡게 해도 안전하다(퍼즐판만 딤). 기존엔 `transition:filter .15s`
+   에 얹은 정적 filter로 껐다 켰는데, 이 전환이 컷인 자체의 1.0초 타임라인과 무관한 실제 벽시계
+   시간에 매여 있어 getAnimations().currentTime으로 특정 시점을 고정 캡처할 수 없었다(QA 캡처
+   스크립트가 매번 board만 거의 안 어두워진 채로 찍혔다). 오버레이의 lc-dim과 같은 1.0초
+   키프레임으로 바꿔 같은 방식으로 일시정지·시점 고정이 가능하게 한다. */
+.game.legend-cutin .board{animation:lc-board-dim-full 1s ease-out forwards}
+/* .battle-scene은 더 이상 filter로 어둡게 하지 않는다 — #legend-cutin이 .battle-scene의
+   자식이라 예전 방식(filter를 .battle-scene에 직접 적용)은 오버레이(초상·띠·이름판)까지 함께
+   어두워져 전체가 뿌옇게 보였다. 대신 오버레이 안의 .lc-dim(검은 스크림, opacity만 애니메이션 —
+   상태 표현이라 CLAUDE.md가 허용)이 배경만 딤 처리하고, 그 위에 쌓이는 띠·초상·이름판은 원색
+   그대로 완전 불투명하게 얹는다. */
+/* HEROES-LEGENDARY-V37 §6-1·§6-4: 컷인 오버레이(딤·속도선·초상·배경 띠·이름판·플래시). transform·
+   opacity만 애니메이션한다(합성 전용, PERF-POWER-V34 준수). 컷인이 없을 때는 hidden으로 둔다. */
+.legend-cutin-overlay{position:absolute;inset:0;z-index:6;pointer-events:none;overflow:hidden;display:none}
+.legend-cutin-overlay.show{display:block}
+/* CUTIN-V44 §7 적용: 딤·속도선·플래시(.lc-dim/.lc-speed/.lc-flash)는 기본 경로(v2a GL)에서
+   #legend-cutin 안의 전용 WebGL 캔버스(src/cutin-gl/cutin-view.mjs)가 같은 역할을 그린다(띠
+   스윕·앞머리 섬광·딤 모두 GL 유니폼). GL을 못 만드는 기기만 static(아래)으로 내려가는데, 거기서도
+   애니메이션 없는 페이드만 쓰므로 이 세 DOM 레이어·키프레임(lc-dim-full/lc-speed-full/lc-flash-full)은
+   더 이상 어디서도 쓰이지 않아 DOM(index.html)에서도 같이 지웠다.
+   이름판(.lc-nameplate) vs 배경 띠(.lc-band) 버그(2026-10-01 사용자 실기기 제보 "이름판 오른쪽
+   아래가 띠 밖으로 삐져나온다"): 띠는 .lc-band-frame으로 묶여 rotate(-7deg)로 대각선이고,
+   이름판은 원래 수평이라 안 맞았다.
+   1차 시도(이름판을 .lc-band-frame의 자식으로 중첩)는 각도는 맞았지만 두 가지 새 문제를 냈다:
+   (a) .lc-band-frame은 opacity 애니메이션 때문에 자체 스태킹 컨텍스트를 만들어, 안에 중첩된
+   이름판의 z-index가 frame 내부에서만 유효해진다 — 바깥의 .lc-portrait(z-index:2)가 frame
+   전체(z-index:1) 위에 그려져 이름판이 초상 뒤로 숨어버린다(스택 순서 깨짐).
+   (b) 이름판 크기를 "띠 두께(frame 높이)의 %"로 정하면 띠 안에는 들어가지만, 그 결과 390·430처럼
+   overlay 높이가 큰(세로로 긴) 뷰포트에서 이름판 자체가 함께 넓어져 왼쪽의 초상(특히 소품이 길게
+   뻗는 마칼라/puppet, 알파 bbox maxX=580/648)과 실제로 겹쳤다(tests/ui/legendary-cutin-text.test.mjs
+   portraitOverlapsNameplate 검사로 재현).
+   최종 해법: 이름판을 .lc-band-frame 밖, #legend-cutin의 **직속 자식**(.lc-portrait 뒤, DOM/
+   z-index 모두 그 위)으로 두되, 띠가 정지한 상태(슬라이드 애니메이션이 끝난 뒤 rotate(-7deg)
+   translateX(0))와 **똑같은 절대 좌표**에 **직접** rotate(-7deg)를 걸어 시각적으로는 띠에 얹힌
+   것처럼 보이게 한다(실제로 nameplate는 opacity 0→1 전환이 띠의 슬라이드 완료 이후에만 일어나므로
+   — lc-name-full 0~32%는 opacity:0 — 슬라이드 중 움직임을 따라갈 필요가 아예 없다).
+   좌표 유도(.lc-band-frame 기준값 left:-12%,width:124%,top:34%,height:30%,origin:80% 50% 그대로):
+   · 피벗(절대, overlay 기준) Px=-12%+80%*124%=87.2%, Py=34%+50%*30%=49%.
+   · 이름판 폭은 고정 130px(아래 "폭을 고정 px로 두는 이유" 참고). 오른쪽 끝은 기존처럼 오버레이
+     폭의 97% 지점(원래 right:3%와 동일, frame 로컬 12.1%을 역산해도 같은 값):
+     left = 97% - 130px.
+   · 세로 중앙은 띠 두께 중앙과 같은 49%: top = 49% - (130/4.5/2)px ≈ 49% - 14.45px.
+   · transform-origin은 "이름판 자신의 박스" 기준으로, 피벗이 그 박스의 어디에 오는지를 좌표
+     환산해야 한다: origin_x = Px - left = 87.2%*overlayW - (97%*overlayW-130px)
+     = -9.8%*overlayW + 130px. overlay가 항상 뷰포트 폭 그대로라(battle-scene 실측, 375/390/430
+     전부 overlayWidth==viewportWidth) 1%*overlayW ≈ 1vw로 치환 가능하다: calc(130px - 9.8vw).
+     FOLD-V1(2026-10-23): 폴드 펼침·태블릿은 전투가 가운데 기둥(--app-width)이라 overlay 폭 ≠ 뷰포트 폭이다. overlay 폭 =
+     min(100vw, --app-width)이므로 9.8%는 min(9.8vw, --app-width×.098) — 폰(100vw ≤ --app-width)에서는 예전 9.8vw 그대로다.
+     (컨테이너 단위 cqw는 overlay에 레이아웃 격리를 걸어야 해서 쓰지 않았다.)
+     origin_y는 박스를 애초에 49% 중심으로 맞춰 뒀으므로 거리가 overlayH %항과 상관없이 상수로
+     소거돼 항상 50%(박스 정중앙)다.
+   폭을 고정 px(가변 %가 아니라)로 두는 이유: 띠 두께(overlay 높이의 30%, 390·430처럼 세로가
+   길수록 커짐) 기준으로 폭을 정하면 세로가 긴 뷰포트에서 이름판이 함께 넓어져 초상과 겹친다
+   (위 (b) 문제 원인). 반대로 overlay "폭"의 %로 정하면 375~430 사이 폭 차이가 적어(15%) 거의
+   고정값과 다르지 않다 — 그래서 아예 고정 130px로 단순화했다. 130px는 가장 폭이 넓은 초상
+   에셋(마칼라/puppet, 알파 bbox maxX=580/648)의 390·430 렌더 폭을 PIL로 측정해, 이름판 왼쪽
+   끝이 그 초상의 실제(투명 여백 제외) 오른쪽 끝보다 항상 14px 이상 오른쪽에 오도록(여유 포함)
+   역산한 상한이다.
+   높이는 aspect-ratio가 아니라 **명시적 고정값**이다. 처음엔 width:130px에 aspect-ratio:4.5/1
+   (→130/4.5≈28.9px)로 뒀더니, 실제 렌더 높이는 48px로 튀었다 — 이름판은 비대체 요소(div)라
+   내용(이름+필살기명 두 줄, 상속받은 기본 16px 글자)이 더 크면 aspect-ratio보다 min-content
+   높이가 이긴다(스펙대로의 동작, 하지만 원래 width:60%+aspect-ratio였던 수정 전 버전도 똑같이
+   48px 안팎을 필요로 했다 — 바로 그 48px가 띠 두께(30%*140≈42px, 375 기준)보다 커서 "회전을
+   맞춰도 물리적으로 못 들어가는" 원래 버그의 또 다른 축이었다).
+   높이는 band-frame 두께 안에 들어가는 선에서 **가능한 한 크게**(38px) 고정하고, 그 안에 두 줄이
+   들어가도록 글자 크기만 11px로 살짝 낮췄다(상속 16px 그대로는 48px가 필요해 375 띠 두께(42px)를
+   넘는다). 처음에 9px까지 낮췄더니 필살기명(.lc-skill, 7.4px)에 걸린 webkit-text-stroke가 글자
+   자체보다 두꺼워져(2026-10-01 캡처로 확인) 획이 뭉개진 얼룩으로 보였다 — 외곽선은 글자가 작을수록
+   비례해서 더 두꺼워 보이므로, 너무 작은 폰트에는 쓰면 안 된다는 교훈. overflow:hidden은 유지해
+   글꼴·내용이 나중에 다시 커져도 띠 두께를 절대 넘지 못하도록 물리적으로 막는다(38px는 375 띠
+   두께 42px 안에서 회전 여유까지 포함해 테스트로 확인한 값, 390·430은 띠가 훨씬 두꺼워 여유가
+   크다).
+   텍스트는 바로 이 회전된 박스 안에 두지 않고 **반대 방향(+7deg)으로 되돌리는 내부 래퍼
+   (.lc-nameplate-inner)**에 담는다. 처음엔 텍스트까지 박스와 함께 rotate(-7deg)로 회전시켰더니
+   필살기명(작은 글자, 9~11px)이 사선으로 렌더링되며 획이 뭉개진 얼룩처럼 깨져 보였다(2026-10-01
+   캡처로 확인 — 작은 글자를 7도 회전시키면 WebKit 안티앨리어싱이 대각선 글꼴 획을 제대로 못
+   그린다). 바깥 박스(-7deg)와 안쪽 래퍼(+7deg)를 합성하면 최종 회전각은 0으로 상쇄되어 텍스트는
+   화면에 수평으로, 선명하게 그려지면서도 뒤의 금속판 배경 이미지(바깥 박스가 가짐)는 여전히 띠와
+   같은 각도로 보인다 — 흔한 "틀은 기울이고 안의 글자는 바로 세우는" 기법. 컨테인먼트 판정은
+   바깥 .lc-nameplate(배경이 있는, 실제 띠와 맞물려야 하는 상자)만 보면 되므로
+   tests/ui/legendary-cutin-text.test.mjs의 계산은 바뀌지 않는다. */
+.legend-cutin-overlay .lc-band-frame{position:absolute;left:-12%;top:34%;width:124%;height:30%;transform-origin:80% 50%;opacity:0;will-change:transform,opacity;z-index:1}
+.legend-cutin-overlay .lc-band{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;image-rendering:pixelated;filter:saturate(1.25) contrast(1.08)}
+.legend-cutin-overlay .lc-portrait{position:absolute;left:0;top:6%;height:88%;width:auto;max-width:66%;object-fit:contain;object-position:left bottom;opacity:0;image-rendering:pixelated;filter:drop-shadow(0 10px 14px rgba(0,0,0,.55)) drop-shadow(0 0 18px rgba(255,230,160,.35));will-change:transform,opacity;z-index:2}
+/* 2026-10-01 QA B안 확정(artifacts/qa/cutin-label-variants 비교): 나무 이름판 배경을 없애고
+   띠 위에 이름만 올린다. 박스(.lc-nameplate) 자체의 위치·크기·overflow:hidden·회전은 바꾸지
+   않는다 — 위 '이름판 vs 배경 띠' 기하 유도와 tests/ui/legendary-cutin-text.test.mjs의 포함
+   판정이 이 기하에 의존한다. 텍스트도 더 이상 내부 래퍼(.lc-nameplate-inner)에서 반대 방향
+   (+7deg)으로 되돌리지 않는다 — 이름만 크게 보여주는 새 디자인은 글자가 바깥 박스(-7deg)의
+   회전을 그대로 물려받아 띠와 같은 각도로 기울어 보이는 쪽을 택했다(사용자 요청: skew가 아닌
+   rotate라 글자가 찌그러지지 않는다). .lc-nameplate-inner는 이제 "등장 슬라이드"(오른쪽에서
+   들어오는 translateX)만 맡는다 — 아래 .full/.short .lc-nameplate-inner 애니메이션 참고. */
+.legend-cutin-overlay .lc-nameplate{position:absolute;left:calc(97% - 130px);top:calc(49% - 19px);width:130px;height:38px;overflow:hidden;transform:rotate(-7deg);transform-origin:calc(130px - min(9.8vw, var(--app-width) * .098)) 50%;opacity:0;will-change:opacity;z-index:3}
+.legend-cutin-overlay .lc-nameplate-inner{position:absolute;inset:0;font-size:11px;padding:0 3px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;will-change:transform}
+/* 이름 글자 크기는 QA 시안 B(1.3em)의 1.3~1.5배(사용자 지시) 중간값인 1.8em. 언더라인(::after)은
+   .lc-name 자신(display:inline-block이라 content 너비로 줄어든 박스)의 좌우 %만큼만 안쪽에
+   그려 이름 폭이 바뀌어도(영웅마다 글자 수가 다름) 항상 이름 폭에 맞게 따라간다. */
+.legend-cutin-overlay .lc-name{display:inline-block;position:relative;font-size:1.8em;line-height:1.15;letter-spacing:-.2px;color:#fff6e0;-webkit-text-stroke:1.8px #140b03;text-shadow:0 1px 0 #140b03,0 -1px 0 #140b03,1px 0 0 #140b03,-1px 0 0 #140b03,0 3px 6px #000a}
+.legend-cutin-overlay .lc-name::after{content:'';position:absolute;left:6%;right:6%;bottom:-4px;height:2px;background:linear-gradient(90deg,transparent,#ffd76a,transparent);box-shadow:0 1px 1px #000a}
+/* 필살기 이름은 이제 상단 큰 제목(.skill-banner, "○○의 필살기" 대신 필살기 이름 자체를 보여줌)에서
+   보여주므로 띠 위 이름판 안에서는 숨긴다(중복 제거, 사용자 지시). JS(main.mjs)는 여전히
+   textContent를 채운다 — display:none만으로 숨기면 테스트용 값 확인은 그대로 가능하다. */
+.legend-cutin-overlay .lc-skill{display:none}
+/* CUTIN-V44 §7 적용: full/mini의 띠·초상·이름판·딤·속도선·플래시 DOM 애니메이션(lc-*-full,
+   lc-*-mini, 이제 쓰이지 않던 lc-*-short까지)을 지웠다 — 기본 경로(v2a GL)에서는 #legend-cutin
+   전용 WebGL 캔버스가 같은 역할(띠·초상·글자·딤·입자)을 그린다(src/cutin-gl/cutin-view.mjs).
+   GL을 못 만드는 기기만 아래 .static 규칙(애니메이션 없는 페이드)으로 떨어진다. .lc-dim/.lc-speed/
+   .lc-flash DOM 엘리먼트도 같이 지웠다(index.html) — static 경로는 이 셋을 쓰지 않는다.
+   .short는 showCutin에 전달되는 kind가 'full'|'mini'|'static'뿐이라(legend-cutin.mjs
+   starFxKind) 이전부터 실제로는 한 번도 적용되지 않던 죽은 클래스였다. */
+/* 정적 표시(저사양·연출축소 전용, 최소 0.6초): 애니메이션(슬라이드·속도선) 없이 opacity 페이드만
+   쓴다 — "생략하지 않는다"(§개선)가 목표라 기존 reduce-motion 패턴(lc-fade-only)을 그대로 쓴다. */
+.legend-cutin-overlay.static .lc-band-frame,.legend-cutin-overlay.static .lc-portrait,.legend-cutin-overlay.static .lc-nameplate{animation:lc-fade-only var(--lc-dur,.6s) ease forwards}
+.legend-cutin-overlay.static .lc-band-frame{transform:rotate(-7deg)}
+.legend-cutin-overlay.static .lc-portrait{transform:none}
+.legend-cutin-overlay.static .lc-nameplate{transform:rotate(-7deg)}
+.legend-cutin-overlay.static .lc-nameplate-inner{transform:none}
+/* 일반·고급 영웅은 전용 컷인 아트(band/portrait 이미지)가 없다 — 영웅색 CSS 띠로 대체한다. 이
+   레이어는 전투 이펙트 오버레이이고 CLAUDE.md의 "표면"(패널·카드·버튼 등) 규칙 대상이 아니다
+   (위 .lc-speed 속도선과 같은 판단: 합성 전용 FX).
+   2026-10-04 재검수 수정: 색 배경을 <img class="lc-band">가 아니라 **부모 .lc-band-frame**(div)
+   에 건다 — main.mjs가 더 이상 <img>를 display:none으로 숨기지 않으므로 img 자체에 걸면 보이지만,
+   당시 버그(img가 숨겨진 채 배경도 함께 숨겨짐)를 다시 만들지 않도록 아예 프레임에 분리해 둔다.
+   img는 src가 비어 있어도 투명하게 겹칠 뿐이라 프레임의 불투명 색이 그대로 보인다. 폭(124%)·두께
+   (overlay 높이의 30%)는 레전더리 띠와 같은 .lc-band-frame 치수를 그대로 쓰므로 화면 폭의 70%를
+   훨씬 넘는다. */
+.legend-cutin-overlay.no-art .lc-band-frame{background:linear-gradient(135deg,var(--lc-tile-color,#f4d995),#2b2116 85%)}
+.legend-cutin-overlay.no-art .lc-band{opacity:0}
+/* 2026-10-04 "일반 영웅 필살기가 레전더리보다 커 보인다" 제보 대응: 일반·고급은 전용 컷인 아트가
+   없어 .lc-portrait가 기존엔 레전더리와 똑같은 height:88%(기본 규칙)를 그대로 썼다 — 레전더리
+   초상은 이미지 자체가 가로로 넓어(max-width:66%에 걸림) 실제 표시 높이가 줄었지만, 일반·고급의
+   캔버스 썸네일(세로로 긴 전신, portrait() 비율)은 폭 제약에 안 걸려 height:88%가 그대로
+   적용돼 실측 결과 세 등급 모두 높이가 동일했다(화면 높이의 87~88%). 등급 위계(일반<고급<레전더리)에
+   맞춰 일반·고급 초상 높이를 레전더리보다 확실히 낮춘다(목표: 일반 60~70%, 고급 75~85% of 레전더리).
+   발밑(94%)은 등급 불문 고정해 바닥선을 맞추고, top은 "94% - height"로 역산한다.
+   띠(.lc-band-frame)도 두께(height)·길이(width)를 등급별로 낮춘다 — 수직 중심(49% = 레전더리의
+   top:34%+height:30%/2, docs/game-ui.css 위 '이름판 vs 배경 띠' 유도 참고)은 등급 불문 고정해
+   이름판(.lc-nameplate, 등급 공용·위치 불변) 정렬이 깨지지 않게 한다. 폭도 줄이되
+   tests/ui/legendary-cutin-mini.test.mjs의 "화면 폭 70% 이상" 가시성 기준은 회전 후 실측으로
+   여유 있게 넘긴다(375 기준 일반도 ~319px > 262.5px). */
+.legend-cutin-overlay.no-art:not(.tier-rare) .lc-band-frame{top:41%;height:16%;left:7.5%;width:85%}
+.legend-cutin-overlay.no-art:not(.tier-rare) .lc-portrait{top:38%;height:56%}
+.legend-cutin-overlay.no-art.tier-rare .lc-band-frame{top:38%;height:22%;left:-2.5%;width:105%}
+.legend-cutin-overlay.no-art.tier-rare .lc-portrait{top:24%;height:70%}
+/* 고급(rare) 전용 위계 강조: 초상에 금빛 발광, 띠 테두리에 금빛 그림자. CLAUDE.md가 허용하는
+   "상태 표현"(필터·그림자) 범위 — 새 표면 에셋을 만드는 대신 필터만 쓴다. */
+.legend-cutin-overlay.tier-rare .lc-portrait{filter:drop-shadow(0 0 16px #ffd76a) drop-shadow(0 10px 14px rgba(0,0,0,.55))}
+.legend-cutin-overlay.tier-rare .lc-band-frame{box-shadow:0 0 22px 6px #ffd76a99}
+/* 전투·상단 UI에 겹치는 큰 제목("○○의 필살기", #skill-banner 재사용)이 숲 배경에 묻히지 않도록
+   컷인 중에만 굵은 외곽선(webkit-text-stroke)과 짙은 그림자를 더한다 — CLAUDE.md가 허용하는
+   "글자(폰트·색·그림자)" 범위. 2026-09-30 실기기 제보("컷신 텍스트 짤린다") 원인: #legend-cutin
+   (z-index:6, 내부 .lc-band가 완전 불투명 기울어진 띠 이미지)이 .skill-banner(z-index:2)보다
+   위 스택에 그려져, 컷인 중 띠가 제목 글자를 대각선으로 가로질러 실제로 잘라 보이게 했다(가운데
+   음절이 띠 가장자리 아래로 사라짐). z-index를 오버레이보다 높여 띠 위에 완전 불투명하게 얹는다.
+   폭이 좁은 뷰포트(375px)에서도 두 줄(제목+부제)이 잘리지 않도록 max-width는 이미 left/right:10px
+   여백으로 화면 폭 안에 들어와 있고, 부제(<small>)는 필요하면 자동 줄바꿈된다(고정 nowrap 아님). */
+/* 2026-10-04 재검수 수정: 전에는 .legend-cutin(풀 컷인 전용)에만 걸려 있어, mini/static 컷인에서
+   띠(.legend-cutin-overlay, z-index:6)가 부제("○○의 필살기")를 가렸다. cutin-active는 모든
+   종류(full/mini/static)에서 걸리므로 공통으로 올린다. */
+.game.legend-cutin .skill-banner,.game.cutin-active .skill-banner{z-index:7;font-size:25px;-webkit-text-stroke:2.5px #140b03;text-shadow:0 2px 0 #140b03,0 -2px 0 #140b03,2px 0 0 #140b03,-2px 0 0 #140b03,0 5px 12px #000d}
+/* z-index를 올려 띠 위로 꺼내니(위 규칙) 이번엔 제목 아래의 부제(<small>, 필살기명)가 오른쪽의
+   이름판과 같은 세로 구간에 겹쳐 서로 가려졌다 — 이름판이 같은 필살기명을 이미 보여주므로
+   부제는 컷인 중엔 중복이다. 컷인 중에만 숨겨 겹침을 없앤다(평상시 스킬 배너는 그대로 유지). */
+.game.legend-cutin .skill-banner small{display:none}
+@keyframes lc-board-dim-full{0%{filter:brightness(1)}10%,85%{filter:brightness(.6)}100%{filter:brightness(1)}}
+@keyframes lc-fade-only{0%,100%{opacity:0}20%,80%{opacity:1}}
+/* CUTIN-V44 §7: lc-dim-full/lc-speed-full/lc-flash-full/lc-band-full/lc-portrait-full/
+   lc-name-full/lc-name-slide-full/lc-band-short/lc-name-short/lc-name-slide-short 키프레임과
+   그 reduce-motion 오버라이드를 지웠다 — GL 기본 경로에서는 전용 캔버스가 같은 연출을 그리고,
+   정적 표시(.static, 위)는 이미 lc-fade-only를 직접 쓴다. reduced=true는 항상 kind='static'으로
+   내려가므로(legend-cutin.mjs starFxKind) .full/.mini와 reduce-motion이 동시에 걸리는 경우가
+   없어 이 오버라이드도 실제로는 적용된 적이 없었다. lc-board-dim-full(보드 자체를 어둡게 하는
+   필터)만 남긴다 — GL이 그리지 않는, 실제 퍼즐판 DOM 섹션의 밝기 전환이라 변형이 전혀 아니다. */
+.game-footer{height:32px;flex:none;padding:0 10px;box-sizing:content-box;display:flex;align-items:center;gap:8px;position:relative;background:#4e3c29;border-top:1px solid #8a6a48;font-size:10px;color:#94714d}
+#board-message{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* en(2026-10-20): 안내·기믹 문장("Match 3 or more of the same emblem", "Acolyte · Defeat the Support First · 1/1")이 한 줄 말줄임으로
+   잘렸다 — 영어는 푸터 높이(32px) 안에서 두 줄까지 접는다. 같은 자리의 #combat-cue도 같다. */
+:lang(en) #board-message{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2}
+:lang(en) #combat-cue{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2;top:50%;transform:translateY(calc(-50% + 3px))}:lang(en) #combat-cue.active{transform:translateY(-50%)}
+/* ja(ja 현지화 2차 2026-10-21): 같은 안내 문장("同じ文様を3つ以上マッチさせよう")이 같은 자리에서 말줄임으로
+   잘렸다(ja-longest.test.mjs 실측) — en과 같은 해법(두 줄까지 접기). */
+:lang(ja) #board-message{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2}
+:lang(ja) #combat-cue{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2;top:50%;transform:translateY(calc(-50% + 3px))}:lang(ja) #combat-cue.active{transform:translateY(-50%)}
+/* zh(중국어 현지화 2026-10-21): 같은 안내 문장("配對顏色所屬的英雄立即發動攻擊")이 컷인 상태에서 좁아진
+   자리에 말줄임으로 잘렸다(zh-hans-sweep-battle.test.mjs 320px 실측) — en·ja와 같은 해법. */
+:lang(zh) #board-message{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2}
+:lang(zh) #combat-cue{white-space:normal;overflow:visible;text-overflow:clip;font-size:9px;line-height:1.2;top:50%;transform:translateY(calc(-50% + 3px))}:lang(zh) #combat-cue.active{transform:translateY(-50%)}
+#clock{font:10px Galmuri9,monospace;color:#d9cbaa;flex:none;background:#453524;padding:4px 5px}
+#combat-cue{position:absolute;left:10px;right:96px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0;color:#f4ddb0;font-size:10px;font-weight:700;transform:translateY(3px);transition:opacity .15s,transform .15s;pointer-events:none}
+#combat-cue:before{content:'✦ ';color:#f7ca71}#combat-cue.active{opacity:1;transform:translateY(0)}.game-footer:has(#combat-cue.active) #board-message{visibility:hidden}
+#mode-label,#practice{display:none}
+.game-footer button{height:28px;flex:none;border:0;background:transparent;font-size:11px;color:#e1c78d;padding:0 2px}.game-footer button span{font-size:10px;margin-left:4px}
+/* zh(중국어 현지화 2026-10-21): FusionPixel 줄 상자(Galmuri11 비율로 맞춤)가 이 버튼이 원래 쓰던 Galmuri9
+   줄 상자보다 약간 커, 고정 높이 28px 버튼 안에서 "? 說明"/"? 说明" 글자가 2~3px 새어 나왔다
+   (zh-hans-sweep-battle.test.mjs 실측) — 이 버튼만 줄 높이를 좁힌다. */
+:lang(zh) .game-footer button{line-height:1;padding:0}
+/* FusionPixel "説明/说明" 2자의 글자 가로폭(advance width)이 같은 font-size에서 Galmuri9보다 커(실측,
+   320px 폭에서 47px·375px에서 3px 새어 나옴 — zh-hans-sweep-battle.test.mjs) 버튼 테두리(border-image
+   cap, html[data-ui-art=ready] .game-footer button)를 벗어났다. 그 규칙이 padding은 더 구체적으로 이기므로
+   (대표적인 캡 패딩 자체는 못 줄인다) 글자 크기를 줄이고 "?"와의 간격을 없애 안쪽 공간을 확보한다. */
+:lang(zh) .game-footer button span{font-size:8px;margin-left:1px}
+.practice-bar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;justify-content:center;padding:10px;background:#604932;color:#f4e8c9;border-top:2px solid #f3dfaa;font-size:10px}
+.practice-bar button{padding:7px 8px;min-height:32px;background:#74593c;border:1px solid #94714d;color:#f6e9c9;box-shadow:1px 2px #413222;font-size:11px;position:relative}
+/* H11: 시각 높이(32~36px)는 유지하고 투명 히트 영역만 44px 이상으로 넓힌다. */
+.practice-bar button::before{content:'';position:absolute;inset:-4px}
+.practice-bar button[aria-pressed="true"]{background:#806242;color:#f7eac4;border-color:#d5b777}
+.energy-layer{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+/* 시작·일시정지·도움말·결과 화면은 한 장의 원정 카드로 통일한다. */
+dialog{position:fixed;inset:0;width:calc(100vw - 40px);max-width:350px;max-height:calc(100svh - 32px);overflow:auto;border:2px solid #af935f;padding:0 24px 16px;background:var(--surface);color:var(--surface-ink);box-shadow:0 0 0 3px #826444,7px 8px #413222aa;text-align:center}
+dialog::backdrop{background:#413222c7;backdrop-filter:blur(2px)}
+/* 2026-09-28(V36 2단계): 그림 띠는 액자가 아니라 순수 배경(원칙1, 프레임 최대 2겹) — 아래쪽 테두리를
+   없애 다이얼로그(paper-lg, 1겹) 위에 엠블럼(2겹)만 남긴다. */
+.modal-art{height:90px;margin:0 -24px 20px;position:relative;display:grid;place-items:center;background:#365b51 url('/blockhero-site/play/assets/final/backgrounds/mosswood-v3.png') center 32%/cover;image-rendering:pixelated}
+.modal-art:before{content:"";position:absolute;inset:0;background:#173a2859}
+.modal-emblem{position:relative;display:grid;place-items:center;width:43px;height:43px;background:#213d36;border:2px solid #e3c67e;box-shadow:3px 3px #173327;color:#f4d38a}
+.modal-emblem .icon{width:26px;height:26px}
+dialog h2{font-size:24px;letter-spacing:-.9px;margin:11px 0 12px;font-weight:800}
+dialog p{font-size:12px;line-height:1.9;color:#94714d;white-space:pre-line;margin:0 0 19px}
+.modal-rules{display:grid;gap:12px;margin:20px 0 25px;text-align:left;font-size:11px;line-height:1.6;color:#94714d}
+.modal-rules>div{display:flex;align-items:center;gap:10px}.modal-rules b{display:grid;place-items:center;flex:0 0 25px;height:25px;background:#6f553a;border:0;color:#e8c784;font-size:12px}
+/* 버튼 위계: 주 행동(btn-primary) · 보조 행동(btn-secondary, 테두리 있는 알약형) · 텍스트 탈출 행동(btn-tertiary). */
+.btn-primary{width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border:1px solid #a98a4d;background:#bd9657;color:#201b22;font-size:13px;font-weight:800;text-shadow:0 1px #f2d696;box-shadow:inset 0 -3px #78552e,2px 3px #413122}
+.btn-primary:hover{background:#d2aa64}.btn-primary>span{font-size:18px}
+/* 보조 버튼: 양피지 알약 에셋(border-image)을 ui-art.css에서 입히므로 여기서는 레이아웃만 잡는다. 다이얼로그
+   스택에서 btn-primary와 같은 높이(52px)로 맞춘다. display:flex로 바꿔 btn-primary처럼 글자를 세로 중앙에 둔다
+   (기존 display:block은 텍스트가 박스 위쪽에 붙어 주 버튼과 어긋나 보였다). */
+.btn-secondary{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;margin-top:10px;padding:10px 14px;border:2px solid #8b5e34;border-radius:5px;background:#e9d4a8;color:#5a3a1e;font-size:12px;font-weight:700}
+.btn-tertiary{display:block;width:100%;min-height:42px;padding:12px 0 2px;border:0;background:transparent;color:#c7bc9b;font-size:11px}
+.result-stats{display:flex;justify-content:space-around;padding:16px 0;margin:22px 0;border-block:1px dashed #94714d}
+.result-stats b{font:700 23px Galmuri9,monospace;display:block;color:#f0d295}.result-stats small{display:block;font-size:9px;color:#94714d;margin-top:6px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@keyframes hint{50%{filter:brightness(1.4)}}
+@media(max-width:1160px){.layout{grid-template-columns:minmax(220px,1fr) 420px;max-width:940px;gap:52px;padding:28px 32px}.right-note{display:none}}
+@media(max-width:760px){
+  .layout{display:block;max-width:440px;padding:0;min-height:100svh}.intro,.right-note{display:none}
+  .game{border:0;box-shadow:none}
+}
+/* FOLD-V1: 폭 조건을 뺐다 — 가로로 돌린 폴드 펼침(841×673)처럼 넓고 낮은 화면도 같은 압축 규칙을 쓴다(폰은 원래 760 이하라 그대로). */
+@media(max-height:740px){
+  .battle-scene{min-height:142px}.party-section{padding:5px 12px}
+  .scene-location{top:7px}.skill-banner{top:23px;font-size:20px}.threat{bottom:6px;padding-block:4px}
+}
+html.reduce-motion *,html.reduce-motion *:before,html.reduce-motion *:after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+html.reduce-motion dialog::backdrop{backdrop-filter:none}html.reduce-motion .game.skill-focus .board{filter:none}
+
+
+/* 프레임의 모서리 장식과 면의 두께로 게임 UI의 질감을 통일한다. */
+.game-header{background:linear-gradient(#6d5439,#55412c);box-shadow:inset 0 2px #94714d66,0 2px #3d2e20;position:relative;z-index:1}
+/* C4 보강: ui-art.css의 html[data-ui-art=ready] .game-header{background:transparent!important}는
+   전투 상단바를 --ui-topbar-battle border-image에만 맡긴다. border-image가 비거나 모서리가 비는
+   경우를 대비해 그 뒤에 불투명 폴백을 깔아둔다. 특이도(body 추가)로 ui-art.css를 덮되 파일은
+   건드리지 않는다(ui-art.css는 WP-1 소유). */
+html[data-ui-art=ready] body .game-header{background:#3b2314!important}
+.wordmark{text-shadow:2px 2px #3a2d1e,0 2px #3a2d1e}
+.header-actions button:before{border:1px solid #94714d;border-radius:5px;background:linear-gradient(#755a3d,#59442e);box-shadow:inset 0 2px #94714d44,0 2px #3c2e1f}
+.stage-number{border:1px solid #bc9c5d;border-radius:4px;box-shadow:inset 0 1px #fff1b833,0 2px #3a2d1e}
+.party-section{background:linear-gradient(#674f36,#54402c);box-shadow:inset 0 2px #94714d66,inset 0 -3px #473625;position:relative}
+.party-section:before,.party-section:after{content:"";position:absolute;top:0;width:11px;height:11px;border-top:3px solid #c1a16a;pointer-events:none}
+.party-section:before{left:0;border-left:3px solid #c1a16a}.party-section:after{right:0;border-right:3px solid #c1a16a}
+.hero-portrait{border:1px solid #8c815f;border-radius:3px;box-shadow:0 1px #403121}
+.puzzle-section{background:linear-gradient(90deg,#624b33,#55412c 12%,#55412c 88%,#624b33)}
+.game-footer button{border:1px solid #94714d;border-radius:4px;background:linear-gradient(#6b5238,#59442e);box-shadow:inset 0 1px #94714d33,0 2px #433323;padding-inline:9px}
+/* GL-ROLLOUT-V43: 블럭 몸체·문양·특수 표식은 WebGL 아틀라스(src/board-gl/atlas.mjs)가 그린다. 버튼은 투명 입력·접근성 격자. */
+.tile{isolation:isolate;border-radius:24%}
+.tile.special{outline:2px solid #ffdf89;outline-offset:1px;box-shadow:0 0 0 3px #8e6039,0 0 8px #edc67466}
+.tile.selected,.tile.hinted{outline:2px solid #fff2bf;outline-offset:1px;filter:brightness(1.15)}
+dialog{background:linear-gradient(#253951,#14223b);border-radius:7px;box-shadow:0 0 0 3px #384e70,0 0 0 4px #091226,7px 8px #030916aa}
+dialog .eyebrow{color:#d4bc86}.btn-primary{border-radius:5px}.modal-emblem{background:#17263d;border-radius:5px}.modal-rules b{border:1px solid #5c6e89;border-radius:4px}
+/* 9px용 픽셀 서체는 작은 상태값, 11px용 서체는 이름과 설명에 사용한다. */
+.chapter,.scene-location,.cast-queue,.hero-name,.hp-value,.energy-label,.energy-value,#combat-cue,.game-footer,.hero-name small{font-family:Galmuri9,monospace;letter-spacing:0}
+.hero-name small,.hp-value,.energy-label,.energy-value,.chapter,.scene-location,.cast-queue{font-size:9px}
+.hero-name{font-size:10px;font-weight:400}.hp-value{line-height:11px}.hero-energy{gap:3px}.hero-card{column-gap:4px}
+.hero-card.down .energy-label{color:#e8ca90}.bar.charge{height:7px;border-bottom:1px solid #0007}
+.skill-banner{font-family:Galmuri11,sans-serif;font-size:22px;letter-spacing:0;text-shadow:2px 2px #081426}
+.intro h1{font-size:33px;letter-spacing:-1px}.right-note h2{font-size:22px}.threat{font-family:Galmuri9,monospace;font-size:10px;background:#15243ced;border-color:#b09966}
+@media(max-width:380px){.hero-card{padding-inline:3px}.heroes{gap:4px}.hero-energy{gap:2px}}
+.puzzle-section{position:relative}
+.cascade-pop{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;font-family:Galmuri11,sans-serif;font-size:26px;color:#ffe39a;text-shadow:2px 2px #173d30,0 0 10px #f7ca71aa;animation:cascade-pop .7s ease-out forwards}
+@keyframes cascade-pop{0%{opacity:0;transform:translate(-50%,-40%) scale(.8)}18%{opacity:1;transform:translate(-50%,-58%) scale(1.08)}70%{opacity:1;transform:translate(-50%,-72%) scale(1)}100%{opacity:0;transform:translate(-50%,-86%) scale(1)}}
+.tile.tutorial-target{outline:2px solid #9ef0c0;outline-offset:1px;animation:tutorial-target 1s infinite;z-index:2}
+@keyframes tutorial-target{50%{filter:brightness(1.35)}}
+/* M18: 위로 -100% 튀어나가 파티 카드(.party-section)를 덮던 말풍선을 .puzzle-section(보드 영역) 안쪽 상단으로 내린다. */
+/* 2026-10-11(에셋 전수 점검): 단색 배경+border+box-shadow+CSS 삼각형 꼬리를 맞춤 에셋(9분할 몸체 +
+   꼬리 1:1)으로 교체. 레이아웃·글자·상태 필터만 CSS, 표면은 --ui-tutorial-bubble*(docs/UI-BESPOKE-V25.md). */
+#tutorial-caption{position:absolute;left:50%;top:8px;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:8px;max-width:min(92vw,360px);color:#3b2c1c;border-style:solid;border-width:9px;border-image-source:var(--ui-tutorial-bubble);border-image-slice:var(--ui-tutorial-bubble-slice) fill;border-image-width:var(--ui-tutorial-bubble-width);border-image-repeat:round;padding:9px 12px;font-family:Galmuri9,monospace;font-size:11px;line-height:1.4}
+#tutorial-caption:after{content:'';position:absolute;left:24px;bottom:-11px;width:16px;aspect-ratio:146/104;background-image:var(--ui-tutorial-bubble-tail);background-size:contain;background-repeat:no-repeat}
+#tutorial-caption .tutorial-text{flex:1}
+#tutorial-caption.flash{animation:tutorial-flash .35s ease-in-out}
+@keyframes tutorial-flash{0%,100%{filter:none}50%{filter:brightness(1.1) saturate(1.6) hue-rotate(-18deg)}}
+#tutorial-caption #tutorial-skip{flex:none;background:none;border:0;color:#76502d;font-family:Galmuri9,monospace;font-size:9px;padding:4px 7px}
+/* FTUE-V1 §3-1·3-2(docs/FTUE-VISUAL-AUDIT-V1.md): 본문 13px·건너뛰기 11px(진한 색). 목표가 보드 위쪽이면 말풍선을 보드 아래로
+   내리고(.below, 꼬리는 위로 뒤집는다), 꼬리 x는 목표 열 중심(--tail-x, main.mjs placeTutorialCaption). 필살기 컷인 중에는 숨긴다. */
+#tutorial-caption{font-family:Galmuri11,sans-serif;font-size:13px;line-height:1.35;width:max-content;max-width:min(calc(100% - 16px),360px);box-sizing:border-box}
+#tutorial-caption .tutorial-text{word-break:keep-all}
+#tutorial-caption #tutorial-skip{font-family:Galmuri11,sans-serif;font-size:11px;color:#5a3a1e;text-decoration:underline;text-underline-offset:2px}
+#tutorial-caption:after{left:var(--tail-x,24px)}
+#tutorial-caption.below{top:auto;bottom:8px}
+#tutorial-caption.below:after{bottom:auto;top:-11px;transform:scaleY(-1)}
+.game.cutin-active #tutorial-caption,.game.cutin-active .tutorial-hand{visibility:hidden}
+/* FTUE-V1 N2 손가락(에셋 대기): 288×96 3프레임 → 32×32 표시. :root.ftue-art-hand(src/ftue-art.mjs가 에셋이 있을 때만 붙임)일 때만 보인다. */
+.tutorial-hand{position:absolute;left:var(--hand-x,0);top:var(--hand-y,0);width:32px;aspect-ratio:1;z-index:7;pointer-events:none;display:none}
+:root.ftue-art-hand .tutorial-hand:not([hidden]){display:block;background-image:var(--ui-tutorial-hand);background-size:300% 100%;background-repeat:no-repeat;image-rendering:pixelated;animation:tutorial-hand-move 1.6s ease-in-out infinite,tutorial-hand-frame 1.6s steps(1) infinite}
+.board.busy~.tutorial-hand{visibility:hidden}
+/* 손끝(프레임 왼쪽 아래 약 15%·80%)이 칸 중심에 오게 민다. */
+@keyframes tutorial-hand-move{0%,18%{transform:translate(-15%,-80%);opacity:1}62%,82%{transform:translate(calc(-15% + var(--hand-dx,0px)),calc(-80% + var(--hand-dy,0px)));opacity:1}100%{transform:translate(calc(-15% + var(--hand-dx,0px)),calc(-80% + var(--hand-dy,0px)));opacity:0}}
+@keyframes tutorial-hand-frame{0%{background-position:0 0}12%{background-position:50% 0}22%,100%{background-position:100% 0}}
+.reduce-motion .tutorial-hand{animation:none!important;background-position:0 0;transform:translate(-15%,-80%)}
+/* COMBAT-V46: 공격 게이지 줄 제거(매치 즉시 평타). 카드 높이·격자(2행)는 그대로 두고 아래 줄을 길게 쓴 체력 막대로 바꾼다.
+   쓰러지면 같은 줄이 부활 막대(9칸)로 바뀐다. 표면 에셋은 그대로(막대는 기존 .bar 스타일 재사용). */
+.hero-card .hero-info{display:flex;flex-direction:column;justify-content:center;gap:3px}
+.hero-card .hero-energy .bar.hp{flex:1;height:7px;margin-top:0;border-bottom:1px solid #0007}
+.hero-card:not(.down) .hero-energy :is(.energy-label,.bar.charge,.energy-value){display:none}
+.hero-card.down .hero-energy .bar.hp{display:none}
+/* 연쇄 표시: 단계가 오를수록 크고 뜨겁게(transform·opacity 애니메이션만 — 합성 비용만 든다). */
+.cascade-pop{font-size:calc(26px + var(--chain-boost,0) * 4px);color:var(--chain-color,#ffe39a)}
+.cascade-pop.hot{text-shadow:2px 2px #173d30,0 0 12px #ff9f43cc,0 0 2px #fff6d0}
+/* COMBAT-V46c 연쇄 아나운서(총괄 검수 반영): 불투명 채움 + 매끈한 진한 외곽선(-webkit-text-stroke, paint-order로 채움 위에 덮지 않게)
+   + 아래 그림자로 블럭 위에서도 또렷하게. 단계별 색(금 → 하늘 → 주황 → 붉은 분홍)은 채도·명도를 올려 블럭 색과 대비. 표면 없음(글자만). */
+.cascade-pop{display:flex;flex-direction:column;align-items:center;white-space:nowrap;line-height:1.05;width:max-content}
+/* en(2026-10-20): "Legendary!"·"chain ×6!"처럼 긴 라틴 단어는 절대 위치 상자(left:50%)의 줄어든 폭을 넘쳤고, 내림 글자(g·y)가 줄 높이 밖으로 나갔다. */
+:lang(en) .cascade-pop{line-height:1.2}
+/* ja(ja 현지화 2차 2026-10-21): 전각 글자(見事！·連鎖 ×4!·レジェンダリー！)가 line-height:1.05 상자보다
+   커 2px씩 넘쳤다(ja-sweep-battle.test.mjs 실측) — en과 같은 해법. */
+:lang(ja) .cascade-pop{line-height:1.2}
+/* zh(중국어 현지화 2026-10-21): 전각 한자 글자(惊人!·连锁 ×4!·传说级!)가 같은 이유로 line-height:1.05
+   상자보다 2px씩 넘쳤다(zh-hans-sweep-battle.test.mjs 실측) — ja와 같은 해법. */
+:lang(zh) .cascade-pop{line-height:1.2}
+.cascade-pop.called{animation:cascade-pop-word .9s ease-out forwards}
+@keyframes cascade-pop-word{0%{opacity:1;transform:translate(-50%,-50%)}75%{opacity:1;transform:translate(-50%,-64%)}100%{opacity:0;transform:translate(-50%,-78%)}}
+.cascade-pop.called .cascade-word,.cascade-pop.called .cascade-count{-webkit-text-stroke:6px #1d140a;paint-order:stroke fill;text-shadow:0 4px 0 #0009}
+.cascade-pop .cascade-word{font-size:calc(32px + var(--chain-boost,0) * 3px);color:var(--word-color,#ffe14d);animation:cascade-word .9s ease-out forwards}
+.cascade-pop.called .cascade-count{font-size:calc(22px + var(--chain-boost,0) * 2px);color:#fff4c2}
+@keyframes cascade-word{0%{transform:scale(.55)}14%{transform:scale(1.3)}26%{transform:scale(.95)}36%{transform:scale(1)}100%{transform:scale(1)}}
+.reduce-motion .cascade-pop .cascade-word{animation:none}
+/* FTUE-V1 §3-13: 하단 전투 로그 대비(밝은 크림 글자 + 진한 그림자), 지역 띠는 3초 뒤 접는다(main.mjs updateUi .loc-folded). */
+.game-footer #combat-cue{color:#fff4d2;text-shadow:1px 1px 0 #3d2612}
+.game-footer #combat-cue:before{color:#ffe08a}
+/* 같은 줄의 #board-message는 cue가 .active인 동안만 숨는다(:has). cue가 꺼질 때 0.15초 페이드가 남으면 그 사이 두 문장이
+   겹쳐 찍혔다(대비를 올린 뒤 눈에 띔, 토스 02 캡처) — 끌 때는 즉시 사라지게 하고 켤 때만 페이드한다. */
+.game-footer #combat-cue:not(.active){transition:none}
+.scene-location{transition:opacity .4s}
+.game.loc-folded .scene-location{opacity:0}
+/* FTUE-V1 N3 일반·고급 필살기 미니 컷인 띠(main.mjs showUltMiniBand, 에셋 대기). 띠 1170×240 → 폭 100%·390:80, 스킬명 판 780×132 wide3(캡 66 → 22px)
+   을 고정 높이 44px로 깐다. :root.ftue-art-ult-band가 없으면 요소 자체가 만들어지지 않는다. */
+.ult-mini-band{position:absolute;left:0;top:26%;width:100%;aspect-ratio:390/80;z-index:7;pointer-events:none;display:none;align-items:center;justify-content:center;box-sizing:border-box;background-image:var(--ui-ult-band-normal);background-size:contain;background-position:center;background-repeat:no-repeat;image-rendering:pixelated}
+:root.ftue-art-ult-band .ult-mini-band.show{display:flex;animation:umb-in var(--umb-dur,.8s) ease-out forwards}
+/* 띠 가운데 1/3은 초상 자리로 비워 둔 그림이다 — 초상을 가운데에, 스킬명 판은 띠 바로 아래 가운데에 건다. */
+.ult-mini-band .umb-portrait{flex:none;height:92%;aspect-ratio:1;object-fit:contain;image-rendering:pixelated}
+.ult-mini-band .umb-plate{position:absolute;left:50%;top:calc(100% - 8px);transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;height:44px;box-sizing:border-box;padding:0 26px;color:#fff3c8;font-family:Galmuri11,sans-serif;text-shadow:1px 1px 0 #2a1608;white-space:nowrap}
+:root.ftue-art-nameplate .ult-mini-band .umb-plate{border-style:solid;border-width:0 22px;padding:0 6px;border-image-source:var(--ui-skill-nameplate);border-image-slice:0 66 fill;border-image-width:0 22px;border-image-repeat:stretch}
+.ult-mini-band .umb-skill{font-size:17px;line-height:1.2}
+.ult-mini-band .umb-name{font-size:10px;line-height:1.2;opacity:.9}
+/* 띠가 스킬명 판에 이름을 이미 보여 준다 — 같은 순간 씬 꼭대기 배너(✦ 스킬명 ✦)는 겹쳐 띄우지 않는다. */
+.game.ult-band-on .skill-banner{visibility:hidden}
+@keyframes umb-in{0%{transform:translateX(-30%);opacity:0}14%{transform:none;opacity:1}82%{opacity:1}100%{opacity:0}}
+.reduce-motion .ult-mini-band.show{animation:umb-fade var(--umb-dur,.8s) steps(1) forwards}
+@keyframes umb-fade{0%{opacity:1}100%{opacity:0}}

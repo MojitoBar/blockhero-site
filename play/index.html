@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#5b3825">
+  <script>
+    /* 개발 전용: 실기기 노치/홈 인디케이터가 없는 Chromium에서 env(safe-area-inset-*)를 흉내 낸다.
+       ?safe=59,34 처럼 쿼리로 넘기면 --safe-top/--safe-bottom을 덮어써 CSS가 그 값을 쓰게 한다. 쿼리가 없으면 아무 일도 하지 않는다(프로덕션 무해). */
+    /* 다국어(2026-10-20): 정적 스플래시가 뜨기 전에 저장된 언어 선택으로 <html lang>을 먼저 맞춘다 — 비ko는 한국어 로고가 없는
+       스플래시(:lang 규칙, 아래 #boot-splash)를 쓴다. 최종 로케일은 src/i18n/index.mjs 부팅이 다시 정한다. */
+    try { const l0 = localStorage.getItem('block-hero-locale-pref-v1'); if (!l0 && /^ko/i.test(navigator.language || '')) document.documentElement.lang = 'ko'; } catch {}
+    try { const l = localStorage.getItem('block-hero-locale-pref-v1'); if (l && l !== 'ko' && l !== 'auto') document.documentElement.lang = l; } catch {}
+    (() => { const m = /[?&]safe=([\d.]+),([\d.]+)/.exec(location.search); if (!m) return;
+      document.documentElement.style.setProperty('--safe-top', m[1] + 'px'); document.documentElement.style.setProperty('--safe-bottom', m[2] + 'px'); })();
+  </script>
+  <link rel="icon" href="/blockhero-site/play/assets/final/ui/favicon.svg" type="image/svg+xml">
+  <meta name="description" content="Block Hero: a match-3 puzzle RPG. Play the first chapter free in your browser.">
+  <meta property="og:title" content="Block Hero — play the first chapter in your browser">
+  <meta property="og:description" content="A pixel-art match-3 puzzle RPG. Match blocks to power three heroes. Free web demo.">
+  <meta property="og:image" content="/blockhero-site/play/assets/final/ui/splash-a.png">
+  <title data-i18n="shell.html.title">Block Hero — Web Demo</title>
+  <link rel="preload" href="/blockhero-site/play/assets/final/fonts/Galmuri11.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/blockhero-site/play/assets/final/fonts/Galmuri9.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" as="image" href="/blockhero-site/play/assets/final/ui/splash-a-logo.png" fetchpriority="high">
+  <style>
+    #boot-splash{position:fixed;inset:0;z-index:9999;height:100svh;min-height:100svh;overflow:hidden;background:url(/blockhero-site/play/assets/final/ui/splash-a-logo.png) center/cover #dda38e}
+    html:not([lang="ko"]) #boot-splash{background-image:url(/blockhero-site/play/assets/final/ui/splash-a.png)}
+    #boot-splash .splash-loading{position:absolute;bottom:6.5%;left:50%;transform:translateX(-50%);width:62%;min-height:85px;text-align:center}
+    #boot-splash .splash-loading progress{appearance:none;width:100%;height:9px;border:2px solid #5a3a1e;border-radius:4px;overflow:hidden}
+    #boot-splash .splash-loading progress::-webkit-progress-bar{background:#f6e1b7}
+    #boot-splash .splash-loading progress::-webkit-progress-value{background:#c99a3c}
+    #boot-splash .splash-loading progress::-moz-progress-bar{background:#f6e1b7}
+  </style>
+  <link rel="stylesheet" href="/blockhero-site/play/src/game-ui.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/app-shell.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/ui-art.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/native.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/v47-cards.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/v47-formation.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/v47-recruit.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/v47-camp.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/v47-skins.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/battle-focus.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/notices-view.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/iap.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/gifts.css">
+  <link rel="stylesheet" href="/blockhero-site/play/src/rtl.css">
+</head>
+<body>
+  <div id="boot-splash" aria-hidden="true">
+    <div class="splash-loading"><progress max="100" value="0" aria-hidden="true"></progress></div>
+  </div>
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="icon-crown" viewBox="0 0 24 24"><path fill="currentColor" d="M2 5h4v4h4V3h4v6h4V5h4v4h-2v11H4V9H2zm5 12h10v-3H7z"/></symbol>
+    <symbol id="icon-spark" viewBox="0 0 24 24"><path fill="currentColor" d="M10 2h4v6h2v2h6v4h-6v2h-2v6h-4v-6H8v-2H2v-4h6V8h2z"/></symbol>
+    <symbol id="icon-sound" viewBox="0 0 24 24"><path fill="currentColor" d="M10 3h11v12h-3V7h-5v12h-3v2H4v-2H2v-4h2v-2h6z"/></symbol>
+    <symbol id="icon-pause" viewBox="0 0 24 24"><path fill="currentColor" d="M5 4h5v16H5zm9 0h5v16h-5z"/></symbol>
+    <symbol id="icon-play" viewBox="0 0 24 24"><path fill="currentColor" d="M5 3h4v3h4v3h4v2h3v2h-3v2h-4v3H9v3H5z"/></symbol>
+    <symbol id="icon-arrow" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3h3v3h3v3h3v6h-3v3h-3v3h-3v-6H3V9h9z"/></symbol>
+  </defs></svg>
+  <div class="ambient" aria-hidden="true"></div>
+  <main id="app-shell" aria-label="블럭히어로 메인" data-i18n-attr="aria-label:shell.html.appShellAria"></main>
+  <div class="layout" hidden>
+    <aside class="intro">
+      <div class="desktop-brand"><svg class="icon"><use href="#icon-crown"/></svg><span>BLOCK HERO</span></div>
+      <span class="eyebrow" data-i18n="shell.html.introEyebrow">작은 영웅들의 퍼즐 모험</span>
+      <h1 data-i18n="shell.html.introHeadline">작은 블럭,<br>커다란 모험<span>.</span></h1>
+      <p data-i18n="shell.html.introSub">세 명의 작은 영웅과<br>잠들어 있던 숲을 깨워보세요.</p>
+      <div class="intro-rule"></div>
+      <div class="guide-item"><span>01</span><p data-i18n="shell.html.guide1"><b>같은 토큰을 세 개</b><br>블럭을 밀어 영웅의 힘을 모아요.</p></div>
+      <div class="guide-item"><span>02</span><p data-i18n="shell.html.guide2"><b>네 개부터는 특별하게</b><br>빛나는 블럭을 터치해 스킬을 펼쳐요.</p></div>
+      <div class="guide-item"><span>03</span><p data-i18n="shell.html.guide3"><b>함께라면 다시 한번</b><br>쓰러진 영웅의 토큰을 모아 되살려요.</p></div>
+      <div class="intro-foot" data-i18n="shell.html.introFootHtml"><span class="pixel-star">✦</span> 첫 번째 원정 <span>이끼숲의 수호자</span></div>
+    </aside>
+    <main class="game" aria-label="블럭히어로 게임" data-i18n-attr="aria-label:shell.html.gameAria">
+      <header class="game-header"><a href="/blockhero-site/play/" class="wordmark" aria-label="블럭히어로 처음으로" hidden data-i18n-attr="aria-label:shell.html.wordmarkAria"><svg class="icon brand-mark" aria-hidden="true"><use href="#icon-crown"/></svg><span data-i18n="shell.header.brandHtml">블럭<b>히어로</b></span></a><div class="stage-name"><span class="stage-number">1–1</span><span class="chapter" hidden>이끼숲 원정</span><h2 id="stage-title">숲의 입구</h2><div class="wave-dots" aria-label="웨이브 진행" data-i18n-attr="aria-label:shell.html.waveDotsAria"><span class="active">1</span><i></i><span>2</span><i></i><span aria-label="보스" data-i18n-attr="aria-label:shell.html.bossAria">✦</span></div></div><div class="header-actions"><button id="focus-mode" aria-label="스킬 집중 연출" aria-pressed="true" title="스킬 집중 연출" data-i18n-attr="aria-label:shell.settings.focusLabel;title:shell.settings.focusLabel"><svg class="icon" aria-hidden="true"><use href="#icon-spark"/></svg></button><button id="sound" aria-label="효과음 켜기" aria-pressed="false" title="효과음" data-i18n-attr="title:shell.settings.sfxLabel"><svg class="icon" aria-hidden="true"><use href="#icon-sound"/></svg></button><button id="pause" aria-label="일시정지" title="일시정지" data-i18n-attr="aria-label:battle.main.common.pause;title:battle.main.common.pause"><svg class="icon" aria-hidden="true"><use href="#icon-pause"/></svg></button></div></header>
+      <section class="battle-scene" aria-label="실시간 전투" data-i18n-attr="aria-label:shell.html.battleAria">
+        <canvas id="battle-bg" aria-hidden="true"></canvas>
+        <canvas id="battle" width="840" height="470" aria-label="아군 세 명과 적의 전투 애니메이션" data-i18n-attr="aria-label:shell.html.battleCanvasAria"></canvas>
+        <div class="scene-location"><span></span> 이끼숲 · 전투 중</div>
+        <div id="cast-queue" class="cast-queue" aria-live="polite"></div>
+        <div id="skill-banner" class="skill-banner" aria-live="polite"></div>
+        <div id="legend-cutin" class="legend-cutin-overlay" aria-hidden="true"><div class="lc-band-frame"><img class="lc-band" alt=""></div><img class="lc-portrait" alt=""><div class="lc-nameplate"><div class="lc-nameplate-inner"><b class="lc-name"></b><small class="lc-skill"></small></div></div></div>
+        <div id="threat" class="threat">모험을 시작할 준비가 되었어요</div>
+        <div id="mech-chip" class="mech-chip" hidden></div>
+        <!-- EXPEDITION-UX-V2.md §3 S5: 보유 유물 트레이(원정 전투에서만 보인다, main.mjs updateRelicTray). -->
+        <div id="relic-tray" class="relic-tray" hidden role="button" tabindex="0" aria-label="보유 유물 보기" data-i18n-attr="aria-label:shell.html.relicTrayAria"></div>
+        <div id="combo" class="combo" role="status" title="한 번의 조작에서 이어진 매치 수 · 연쇄마다 평타·충전·회복·보호막 ×1.25 (최대 ×2.5)" data-i18n-attr="title:shell.html.comboTitle"></div>
+      </section>
+      <section class="party-section" aria-label="우리의 원정대" data-i18n-attr="aria-label:shell.html.partySectionAria"><div id="heroes" class="heroes" aria-label="히어로별 체력" data-i18n-attr="aria-label:shell.html.heroesAria"></div><div id="party-echo" class="party-echo" aria-hidden="true" hidden><img class="pe-portrait" alt=""><span class="pe-text"><b class="pe-skill"></b><small class="pe-name"></small></span></div></section>
+      <section class="puzzle-section" aria-label="퍼즐" data-i18n-attr="aria-label:shell.html.puzzleSectionAria">
+        <div id="tutorial-caption" class="tutorial-caption" role="status" hidden><span class="tutorial-text"></span><button type="button" id="tutorial-skip" data-i18n="shell.onboarding.skip">건너뛰기</button></div>
+        <div id="board" class="board" role="group" aria-label="7행 7열 퍼즐 보드" data-i18n-attr="aria-label:shell.html.boardAria"></div>
+        <div id="tutorial-hand" class="tutorial-hand" aria-hidden="true" hidden></div>
+      </section>
+      <footer class="game-footer"><span id="board-message">같은 문양을 3개 이상 맞춰주세요</span><span id="combat-cue" role="status">문양을 맞추면 영웅이 바로 공격해요</span><span id="clock">00:00</span><button id="hint" aria-label="도움말" data-i18n-attr="aria-label:shell.html.hintAria">? <span data-i18n="shell.html.hintLabel">도움말</span></button><span id="mode-label" hidden>이끼숲의 수호자 · 1-1</span><button id="practice" hidden data-i18n="shell.html.practiceButton">스킬 연습실 ↗</button></footer>
+      <div id="practice-bar" class="practice-bar" hidden><span data-i18n="shell.html.practiceSceneLabel">연습 장면</span><button data-practice="0" data-i18n="shell.html.practiceHero0">불꽃</button><button data-practice="1" data-i18n="shell.html.practiceHero1">서리</button><button data-practice="2" data-i18n="shell.html.practiceHero2">궁수</button><button data-practice="3" data-i18n="shell.html.practiceHero3">모아</button><button data-practice="4" data-i18n="shell.html.practiceHero4">브릭</button><button data-practice="5" data-i18n="shell.html.practiceHero5">니아</button><button data-practice="6" data-i18n="shell.html.practiceHero6">토토</button><button data-practice="7" data-i18n="shell.html.practiceHero7">벨</button><button data-practice="8" data-i18n="shell.html.practiceHero8">포포</button><button data-practice="9" data-i18n="shell.html.practiceHero9">세라</button><button data-practice="10" data-i18n="shell.html.practiceHero10">라크</button><button data-practice="11" data-i18n="shell.html.practiceHero11">로아</button><button data-practice="12" data-i18n="shell.html.practiceHero12">누리</button><button data-practice="13" data-i18n="shell.html.practiceHero13">탄</button><button data-practice="revive" data-i18n="shell.html.practiceRevive">부활</button><button data-practice="victory" data-i18n="shell.html.practiceVictory">보스 처치</button><button id="exit-practice" data-i18n="shell.html.exitPractice">나가기</button></div>
+    </main>
+    <aside class="right-note"><span class="eyebrow" data-i18n="shell.html.noteEyebrow">모험가의 수첩</span><h2 data-i18n="shell.html.noteHeadline">작은 블럭의<br>특별한 힘.</h2><p data-i18n="shell.html.noteSub">네 개 이상 모았다면,<br>빛나는 블럭을 톡 눌러보세요.</p><div class="skill-guide"><div><b>↔</b><span data-i18n="shell.html.guideHorizontal">가로 4개<small>한 줄을 가르는 스킬</small></span></div><div><b>↕</b><span data-i18n="shell.html.guideVertical">세로 4개<small>한 곳에 집중하는 강타</small></span></div><div><b>✚</b><span data-i18n="shell.html.guideCross">T · L · 십자<small>주변을 휩쓰는 폭발</small></span></div><div><b>✦</b><span data-i18n="shell.html.guideUltimate">일자 5개<small>영웅의 강력한 필살기</small></span></div></div><div class="note-tip" data-i18n="shell.html.noteTip">서두르지 않아도 괜찮아요.<br>하트와 방패도 함께 모아주세요.</div></aside>
+  </div>
+  <dialog id="modal" aria-labelledby="modal-title">
+    <div class="modal-art" aria-hidden="true"><div class="modal-emblem"><svg class="icon"><use href="#icon-crown"/></svg></div></div><span id="modal-kicker" class="eyebrow">CHAPTER 01</span><h2 id="modal-title">이끼숲의 수호자</h2><p id="modal-body"></p><div id="modal-detail"></div><button id="modal-primary" class="btn-primary">모험 시작하기 <span>→</span></button><button id="modal-secondary" class="btn-secondary">스킬 먼저 구경하기</button><button id="modal-home" class="btn-tertiary" hidden data-i18n="shell.html.modalHome">메인으로 돌아가기</button>
+  </dialog>
+  <dialog id="glossary-dialog" aria-labelledby="glossary-dialog-title"></dialog>
+  <div id="announcer" class="sr-only" aria-live="polite"></div>
+  <script type="module" src="/blockhero-site/play/app.js"></script>
+</body>
+</html>

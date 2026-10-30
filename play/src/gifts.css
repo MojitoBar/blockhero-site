@@ -1,0 +1,16 @@
+/* ── 운영자 선물 안내 창(src/toss/gifts.mjs 흐름, 토스·iOS 공용 — docs/OPERATOR-GIFTS.md) ──
+   새 표면 없음: 기존 <dialog> 양피지 프레임(--ui-paper-lg) + 확률 정보 창과 같은 행(.odds-rows/.odds-row) + .embark 초록 버튼 에셋 +
+   재화 아이콘 에셋(.coin-icon·.token-icon). 여기서는 배치·글자만 정한다. 토스 설정 칸(모험가 번호) 스타일은 src/toss/toss.css. */
+#toss-gift-dialog{width:calc(100vw - 32px);max-width:340px;padding:24px 22px 18px}
+#toss-gift-dialog h2{font-size:16px;margin:10px 0;white-space:nowrap}
+#toss-gift-dialog .toss-gift-message{font:12px/1.8 Galmuri11;color:#69482e;margin:0 0 6px;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
+#toss-gift-dialog .toss-gift-rewards{margin:10px 0 4px;max-height:none}
+#toss-gift-dialog .toss-gift-row{font:11px Galmuri11}
+#toss-gift-dialog .toss-gift-row>span{display:flex;align-items:center;gap:6px;white-space:nowrap}
+#toss-gift-dialog .toss-gift-row b{font:700 12px Galmuri11;white-space:nowrap}
+.toss-gift-icon-spacer{flex:none;display:inline-block;width:16px;height:16px}
+#toss-gift-dialog .embark{margin-top:14px}
+/* iOS는 다국어라 제목·메시지가 길어질 수 있다 — 토스(ko 고정)의 한 줄 고정·한글 단어 단위 줄바꿈을 풀어 준다. */
+html:not(.toss-app) #toss-gift-dialog h2{white-space:normal;text-wrap:balance;overflow-wrap:anywhere}
+html:not(.toss-app) #toss-gift-dialog .toss-gift-message{word-break:normal}
+html:not(.toss-app) #toss-gift-dialog .toss-gift-row>span{white-space:normal;min-width:0}

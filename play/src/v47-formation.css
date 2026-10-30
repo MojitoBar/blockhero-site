@@ -1,0 +1,122 @@
+/* V47 WS-A: 편성 화면 무대형 레이아웃(docs/OVERHAUL-V47.md §3). v47Formation=1일 때만 쓰인다
+   (0이면 legacyBody가 기존 app-shell.css 규칙을 그대로 쓴다).
+   무대·발판·포지션 꼬리표·먼지는 전용 에셋(assets/final/ui/v47/, V47-ART-AUDIT §6 게이트 합격본)을 쓴다.
+   무대 그림은 테두리 없는 장면이고, 테두리는 camp-stage-frame-v47(9분할, 슬라이스 118px = 10.75%/19.19%)을
+   ::after로 얹는다. 화면 높이에 따라 무대 비율이 226/150/118로 바뀌어 cover 크롭이 달라지므로 테두리를
+   그림에 구우면 잘린다(V47-ART-AUDIT §2-2 재제작 판정 기록). 장면은 아래 기준으로 붙여 낮은 화면에서도
+   발판이 놓이는 나무 무대가 남는다. 테두리 이미지 바깥 투명 여백(44/118)만큼 장면을 안쪽으로 들인다. */
+
+.formation-v47 .formation-stage-v47{
+  --stage-fw:24px;
+  position:relative;aspect-ratio:366/226;margin:10px 0 2px;overflow:hidden;padding:calc(var(--stage-fw) * .373);box-sizing:border-box;
+  background-image:url('/blockhero-site/play/assets/final/ui/v47/formation-stage-v47.png');background-size:cover;background-position:center bottom;background-repeat:no-repeat;
+  background-origin:content-box;background-clip:content-box;
+}
+.formation-v47 .formation-stage-v47::after{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  border-style:solid;border-width:var(--stage-fw);border-image-source:url('/blockhero-site/play/assets/final/ui/v47/camp-stage-frame-v47.png');
+  border-image-slice:19.19% 10.75%;border-image-width:var(--stage-fw);border-image-repeat:stretch}
+/* 파티 전투력: 맨글자 대신 기존 전투력 판(cp-plate-v47 426×84, 표시 28px = 3x, 캡 24 = 5.6%)을 깐다(V47-ART-AUDIT). */
+.formation-cp{position:absolute;z-index:2;top:calc(var(--stage-fw) + 2px);left:50%;transform:translateX(-50%);height:28px;padding:0 6px;display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:none;white-space:nowrap;
+  border-style:solid;border-color:transparent;border-width:0 8px;border-image-source:url('/blockhero-site/play/assets/final/ui/v47/cp-plate-v47.png');border-image-slice:0 5.6% fill;border-image-width:0 8px;border-image-repeat:stretch}
+.formation-cp-label{font:700 10px Galmuri9;color:#f6e1b7;text-shadow:0 1px 2px #2a160a,0 0 4px #2a160a}
+.formation-cp-value{font:700 11px Galmuri9;color:#fff3d1;text-shadow:0 1px 2px #2a160a,0 0 4px #2a160a}
+.formation-cp-delta{font:700 10px Galmuri9;text-shadow:0 1px 2px #2a160a;animation:formation-cp-delta-fade 1.2s ease forwards}
+.formation-cp-delta.is-up{color:#8ee07a}
+.formation-cp-delta.is-down{color:#e8847a}
+@keyframes formation-cp-delta-fade{0%{opacity:0;transform:translateY(3px)}15%{opacity:1;transform:translateY(0)}75%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}
+
+/* 아래쪽 패딩에 꼬리표 높이(18px + margin-top 2px)만큼을 더 reserve해 둔다 — 꼬리표를 발판
+   흐름에서 떼어 absolute로 내리므로(아래 party-slot-pos-tag), 그만큼을 안 비워 두면 발판이
+   전보다 아래로 내려가 앉고 꼬리표는 화면 테두리 밖으로 잘린다. */
+.formation-v47 .party-slots{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:4%;padding:0 calc(var(--stage-fw) + 2%) calc(var(--stage-fw) + 21px);margin:0}
+/* 슬롯 박스 높이 = 발판 높이만(꼬리표는 아래로 절대배치돼 흐름 높이에 안 들어간다, 아래 참고) —
+   영웅 초상의 bottom%를 발판 기준으로만 계산할 수 있게 한다(전에는 꼬리표 높이까지 섞여 폭마다
+   발 위치가 들쭉날쭉했다, 대표 캡처 피드백 "발판 뒤쪽에 서 있다"). */
+.formation-v47 .party-slot{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;width:28%;min-height:0;padding:0;margin:0;border:0;background:transparent;box-shadow:none;border-radius:0;color:inherit;text-align:center}
+.formation-v47 .party-slot-pedestal{display:block;width:100%;aspect-ratio:88/34;background-image:url('/blockhero-site/play/assets/final/ui/v47/pedestal-v47.png');background-size:300% 100%;background-repeat:no-repeat}
+.formation-v47 .party-slot-pedestal-empty{background-position:0% 0}
+.formation-v47 .party-slot-pedestal-filled{background-position:50% 0}
+.formation-v47 .party-slot.just-placed .party-slot-pedestal-filled{background-position:100% 0}
+/* 영웅 크기(대표 캡처 피드백: "너무 작다") — 58%→100%(약 1.72배)로, 발판 원판 정중앙 위에 발을
+   딛도록 bottom을 발판 높이 기준 38%(원판 윗면 중심 바로 아래)로 올린다. 슬롯 폭 전체를 쓰므로
+   좌우centering은 명시적으로 한다(발판이 유일한 흐름 자식이라 flex align-items 묵시 센터링에
+   기대지 않는다). */
+.formation-v47 .party-slot-portrait{position:absolute;left:50%;bottom:38%;width:100%;aspect-ratio:1/1;transform:translateX(-50%);display:grid;place-items:end center;pointer-events:none}
+.formation-v47 .party-slot-portrait canvas{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 2px #00000055)}
+.formation-v47 .party-slot.is-filled.just-placed .party-slot-portrait canvas{filter:drop-shadow(0 2px 2px #00000055) brightness(1.08)}
+/* 꼬리표는 발판 "아래 앞쪽"으로 — 전에는 흐름상 발판 바로 아래 붙어 큰 영웅의 발·하체를 가렸다.
+   발판 기준 absolute로 내려 영웅 초상(z-index 없음, 기본 쌓임 순서상 나중 요소가 위)과 겹치지
+   않게 한다. */
+.formation-v47 .party-slot-pos-tag{position:absolute;left:50%;top:100%;transform:translateX(-50%);margin-top:2px;min-width:30px;padding:0 3px;display:inline-flex;align-items:center;justify-content:center;height:18px;font:700 8px Galmuri9;color:#fff3d1;text-shadow:0 1px 1px #2a160a;border-style:solid;border-width:0 9px;border-image-source:url('/blockhero-site/play/assets/final/ui/v47/pos-tag-v47.png');border-image-slice:0 16.667% fill;border-image-width:0 9px;border-image-repeat:stretch;white-space:nowrap}
+.formation-v47 .party-slot.empty-slot{opacity:.9}
+/* 레거시 편성 슬롯 액자(ui-art.css html[data-ui-art=ready] .party-slot — party-slot-bespoke 배경, 315:198 비율)가
+   무대 발판 위에 한 겹 더 그려지던 문제를 끊는다(V47-ART-AUDIT §6-4-2 레거시 표면 중첩 금지). */
+html[data-ui-art] .formation-v47 .party-slot{background:none;aspect-ratio:auto;min-height:0;outline:none;box-shadow:none}
+.formation-v47 .party-slot.empty-slot .party-slot-pos-tag{opacity:.75}
+
+/* 슬롯 번호(앞=1=오른쪽 끝) — 적이 오른쪽이라는 기준(§3-1). flex 문서 순서는 index0(앞)→1→2(뒤)로
+   그대로 두고 order로만 뒤집어 ‘문서상 넣는 순서’와 ‘화면 좌우’를 분리한다. */
+.formation-v47 .party-slot[data-slot-index="0"]{order:3}
+.formation-v47 .party-slot[data-slot-index="1"]{order:2}
+.formation-v47 .party-slot[data-slot-index="2"]{order:1}
+
+/* 넣기/빼기 연출 — 방금 놓인 슬롯 하나만 애니메이션한다(.is-filled 전체에 걸면 필터·정렬 탭마다
+   재렌더되는 다른 슬롯까지 매번 들썩여 화면 흔들림 금지 규칙을 어긴다). */
+.formation-v47 .party-slot.just-placed{animation:formation-slot-in 220ms ease-out}
+@keyframes formation-slot-in{0%{transform:translateY(10px) scale(.85);opacity:.5}100%{transform:translateY(0) scale(1);opacity:1}}
+.formation-fly-ghost{position:fixed;z-index:9999;pointer-events:none;image-rendering:pixelated;will-change:transform,opacity}
+.formation-dust-puff{position:absolute;left:50%;bottom:6%;width:48px;height:24px;transform:translateX(-50%);background-image:url('/blockhero-site/play/assets/final/ui/v47/dust-puff-v47.png');background-size:600% 100%;background-repeat:no-repeat;pointer-events:none;animation:formation-dust-steps 180ms steps(6,jump-none) forwards}
+@keyframes formation-dust-steps{from{background-position:0% 0}to{background-position:100% 0}}
+
+@media(prefers-reduced-motion:reduce){
+  .formation-v47 .party-slot.just-placed{animation:none}
+  .formation-cp-delta{animation:none;opacity:1}
+}
+
+/* 보유 영웅 카드 그리드(WS-CARD 공용 카드 재사용). .hero-tabs 클래스는 app-shell.mjs의
+   renderKeepListScroll 스크롤 복원 선택자(.owned-heroes .hero-tabs)·action()의 closest 판별과
+   호환하기 위해 유지한다. 레거시 .hero-tabs button 액자·패딩 무효화는 v47-cards.css가 맡는다. */
+.hero-tabs-v47{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:2px 16px 10px}
+
+/* 역할·등급 칩: 두 묶음을 감싸 줄바꿈(묶음 안에서는 줄바꿈하지 않는다). */
+.formation-filter-row-v47{margin-bottom:6px}
+.formation-filter-row-v47 .formation-filter-scroll{flex-wrap:wrap;overflow:visible;gap:6px 10px}
+.formation-filter-group{display:flex;flex:none;gap:6px}
+
+/* 낮은 화면(320×568·375×667): 무대를 납작하게, 칩을 작게 해서 보유 영웅 카드가 한 줄 이상 온전히
+   보이게 한다(WS-INT: 320폭에서 카드 그리드가 50px만 남아 카드 아래가 잘려 보였다). 무대 배경은
+   cover라 비율이 바뀌어도 찌그러지지 않는다. */
+@media (max-height:700px){
+  .formation-v47 .formation-stage-v47{aspect-ratio:366/150;margin-top:6px;--stage-fw:18px}
+  .formation-filter-row-v47{margin-bottom:4px}
+  .formation-filter-row-v47 .formation-filter-scroll{gap:4px 8px}
+  .formation-filter-row-v47 .formation-filter-group{gap:4px}
+  .formation-filter-row-v47 .formation-filter-chip{padding:3px 8px;font-size:9px}
+}
+/* 가장 낮은 화면(320×568 등 ≤600px): 무대를 한 번 더 납작하게 해 카드 한 줄이 끝까지 보이게 한다. */
+@media (max-height:600px){
+  .formation-v47 .formation-stage-v47{aspect-ratio:366/118;--stage-fw:14px}
+  /* 가장 납작한 무대(366/118)에서는 폭 100%(1:1)로 두면 영웅 키가 무대 높이를 넘어 위쪽이 잘린다
+     — 기존에도 이 폭에서만 줄였다(전 50%, 1.72배 축척해 86%). */
+  .formation-v47 .party-slot-portrait{width:86%}
+  .formation-cp{top:1px;height:22px}
+}
+
+/* HERO-LV100-PLAN.md D3(2026-10-22 2차: 색 단계 10종으로 확장): 편성 받침 초상 뒤 정적 오라
+   (portrait-aura-v47.png 10칸 × 252×336 = CSS 84×112 3x, 390폭 받침 초상 75px의 112%). 초상 캔버스
+   바로 앞 형제 — 캔버스를 z 1로 올려 오라가 항상 몸 뒤에 깔린다. 발밑 타원이 받침 윗면에 오도록
+   아래로 조금 내린다. */
+.formation-v47 .party-slot-portrait .party-slot-aura{
+  position:absolute;left:50%;bottom:-7%;width:112%;aspect-ratio:3/4;transform:translateX(-50%);z-index:0;pointer-events:none;
+  background:url(/blockhero-site/play/assets/final/ui/v47/portrait-aura-v47.png) 0 0/1000% 100% no-repeat;image-rendering:pixelated;
+}
+.formation-v47 .party-slot-portrait canvas{position:relative;z-index:1}
+.formation-v47 .party-slot-aura.tier-2{background-position:11.1111% 0}
+.formation-v47 .party-slot-aura.tier-3{background-position:22.2222% 0}
+.formation-v47 .party-slot-aura.tier-4{background-position:33.3333% 0}
+.formation-v47 .party-slot-aura.tier-5{background-position:44.4444% 0}
+.formation-v47 .party-slot-aura.tier-6{background-position:55.5556% 0}
+.formation-v47 .party-slot-aura.tier-7{background-position:66.6667% 0}
+.formation-v47 .party-slot-aura.tier-8{background-position:77.7778% 0}
+.formation-v47 .party-slot-aura.tier-9{background-position:88.8889% 0}
+.formation-v47 .party-slot-aura.tier-10{background-position:100% 0}

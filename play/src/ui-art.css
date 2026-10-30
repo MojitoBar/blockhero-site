@@ -1,0 +1,1217 @@
+/* 생성된 프레임의 모서리를 9분할로 보존하고 글자는 실제 서체로 겹친다.
+   규칙 R(docs/UI-AUDIT-V24.md §3.1): 캔버스 = CSS 박스 × DPR 로 만들었으므로 border-image-slice = inset×DPR,
+   border-image-width = inset(css px) 만 지키면 코너가 항상 1:1이다. inset은 에셋당 lg(12)/sm(8) 두 값만 쓴다(P1). */
+:root{--frame:var(--ui-paper-lg);--frame-slice:var(--ui-paper-lg-slice);--frame-width:var(--ui-paper-lg-width)}
+html[data-ui-art=ready] :is(.expedition-plaque,.paper,.hero-tabs button,.bottom-nav,.party-section,.hero-card,.game-footer,dialog,.modal-emblem,.refuge-bubble,.subpage-heading,.result-modal .result-stats,.onboarding-art-frame,#app-toast){
+ background:var(--frame-fill,transparent);background-clip:padding-box;border:var(--frame-width) solid transparent;border-image-source:var(--frame);border-image-slice:var(--frame-slice);border-image-width:var(--frame-width);border-image-repeat:round;border-radius:0;box-shadow:none;
+}
+.expedition-plaque,.bottom-nav,.party-section,.game-footer,.onboarding-art-frame{--frame:var(--ui-wood-lg);--frame-slice:var(--ui-wood-lg-slice);--frame-width:var(--ui-wood-lg-width);--frame-fill:#4b2918}
+/* 온보딩 아트는 프레임 안쪽 채움 없이 아트가 프레임 두께만큼 안쪽에 딱 맞게 들어간다(내부 배경 불필요). */
+.onboarding-art-frame{--frame-fill:transparent;padding:0}
+.refuge-bubble{--frame:var(--ui-wood-sm);--frame-slice:var(--ui-wood-sm-slice);--frame-width:var(--ui-wood-sm-width);--frame-fill:#4b2918}
+/* 대상 3(토스트, docs/UI-CSS-AUDIT-V32.md): 신규 생성 없이 기존 다이얼로그 톤의 어두운 나무 9분할(--ui-wood-sm)을
+   재사용한다 — 업적 달성·증표 획득·레벨 보상 등 모든 토스트가 같은 #app-toast 한 요소를 공유해 하나로 충분하다. */
+#app-toast{--frame:var(--ui-wood-sm);--frame-slice:var(--ui-wood-sm-slice);--frame-width:var(--ui-wood-sm-width);--frame-fill:#4b2918}
+/* 2026-10-11(라운드3b): .refuge-sign/.recruit-mystery/.all-friends는 src/app-shell.mjs 전수 재조사 결과
+   현재 마크업 어디에서도 생성되지 않는 죽은 선택자다(gachaHtml이 .recruit-mystery를 대체한 지 오래, 쉼터
+   화면도 캔버스 기반으로 바뀌며 간판 div 자체가 사라졌다). --ui-title-lg/-sm 결선을 걷어낸 뒤에도 CSS
+   규칙은 남겨 레이아웃 셀렉터로서는 살아있게 두되(재도입 시 참고용), 더 이상 존재하지 않는 title 변수
+   참조만 제거한다 — border-image-source가 빈 값이면 브라우저가 조용히 무시한다(화면에 보이지 않으므로
+   회귀 없음). 유일한 라이브 소비처였던 .inn-sign은 아래에서 전용 nameplate 에셋(wide3)으로 분리했다. */
+.paper,.subpage-heading,dialog{--frame:var(--ui-paper-lg);--frame-slice:var(--ui-paper-lg-slice);--frame-width:var(--ui-paper-lg-width);--frame-fill:#f6e1b7}
+.hero-card,.modal-emblem,body[data-screen=shop] .recruit-mystery,.result-modal .result-stats{--frame:var(--ui-slot-sm);--frame-slice:var(--ui-slot-sm-slice);--frame-width:var(--ui-slot-sm-width);--frame-fill:#f6ead3}
+/* 2026-10-11(라운드3c, C단계): .hero-tabs button(도감·편성 카드 그리드)은 일반 다이얼로그 패널과 성격이
+   달라(선택 가능한 카드형 타일) --ui-paper-lg에서 분리해 전용 변수(--ui-hero-tab-card)를 쓴다. */
+.hero-tabs button{--frame:var(--ui-hero-tab-card);--frame-slice:var(--ui-hero-tab-card-slice);--frame-width:var(--ui-hero-tab-card-width);--frame-fill:#f6e1b7}
+/* 여관 이름판(.inn-sign, 폭이 글자 길이로 변함): legend-nameplate-bespoke 재사용 wide3. */
+html[data-ui-art=ready] .inn-sign{
+ --sign-height:37px;
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-style:solid;border-color:transparent;
+ border-image-source:var(--ui-nameplate-wide)!important;
+ border-image-slice:0 var(--ui-nameplate-cap) fill!important;
+ border-image-width:0 calc(var(--sign-height) * var(--ui-nameplate-cap) / var(--ui-nameplate-canvas-h))!important;
+ border-image-repeat:round;
+ padding:0 calc(var(--ui-nameplate-cap-px) * 0.6 + 6px)!important;
+ height:var(--sign-height);
+ /* 총괄 피드백(2026-10-11): flex 센터링 없이는 block 텍스트가 박스 상단에 붙어 nameplate 위쪽 금테에
+    겹쳤다 — 13px 폰트가 37px 박스보다 짧아 남는 여백이 전부 아래로만 갔다. */
+ display:flex!important;align-items:center;justify-content:center;line-height:1;
+}
+/* 지도 "장 선택" 다이얼로그의 이전/다음·닫기 버튼: icon-btn-bespoke의 리벳 프레임 셀을 40px 정사각
+   고정 캔버스로 구워 배경으로 쓴다(--ui-slot-sm 카드 프레임과 분리, ui-art.mjs 참고). */
+html[data-ui-art=ready] :is(.chapter-controls button,.chapter-dialog-head button){
+ border:0!important;box-shadow:none!important;border-radius:0!important;
+ width:40px;height:40px;padding:0;
+ background-color:transparent!important;background-image:var(--ui-icon-btn-top-40)!important;background-size:40px 40px!important;background-repeat:no-repeat!important;background-position:center!important;
+ display:inline-flex;align-items:center;justify-content:center;
+}
+/* 2026-09-28(V36 1단계): 전투 HUD 스테이지 번호는 판 없이 글자로만 표시한다(원칙2, 위계는 크기·색으로). */
+.stage-number{background:none!important;border:0!important;box-shadow:none!important;color:#fff0c6;font:700 12px Galmuri11;text-shadow:-1px 0 #23120a,1px 0 #23120a,0 -1px #23120a,0 1px #23120a,0 2px #23120a}
+/* 맞춤(bespoke) 1:1 에셋: 박스 비율 = 에셋 비율을 aspect-ratio로 고정하고, background-size:contain으로 안전장치를 둔다
+   (박스 크기 100%로 배경을 늘려 채우는 방식은 뷰포트·폰트 스케일 등으로 박스가 에셋 비율과 어긋나면 그대로 찌그러지므로 금지, docs/UI-BESPOKE-V25.md). */
+/* 2026-09-23 사용자 지적("메인화면 오른쪽 버튼들의 작은 텍스트가 테두리랑 글자랑 겹친다"):
+   contain 배경은 박스(75×96)와 에셋 비율(225/219)이 어긋나 프레임이 75×73으로 레터박스되고,
+   그 위아래 11.5px 투명 띠 위에 보조문구가 얹혀 프레임 테두리와 겹쳐 보였다(실측: 프레임 내부 51.7×49,
+   `Lv.2`가 아래 레일 밖으로 5.7px). border가 0이라 content box는 프레임 위치와 아무 관계가 없었다.
+   → 9분할 border-image로 바꿔 프레임이 박스를 정확히 채우게 하고, border-width를 레일 두께로 잡아
+   content box = 프레임 안쪽이 되게 한다. 원본은 CSS 박스의 3배(225/75)이므로 slice = width×3이면 코너가 1:1.
+   레일 실측(docs/UI-QA-V26.md §1): L 11.3 / R 12 / T 12.3 / B 11.7 CSS px = 소스 33.9/36/36.9/35.1px —
+   slice 42/39가 그 위를 덮고, width 14px/13px가 정확히 그 1/3이다. */
+/* 회귀(빌드 33 QA, 홈 "영웅 영입" 타일): tile-frame-plain-bespoke.png(225×219)는 상하 투명 패딩이
+   비대칭(위 5px/아래 10px)이고, 슬라이스 경계(42/39)가 아래쪽 나무 레일의 베벨 픽셀(y≈175~177)을
+   완전히 배제하지 못해 그 줄이 "가운데/좌우 반복(fill+round)" 조각 안에 섞여 들어간다. 버튼 높이(89px)가
+   이 조각의 자연 크기보다 커 round가 세로로 2회 반복하면서 그 베벨 줄이 타일 경계에 겹쳐 그려져
+   타일 폭 전체를 가로지르는 옅은 가로선으로 보였다 — R1 회귀(:566 주석, 버튼 아트 위아래 겹침)와
+   같은 유형의 버그다. R1과 같은 해법으로 repeat을 round→stretch로 바꾼다: 가운데·좌우 조각을
+   반복하지 않고 단일 이미지로 늘려 타일 경계 자체를 없앤다(레일의 베벨 오차 몇 px는 늘어난 이미지
+   안에서 옅게 흡수돼 눈에 띄지 않는다).
+*/
+html[data-ui-art=ready] .refuge-tools button{
+ background:none;box-shadow:none;border-radius:0;aspect-ratio:auto;padding:0;
+ border-style:solid;border-color:transparent;border-width:14px 13px;
+ border-image-source:var(--ui-tile-frame-plain-bg);border-image-slice:42 39 fill;
+ border-image-width:14px 13px;border-image-repeat:stretch;
+}
+html[data-ui-art=ready] .party-slot{border:0;background:var(--ui-party-slot-bg) center/contain no-repeat;aspect-ratio:315/198;box-shadow:none;border-radius:0}
+html[data-ui-art=ready] .settings-shortcut,html[data-ui-art=ready] .map-node-icon{border:0;background:var(--ui-icon-square-bg) center/contain no-repeat;aspect-ratio:1;box-shadow:none;border-radius:0}
+/* 2026-09-28(V36 1단계): 뒤로가기는 액자 없이 기존 금빛 글리프(icon-btn-bespoke 셀5, --ui-icon-back-20)만
+   나무 위에 바로 올린다. 터치 영역은 버튼 padding으로 44×44 유지(border-image 프레임 제거). */
+html[data-ui-art=ready] .back-button{border:0;background:none;box-shadow:none;border-radius:0}
+html[data-ui-art=ready] .header-actions button:before{border:0;background:var(--ui-icon-square-sm) center/contain no-repeat;aspect-ratio:1;box-shadow:none;border-radius:0}
+/* 재화는 판 없이 아이콘+외곽선 숫자로 표시한다(원칙2, A안) — wallet-dark 판 배경을 없앤다.
+   --ui-wallet-dark 등록 자체는 .skill-preview가 그대로 쓰므로 유지한다(ui-art.mjs). */
+html[data-ui-art=ready] .wallet{border:0;background:none;box-shadow:none;border-radius:0;width:auto;height:auto;aspect-ratio:auto}
+html[data-ui-art=ready] .wallet-group-compact{background:none!important;border:0;box-shadow:none;border-radius:0;height:40px;padding:0}
+html[data-ui-art=ready] .btn-mission.btn-primary,html[data-ui-art=ready] .btn-mission.btn-secondary{border:0!important;background:var(--ui-btn-mission-bg) center/contain no-repeat!important;aspect-ratio:216/96;box-shadow:none;border-radius:0}
+html[data-ui-art=ready] #board{border:0;background:var(--ui-board-frame-bg) center/contain no-repeat,#443423;aspect-ratio:1;box-shadow:inset 0 2px 5px #0009}
+/* 메달리온은 카드 폭에 비례한 정사각(카드 내부 폭의 70%)으로 그려 카드 크기(뷰포트별 % 확대)가 바뀌어도 비율이 유지된다 —
+   고정 72px이면 카드가 커져도 메달리온만 따로 놀고, 부모가 늘리면 aspect-ratio 없이는 찌그러질 수 있어 안전장치로 함께 건다. */
+html[data-ui-art=ready] .hero-medallion{display:flex;align-items:center;justify-content:center;width:70%;aspect-ratio:1;height:auto;margin:0 auto 5px;background:var(--ui-hero-card-bg) center/contain no-repeat}
+/* 맞춤 상단 바: 모든 화면이 지도와 같은 간판(signboard) 프레임 하나를 공유한다(높이·캡·패딩 동일, §UI 피드백).
+   홈은 워드마크·간판 없이 지갑·설정만 뜨는 별도 레이아웃이라 바로 아래에서 배경을 지운다. 전투 HUD(battle)의
+   --ui-topbar-battle은 그대로 별도 유지한다. */
+/* 2026-09-28(V36 1단계): 서브 화면 상단 바를 장식 없는 얇은 호두나무 띠(topbar-plank, N1)로 통일한다
+   (기존 덩굴 모서리 간판 signboard 대체). 높이 56→46, 액자 없는 뒤로가기·재화라 안쪽 여백도 줄인다. */
+html[data-ui-art=ready] .app-top{
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-image-source:var(--ui-topbar-plank-wide)!important;border-image-slice:0 var(--ui-topbar-plank-cap) fill!important;
+ border-image-width:0 var(--ui-topbar-plank-cap-px)!important;border-image-repeat:round;padding-inline:12px;
+}
+html[data-ui-art=ready] body[data-screen=home] .app-top{
+ border-width:0!important;background:transparent!important;border-image:none!important;box-shadow:none!important;padding-inline:0!important;
+}
+html[data-ui-art=ready] .game-header{
+ /* topbar-battle-bespoke는 44px 전용 캔버스로 재래스터화됐지만(WP-3 §7.1), 이미지 로드 전/실패 시에도
+    뒤 배경이 비치지 않게 불투명 나무색을 폴백으로 깐다(C4). 로드되면 border-image가 그 위를 완전히 덮는다. */
+ border-width:0!important;background:#3b2314!important;border-radius:0!important;box-shadow:none;
+ border-image-source:var(--ui-topbar-battle-wide)!important;border-image-slice:0 var(--ui-topbar-battle-cap) fill!important;
+ border-image-width:0 var(--ui-topbar-battle-cap-px)!important;border-image-repeat:round;padding-inline:36px;
+}
+/* 맞춤 미션 패널(양피지): .daily-plaque 전체가 프레임을 갖는다. 미션 개수·줄바꿈에 따라 실제 박스 높이가
+   달라지는 세로 가변 상태라, 예전 3분할(위/아래 슬라이스 0, `--ui-mission-wide`)은 박스 높이가 원래
+   캔버스 높이(펼침 123 / 접힘 44)와 다를 때마다 모서리 금장식까지 세로로 눌리거나 늘어났다(2026-09-22 발견).
+   `--ui-mission-panel-9`(24px 인셋 9분할, ui-art.mjs가 이미 만들어 두고 있던 값)로 바꿔 모서리를 고정하고
+   가운데만 늘어나게 한다. 접힘/펼침 모두 같은 소스를 쓰고 padding만 다르다. 자식 .daily-header/.daily-missions는
+   프레임 없이 내용만 담는다. 양피지 위라 글자는 어두운 갈색으로 바꾼다(가독성). */
+html[data-ui-art=ready] .expedition-plaque.daily-plaque{
+ border-style:solid;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-width:var(--ui-mission-panel-9-width);
+ border-image-source:var(--ui-mission-panel-9)!important;border-image-slice:var(--ui-mission-panel-9-slice) fill!important;
+ border-image-width:var(--ui-mission-panel-9-width)!important;border-image-repeat:round;padding:2px 14px 0;
+ color:#5a3a1e;
+}
+html[data-ui-art=ready] .daily-overlay .expedition-plaque.daily-plaque{padding:6px 14px 10px;box-shadow:0 8px 20px #2b1c1066}
+html[data-ui-art=ready] .daily-plaque .daily-head small,html[data-ui-art=ready] .daily-plaque .daily-mission-progress{color:#8a5f34}
+html[data-ui-art=ready] .daily-plaque .daily-head,html[data-ui-art=ready] .daily-plaque .daily-close,html[data-ui-art=ready] .daily-plaque .daily-mission-title{color:#5a3a1e}
+/* 맞춤 스테이지 카드(양피지): 지도 스테이지 상세. 3분할(캡 83px)은 374px 카드 폭에 과대해 텍스트를 덮었다(C1).
+   WP-3가 안전 인셋 24px로 재슬라이스한 9분할 --ui-stage-card로 교체한다(docs/UI-BESPOKE-V25.md §7.2). */
+html[data-ui-art=ready] .stage-detail.paper{
+ border-style:solid;border-width:24px;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-image-source:var(--ui-stage-card)!important;border-image-slice:var(--ui-stage-card-slice) fill!important;
+ border-image-width:var(--ui-stage-card-width)!important;border-image-repeat:round;padding:18px 20px;
+}
+.nav-icon{display:block;width:32px;height:32px;background:var(--menu-icon) center/contain no-repeat;font-size:0!important;filter:drop-shadow(0 2px #301c1766)}
+.icon-home{--menu-icon:var(--icon-home)}.icon-shop{--menu-icon:var(--icon-shop)}.icon-heroes{--menu-icon:var(--icon-heroes)}.icon-map{--menu-icon:var(--icon-map)}.icon-settings{--menu-icon:var(--icon-settings)}.icon-scenery{--menu-icon:var(--icon-scenery)}.icon-notice{--menu-icon:var(--icon-notice)}
+.coin-icon{width:14px;height:12px;border:0;border-radius:0;box-shadow:none;background:var(--icon-coin) center/contain no-repeat;font-size:0;vertical-align:-0.15em}
+.wallet .coin-icon{width:18px;height:15px}
+/* 2026-09-24: 영웅의 증표 아이콘. 칩(16px)·대형(패널·결과 화면, 40px) 두 크기. */
+.token-icon{display:inline-block;width:16px;height:16px;aspect-ratio:1;border:0;border-radius:0;box-shadow:none;background:var(--icon-token) center/contain no-repeat;font-size:0;vertical-align:middle;margin-bottom:2px}
+.token-icon-lg{display:inline-block;width:40px;height:40px;aspect-ratio:1;background:var(--icon-token-lg) center/contain no-repeat;font-size:0}
+/* 2026-09-28(V36 1단계): 상단 바 46px(N1 통일), 재화는 판 없이 아이콘+외곽선 숫자(원칙2). */
+.app-top{height:46px;padding:0 12px;gap:8px;color:#fff5ce}.app-brand{font-size:21px;color:#fff2d2;text-shadow:2px 2px #301c13}.app-brand b{color:#ffda83}.wallet{font:12px Galmuri11;min-height:0;padding:0!important;gap:5px;}.settings-shortcut{width:42px;height:42px;padding:0;flex:none;}.settings-shortcut .nav-icon{width:27px;height:27px}
+.token-chip{font:12px Galmuri11}
+.wallet-group{gap:14px}
+/* 재화 숫자 공통 클래스(.currency-num): 골드·증표가 같은 폰트·굵기·외곽선을 쓰고 색만 다르다(원칙2). */
+.currency-num{font:700 15px Galmuri11;letter-spacing:.2px;color:#ffe49a;text-shadow:-1px 0 #23120a,1px 0 #23120a,0 -1px #23120a,0 1px #23120a,-1px -1px #23120a,1px -1px #23120a,-1px 1px #23120a,1px 1px #23120a,0 2px #23120a;vertical-align:middle}
+#wallet-tokens.currency-num{color:#e9dcff}
+body[data-screen=home] .app-chrome, .refuge-view{height:min(100svh,calc(var(--app-width)*2));min-height:640px}
+/* 홈 상단은 간판 프레임 없이 지갑·설정만 뜬다 — 위치·크기는 app-shell.css가 관리한다. */
+body[data-screen=home] .app-brand{font-size:20px}body[data-screen=home] #app-shell{min-height:0}
+.refuge-sign{top:calc(91px + env(safe-area-inset-top));left:14px;width:244px;max-width:calc(100% - 110px);padding:4px 7px 6px;color:#fff5d9;text-shadow:1px 2px #2c1a0f}.refuge-sign small{font:10px Galmuri11;letter-spacing:0;color:#f3d59c}.refuge-sign h1{font-size:18px;line-height:1.5;white-space:nowrap;margin:5px 0}.refuge-sign>span{font:11px Galmuri11;background:none;border:0;padding:0;color:#fff0c0}
+.refuge-tools{top:calc(96px + env(safe-area-inset-top));right:13px;gap:15px}.refuge-tools.refuge-tools-left{left:13px;right:auto}.refuge-tools.refuge-tools-left button{width:88px}.refuge-tools button{width:80px;min-height:89px;padding:12px;color:#4d2d19;text-shadow:none;}
+/* 2026-10 실기기 피드백(빌드52) 재설계: "오늘의 영웅" 타일을 148px 가로 타일(112-polish)에서 다시
+   오늘의 미션과 같은 정사각(.refuge-tools.refuge-tools-left button 기본 88px)으로 되돌린다. 긴 설명은
+   타일 안이 아니라 탭하면 열리는 안내 다이얼로그(#featured-dialog)로 옮겼다. */
+.refuge-tools .nav-icon{width:40px;height:38px;margin:0 auto 6px}.refuge-tools b{font:700 11px Galmuri11;white-space:nowrap;word-break:keep-all}
+/* U11(docs/LOCALIZATION-PLAN.md §6-2): 영문 타일 라벨("Expedition" 등)이 짧게 줄여도 11px에서
+   타일 폭을 넘쳤다(scrollWidth/nowrap). 영문에서만 한 단계 줄인다. */
+:lang(en) .refuge-tools b{font-size:9px;}.refuge-tools small{font:10px Galmuri11;color:#604328;margin-top:4px;word-break:keep-all}.refuge-tools .tile-sub-line{display:block;white-space:nowrap}.refuge-tools .refuge-expedition-tool small{font-size:9px;line-height:1.6;letter-spacing:-.2px}.refuge-tools .ico-lock{width:9px;height:10px;margin-right:2px;vertical-align:-1px}.notification-dot{font:10px Galmuri11;right:-4px;top:-6px;border:2px solid transparent;padding:3px 5px;background-image:var(--ui-notification-badge);background-size:contain;background-repeat:no-repeat;background-position:center}
+.refuge-bottom{bottom:calc(12px + env(safe-area-inset-bottom));left:10px;right:10px}.refuge-bubble{display:none}.expedition-plaque{padding:4px 7px 8px;color:#fff1ce}.section-label{font:11px Galmuri11}.section-label h2{font:700 13px Galmuri11}.section-label button{font:11px Galmuri11;min-height:34px;color:inherit}.expedition-plaque .section-label{margin-bottom:7px}
+/* 버튼 없는 얇은 정보 줄(2026-10-11→10-12 재설계: "내일 열리는 것"/"N일차 선물"을 합친
+   .home-info-row)은 라벨 한 줄만 있는데도 버튼 카드와 같은 여백을 받으면 아래 절반이 빈 갈색
+   여백으로 보였다(2026-10-11 사용자 지적). 버튼 뒤에 올 여백(margin-bottom·여분 padding-bottom)을
+   없애고 위아래 패딩을 라벨 자체 여백과 대칭으로 맞춰 카드가 내용 높이만큼만 차지하게 한다. */
+.home-info-row{padding-bottom:4px}.home-info-row .section-label{margin-bottom:0}
+/* 홈 하단 카드 묶음 접이식 손잡이(2026-10-12 사용자 제보: 하단 묶음이 오른쪽 "쉼터 강화" 메뉴를
+   가린다 — 접을 수 있어야 함).
+   1차: 배경 없는 투명 글자 버튼(.daily-close 선례) — 쉼터 캔버스(풀밭·길) 바로 위에 떠서 밝은
+   길바닥 위에서 캐럿 글자가 거의 안 보이는 "크림 위 크림" 대비 결함(ops/PERSONA.md §6-3과 같은 종류).
+   2차: 폭 전체 어두운 나무 9분할(--ui-wood-sm, border-image-repeat:round) — 총괄 재검수: 가로로
+   너무 넓어 "빈 판자"처럼 보이고, 24~35px의 낮은 높이에서 9분할 round 반복 타일링이 가장자리에
+   작은 조각을 남겼다(원래 두꺼운 패널·말풍선용 에셋이라 이렇게 얇게 쓰면 타일이 안 맞는다).
+   3차(현재): 도감 정렬 칩(.hero-sort-chip)과 같은 작은 wide3 칩(--ui-currency-plate-wide, 24px
+   기준 가로 3분할 — 반복 타일링이 없어 좁고 낮은 크기에서도 깨지지 않는다)을 재사용해 폭 ~25%의
+   작은 탭으로 줄이고, 음수 margin-bottom으로 아래 카드 위 테두리에 살짝 걸치게 한다(탭이 카드에
+   매달린 느낌). z-index로 카드보다 위에 그려지게 한다. */
+.home-dock{display:flex;flex-direction:column;gap:7px}
+.home-dock-extra{display:flex;flex-direction:column;gap:7px}
+.home-dock-handle{align-self:center;position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:3px;min-width:72px;padding:0 12px;margin:0 0 -9px;color:#fff0be;text-shadow:1px 2px #25441c;font:700 11px Galmuri9}
+.home-dock-handle-label{font-size:10px}
+.home-dock-handle-caret{font-size:13px;line-height:1}
+.home-dock-handle .notification-dot{right:-2px;top:-8px}
+.party-slots{gap:5px}.party-slot{padding:3px 0;min-height:66px;gap:3px;color:#482b17}.party-slot canvas{width:30px;height:auto;aspect-ratio:64/72}.party-slot b{font:11px Galmuri11;white-space:nowrap}.party-slot small{font:10px Galmuri11;color:#694424;margin-top:5px}.slot-number{left:0;top:-3px;color:#75532b;font:8px Galmuri9}.party-slot.chosen{outline:2px solid #758e3e;outline-offset:0}.embark{color:#fff6d5;min-height:61px;padding:5px 11px;font:700 16px Galmuri11;text-shadow:1px 2px #25441c;}.embark>span:last-child{font-size:13px}.embark:disabled{opacity:.6}.expedition-plaque .embark{height:56px;min-height:56px;grid-template-columns:18px minmax(0,1fr) 18px;grid-template-rows:20px 13px;gap:1px 0;align-content:center;padding:1px 6px;margin-top:10px;}.expedition-plaque .embark>span{grid-column:2;grid-row:1;font-size:18px;line-height:20px}.expedition-plaque .embark small{grid-column:2;grid-row:2;font:11px/13px Galmuri11;color:#fff0bb}.expedition-plaque .embark b{grid-column:3;grid-row:1/3;font-size:23px;line-height:26px}
+/* 2026-09-25 사용자 실기기 피드백: 부제목(<small>)이 없는 "이어하기"/"도전 이어하기" 연속전투 버튼은
+   위 2행 그리드(20px+13px, align-content:center)가 그대로 적용돼 화살표(두 행 통째로 차지)는 버튼
+   중앙에 오지만 라벨은 20px짜리 첫 행(중앙 33px 블록의 윗쪽 절반)에만 놓여 화살표보다 위로 뜬다.
+   부제목이 없을 때는 한 행으로 되돌려 라벨·화살표가 같은 행에서 함께 중앙에 오게 한다.
+   ".expedition-plaque .embark:not(:has(small))"이 기본 규칙보다 구체적이라 순서와 무관하게 이긴다. */
+.expedition-plaque .embark:not(:has(small)){grid-template-rows:1fr;align-items:center}
+.expedition-plaque .embark:not(:has(small))>span{grid-row:1}
+.expedition-plaque .embark:not(:has(small))>b{grid-row:1}
+.bottom-nav{height:calc(82px + env(safe-area-inset-bottom));padding:0 0 env(safe-area-inset-bottom);color:#fff0cf;}.bottom-nav button{font:11px Galmuri11;gap:4px;border:0;min-height:56px}.bottom-nav .nav-icon{width:30px;height:30px}.bottom-nav button.active{background:#fff3c51c;box-shadow:inset 0 -3px #f2ce75;color:#ffe492}.app-chrome{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.subpage-heading{padding:12px 10px 15px;margin:12px 10px 0}.subpage-heading h1{font-size:23px}.subpage-heading p{font:12px/1.8 Galmuri11;color:#694529}.eyebrow,.subpage-heading .eyebrow{font:10px Galmuri11;letter-spacing:.4px;color:#795029}.chapter-progress{top:14px;right:9px;font:11px Galmuri11}.paper{padding:12px;margin:14px 10px}.formation{padding:8px}.hero-tabs{padding:0 10px;gap:8px}.hero-tabs button{padding:3px 0 7px;}.hero-tabs b{font:12px Galmuri11;color:#563416}.hero-tabs small{font:10px Galmuri11;color:#78502b}.hero-tabs .unowned{opacity:.72}.hero-tabs canvas{width:37px;height:auto;aspect-ratio:64/72}.hero-description p,.recruit-offer p,.stage-detail p,.save-info p{font:12px/1.9 Galmuri11;color:#69482e}.hero-description>small,.hero-stats{font:11px Galmuri11;color:#78512e}.hero-stats{gap:8px}.hero-stats span{gap:3px}.hero-display canvas{width:100px;height:100px;object-fit:contain}.skill-list span{font:11px/1.6 Galmuri11}.skill-list small{font:10px/1.6 Galmuri11;color:#73502f}.train-button,.btn-cost{min-height:49px;font:12px Galmuri11;color:#512e12;padding:2px}.stage-tip{font:11px/1.8 Galmuri11!important;color:#75502e!important}.stage-facts>span{font:12px Galmuri11}.settings-panel small{font:11px/1.8 Galmuri11;color:#75502e}.settings-panel label,.settings-panel .settings-row-graphics{font-size:14px}.settings-panel h2{font-size:15px}.save-info dl{font:12px Galmuri11}.save-info dd{color:#4f672c}.practice-entry{margin:14px 10px;width:calc(100% - 20px);padding:10px 14px;color:#5a3a1e;min-height:44px;font-size:13px}.recruit-offer .embark{font-size:14px}.recruit-offer .embark>span{font-size:12px}.recruit-odds{font:11px/1.8 Galmuri11;color:#704725}.recruit-odds>div{color:#75502c}.text-button{font:12px Galmuri11;color:#76502d}.language-panel .settings-row-option{display:block;width:100%;text-align:left;padding:10px 4px;margin:0;min-height:40px;font-size:13px;border-top:none}.language-panel .settings-row-option[aria-pressed="true"]{color:#4f672c}.inn-sign{color:#fff0bd;padding:2px 9px}.recruit-lineup canvas{height:auto;aspect-ratio:1}.map-node-icon{width:50px;height:50px;color:#714818}.app-version{font:10px/1.9 Galmuri11;color:#755b3f}
+/* 전투 UI의 면적은 유지하고 장식만 에셋 프레임으로 바꾼다. */
+.game-header{padding-inline:6px}.party-section{padding:8px 8px 10px;}.hero-card{padding:3px;grid-template-rows:28px 12px}.hero-portrait{background:none;border:0;box-shadow:none}.hp-value,.energy-label,.energy-value{color:#644320}.hero-name{color:#412817}.party-heading{color:#fff2ce}.party-heading small{color:#fff1ce}.board{padding:5px;}.game-footer{padding-inline:5px}.header-actions button:before{}.header-actions button{color:#644725}
+/* 회귀(빌드 32 QA): 이 규칙(2026-09-25 이전, "장식만 에셋 프레임으로" 패스)이 위 V36 1단계 규칙(20번째 줄,
+   판 제거 후 밝은 글자+어두운 외곽선으로 바꾼 stage-number)보다 파일에서 나중에 나와 같은 상세도로
+   color만 도로 어두운 갈색(#704a25)으로 덮어썼다 — 어두운 전투 배경 위에서 스테이지 번호("1-1")가
+   거의 안 보였다. 여기서는 color를 다시 지정하지 않아 20번째 줄의 밝은 글자+외곽선이 그대로 적용된다. */
+html[data-ui-art=ready] .header-actions button[aria-pressed=true]{color:#3f6b2e}
+html[data-ui-art=ready] .header-actions button[aria-pressed=false]{color:#9a7a55}
+#clock{color:#f3dcab;background:#3a2617}.primary,.btn-primary{color:#fff2c5;text-shadow:1px 2px #28421d;padding:3px 5px;}.modal-emblem{color:#794722}.result-reward{padding:8px;font-size:14px}dialog{padding:6px 12px 14px}dialog p{color:#6a472e}.modal-art{margin:0 -12px 18px}.stage-tip,.board-caption,.board-bottom{color:#684525}
+/* (FOLD-V1) 예전 761px 이상 홈 840px 띄움 규칙은 app-shell.css의 폭 600px 이상 규칙으로 대체했다. */
+@media(max-width:380px){.party-slot canvas{width:24px}.party-slot b{font-size:10px}.party-slot small{font-size:9px}.refuge-sign{left:10px;max-width:calc(100% - 100px);padding-inline:4px}.refuge-sign h1{font-size:16px}.refuge-tools{right:10px}.refuge-tools.refuge-tools-left{left:10px;right:auto}.refuge-tools.refuge-tools-left button{width:83px}.refuge-tools button{width:79px}.expedition-plaque{padding-inline:3px}.hero-stats{font-size:10px}.skill-list span{font-size:10px}.app-brand,body[data-screen=home] .app-brand{font-size:18px}}
+@media(max-height:740px){.refuge-sign{top:82px}.refuge-tools{top:86px;gap:10px}.refuge-tools button{min-height:81px}.refuge-tools .nav-icon{width:32px;height:30px}.refuge-sign small{display:none}.refuge-sign h1{margin-top:2px}.expedition-plaque{padding-top:0;padding-bottom:3px}.party-slot{min-height:56px}.expedition-plaque .embark{margin-top:9px}.expedition-plaque .embark>span{font-size:17px}.section-label{margin-bottom:4px}.refuge-bottom{bottom:8px}}
+/* 승리 결과는 수집한 영웅과 보상을 중심으로 구성한다. */
+/* 2026-10-11(라운드3c, C단계): 결과(승리/패배) 모달은 축하 톤(금장)이 어울려 일반 다이얼로그 패널과
+   분리된 --ui-result-panel을 쓴다. */
+#modal.result-modal{width:calc(100vw - 28px);max-width:370px;padding:8px 16px 12px;text-align:center;overflow:auto;--frame:var(--ui-result-panel);--frame-slice:var(--ui-result-panel-slice);--frame-width:var(--ui-result-panel-width);--frame-fill:#f6e1b7}
+.result-modal .modal-art{height:99px;margin:0 0 5px;background:none;border:0;overflow:visible;box-shadow:none}.result-modal .modal-art:before{display:none}.result-modal .modal-emblem{width:98px;height:98px;border:0!important;box-shadow:none;background:url('/blockhero-site/play/assets/final/ui/victory-v13.png') center/contain no-repeat;image-rendering:pixelated}.result-modal .modal-emblem svg{display:none}.result-modal.result-lost .modal-emblem{filter:saturate(.2)}
+.result-modal #modal-kicker{font:11px Galmuri11;color:#755027;letter-spacing:1px}.result-modal #modal-title{font-size:24px;line-height:1.5;margin:8px 0;color:#4c2d18}.result-modal #modal-body{font:12px/1.8 Galmuri11;margin:0 0 8px;color:#755131}
+.result-party{display:flex;justify-content:center;gap:24px;margin:7px 0 12px}.result-party>div{display:flex;flex-direction:column;align-items:center;gap:4px}.result-party canvas{width:47px;height:47px;image-rendering:pixelated}.result-party span{font:11px Galmuri11;color:#5f3e23}.result-party .fallen canvas{filter:grayscale(1);opacity:.5}
+.result-modal .result-stats{padding:15px 4px;margin:10px 0 12px}.result-modal .result-stats b{font:20px Galmuri11;color:#6b441e}.result-modal .result-stats small{font:10px Galmuri11;color:#755230;margin-top:6px}
+/* gold 에셋은 장식이 커서 9분할이 불가하다(docs/UI-AUDIT-V24.md §3.2) — 가변 높이 배너인 이 요소는 3분할 버튼으로도 못 쓰므로 단색 골드 패널로 대체한다. */
+.result-modal .result-reward{border:0;background:none;padding:4px 0;margin-bottom:14px;color:#5a320e;font:700 20px Galmuri11;line-height:1.5;text-align:center}.result-modal .result-reward small{font:11px/1.7 Galmuri11;color:#694220;margin-top:5px}
+.result-modal #modal-primary{min-height:55px;font:700 16px Galmuri11;padding:4px 9px}.result-modal #modal-secondary{font:12px Galmuri11;min-height:41px;padding:6px 0;color:#704721}.result-modal #modal-home{display:none}
+.practice-bar{gap:5px;padding:9px;font:11px Galmuri11}.practice-bar>span{width:100%;text-align:center;color:#60411e}.practice-bar button{min-height:36px;padding:7px 10px;font:11px Galmuri11}
+@media(max-height:740px){#modal.result-modal{padding:3px 12px 7px}.result-modal .modal-art{height:66px;margin-bottom:3px}.result-modal .modal-emblem{width:67px;height:67px}.result-modal #modal-title{font-size:22px;margin:4px 0}.result-modal #modal-body{font-size:11px;margin-bottom:3px}.result-party{margin:4px 0 8px}.result-party canvas{width:36px;height:36px}.result-modal .result-stats{margin-block:7px;padding-block:12px}.result-modal .result-reward{margin-bottom:10px}.result-modal #modal-primary{min-height:50px}}
+#modal.result-modal .modal-emblem{border:0!important;border-image:none!important;background:transparent url('/blockhero-site/play/assets/final/ui/victory-v13.png') center/contain no-repeat!important}
+/* 이름 길이와 관계없이 초상화·텍스트 묶음의 기준선을 맞춘다. */
+.party-slot{justify-content:center;align-items:center;text-align:center}
+.party-slot-content{display:grid;grid-template-columns:28px 44px;align-items:center;justify-content:center;gap:5px;flex:none}
+.party-slot-content canvas{display:block;width:28px;height:31.5px;aspect-ratio:64/72;margin:0}
+.party-slot-copy{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0}
+.party-slot-copy b{font:700 11px/14px Galmuri11;letter-spacing:0;margin:0;white-space:nowrap}
+.party-slot-copy small{font:10px/12px Galmuri11;letter-spacing:0;color:#735333;margin:0;white-space:nowrap}
+.party-slot:not([data-slot]) .slot-number{display:none}
+.party-slot[data-slot] .slot-number{top:-1px;left:1px;font:8px/10px Galmuri9}
+@media(max-width:380px){.party-slot-content{grid-template-columns:24px 40px;gap:4px}.party-slot-content canvas{width:24px;height:27px}.party-slot-copy b{font-size:10px;line-height:13px}.party-slot-copy small{font-size:9px;line-height:11px}}
+/* 영입 후보 수와 무관하게 하나의 미지의 영웅을 표시한다. */
+.recruit-mystery{display:grid;place-items:center;width:96px;height:110px;color:#ffe9a5;font:700 56px/1 Galmuri11;text-shadow:2px 3px #442411;filter:drop-shadow(0 4px #43311b55)}
+.recruit-mystery>span{transform:translateY(-2px)}
+
+/* 영웅 도감은 전신을 담을 여유를 두고 캔버스의 원래 비율을 유지한다. */
+.hero-tabs canvas{display:block;flex:none;width:44px;height:49.5px;aspect-ratio:64/72;object-fit:contain}
+
+/* 영웅 감상과 출발 직전 편성을 각각의 화면으로 구분한다. */
+.owned-heroes{margin:18px 0 14px}
+.owned-heroes>.section-label{margin:0 18px 12px;color:#634123}
+.owned-heroes .hero-tabs button{min-height:122px;justify-content:center}
+/* 도감 정렬 칩(2026-09-25 재설계, 사용자 승인): 3분할 큰 탭 대신 "보유 영웅 · N명" 줄 오른쪽의
+   작은 칩 하나로 레벨순→등급순→획득순을 순환한다. 새 에셋을 만들지 않고 상단 재화 칩(.wallet-group-compact)과
+   같은 currency-plate-bespoke 소스를 재사용한다 — ui-art.mjs가 40px(css) 높이로 구운 --ui-currency-plate-wide를
+   가져다, mode-tabs의 --tab-height 스케일 공식과 같은 방식으로 24px 칩 높이에 맞춰 캡 폭만 다시 계산한다
+   (cap·canvas-h는 원본 raw 배율값이라 단위 없이 나눗셈이 성립한다). 패딩은 40px 기준 cap-px에 24/40 비율을 곱해
+   캡 예술 두께에 맞춘다. */
+/* .home-dock-handle도 같은 currency-plate-wide 소스를 24px 칩 높이로 재사용한다(§3c 위 주석). */
+html[data-ui-art=ready] .home-dock-handle{
+ --chip-height:22px;
+ height:var(--chip-height)!important;min-height:var(--chip-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-style:solid;border-color:transparent;
+ border-image-source:var(--ui-currency-plate-wide)!important;
+ border-image-slice:0 var(--ui-currency-plate-cap) fill!important;
+ border-image-width:0 calc(var(--chip-height) * var(--ui-currency-plate-cap) / var(--ui-currency-plate-canvas-h))!important;
+ border-image-repeat:round;
+}
+html[data-ui-art=ready] .hero-sort-chip{
+ --chip-height:24px;
+ height:var(--chip-height)!important;min-height:var(--chip-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-style:solid;border-color:transparent;
+ border-image-source:var(--ui-currency-plate-wide)!important;
+ border-image-slice:0 var(--ui-currency-plate-cap) fill!important;
+ border-image-width:0 calc(var(--chip-height) * var(--ui-currency-plate-cap) / var(--ui-currency-plate-canvas-h))!important;
+ border-image-repeat:round;
+ padding:0 calc(var(--ui-currency-plate-cap-px) * 0.6 + 4px);
+ /* currency-plate는 상단 재화 칩(.wallet, .wallet-group-compact)과 같은 어두운 목판이라, 그 두
+    칩이 쓰는 것과 같은 크림색(#ffe9ae)을 쓴다 — 처음에 어두운 갈색(#5a3416)을 썼다가 목판과
+    거의 같은 톤이라 글자가 안 보이는 대비 사고가 있었다(DPR3 캡처로 확인). */
+ color:#ffe9ae;font:700 10px Galmuri9;display:inline-flex;align-items:center;gap:2px;
+}
+.hero-sort-chip span{font-size:9px}
+/* 편성 필터 칩(2026-09-29)도 같은 currency-plate-wide 소스를 정렬 칩과 같은 24px 높이로 재사용한다.
+   선택 여부는 밝기(brightness)·채도(saturate) 필터로만 구분한다(허용된 상태 표현, 새 표면 아님). */
+html[data-ui-art=ready] .formation-filter-chip{
+ --chip-height:24px;
+ height:var(--chip-height)!important;min-height:var(--chip-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ border-style:solid;border-color:transparent;
+ border-image-source:var(--ui-currency-plate-wide)!important;
+ border-image-slice:0 var(--ui-currency-plate-cap) fill!important;
+ border-image-width:0 calc(var(--chip-height) * var(--ui-currency-plate-cap) / var(--ui-currency-plate-canvas-h))!important;
+ border-image-repeat:round;
+ padding:0 calc(var(--ui-currency-plate-cap-px) * 0.6 + 4px);
+ color:#ffe9ae;font:700 10px Galmuri9;display:inline-flex;align-items:center;justify-content:center;opacity:.62;
+}
+html[data-ui-art=ready] .formation-filter-chip[aria-pressed=true]{opacity:1;filter:brightness(1.15) saturate(1.2)}
+/* ja(ja 현지화 2차 2026-10-21): 편성 화면(src/screens/formation-view.mjs) 역할·등급 칩은 한 묶음(.formation-filter-group)
+   안에서는 줄바꿈하지 않는다(위 "두 묶음을 감싸 줄바꿈" 설계) — 등급 묶음 4개가 전부 "レジェンダリー"급 전각
+   글자일 때(ja-longest.test.mjs 최장 강제 주입) 320px에서 66px 넘쳤다. en과 같은 구조로 ja만 패딩·글자를 줄인다. */
+:lang(ja) .formation-filter-row-v47 .formation-filter-chip{padding:0 5px!important;font-size:9px}
+.hero-dossier{scroll-margin-top:12px}
+.formation-hint{font:11px/1.6 Galmuri11;color:#76502d;margin:12px 0 0;text-align:center}
+.empty-slot{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px}
+.empty-slot>span{font:24px/1 Galmuri11;color:#ae8954}
+.empty-slot>small{margin:0;font:10px/1.4 Galmuri11;color:#76502d}
+.departure-actions .embark{width:100%;font-size:15px;margin-top:0}
+.departure-actions>.text-button{display:block;margin:10px auto 0;min-height:40px}
+.departure-actions .retire-button{font-size:13px}
+.departure-actions .retire-tip{margin:6px 0 0!important;text-align:center}
+/* 편성/원정/숙련 편성 하단: 종이 상자 프레임을 없애고 버튼만 12px(+안전영역) 여백으로 고정, 위쪽엔 얇은 그림자로 목록과 구분한다. */
+.departure-actions.paper{background:none;border:0;border-radius:0;box-shadow:0 -4px 6px -4px #00000055;margin:0;padding:12px 12px calc(12px + env(safe-area-inset-bottom))}
+html[data-ui-art=ready] .departure-actions.paper{background:none!important;border:0!important;border-image:none!important;box-shadow:0 -4px 6px -4px #00000055!important}
+body[data-screen=heroes] .subpage-heading{padding-block:5px 7px}
+body[data-screen=heroes] .subpage-heading h1{font-size:21px;margin:6px 0}
+body[data-screen=heroes] .subpage-heading p{font-size:11px;margin:0}
+body[data-screen=heroes] .hero-dossier{margin-top:12px}
+body[data-screen=heroes] .hero-display{height:100px}
+body[data-screen=heroes] .hero-stats{margin:8px 0 12px;padding-block:10px}
+/* UX-SCROLL-DEX(2026-10-03): 390×844 첫 화면에서 보유 영웅 그리드가 최소 2줄 보이도록 상세
+   패널을 압축한다. 초상을 줄이고, 설명·스킬 2×2는 기본 접힘(토글)으로 숨긴다. 체력·공격·문양은
+   그대로 둔다(이미 얇은 한 줄 구분선이라 더 줄일 여지가 적다). */
+body[data-screen=heroes] .hero-dossier.hero-dossier-compact{padding:10px 12px}
+body[data-screen=heroes] .hero-dossier-compact .hero-display{height:58px}
+body[data-screen=heroes] .hero-dossier-compact .hero-display canvas{width:56px;height:56px}
+/* HERO-LV100-PLAN.md D3: 도감 상세 초상 뒤 정적 오라(portrait-aura-sm-v47.png 5칸 × 150×200 = CSS 50×66.7 3x). 초상
+   캔버스 바로 앞 형제 — 캔버스를 z 1로 올려 오라가 몸 뒤에 깔리고, 발밑 타원이 초상 발 높이에 오게 바닥을 맞춘다.
+   위로 9px쯤 초상 칸 밖으로 나가지만 패널 안쪽 여백 안이다(레이아웃 크기는 바뀌지 않는다 — absolute). */
+.hero-display{position:relative}
+.hero-display>canvas{position:relative;z-index:1}
+.hero-display>.hero-tier-aura{position:absolute;left:50%;bottom:-1px;width:50px;aspect-ratio:3/4;transform:translateX(-50%);z-index:0;pointer-events:none;background:url(/blockhero-site/play/assets/final/ui/v47/portrait-aura-sm-v47.png) 0 0/1000% 100% no-repeat;image-rendering:pixelated}
+.hero-display>.hero-tier-aura.tier-2{background-position:11.1111% 0}
+.hero-display>.hero-tier-aura.tier-3{background-position:22.2222% 0}
+.hero-display>.hero-tier-aura.tier-4{background-position:33.3333% 0}
+.hero-display>.hero-tier-aura.tier-5{background-position:44.4444% 0}
+.hero-display>.hero-tier-aura.tier-6{background-position:55.5556% 0}
+.hero-display>.hero-tier-aura.tier-7{background-position:66.6667% 0}
+.hero-display>.hero-tier-aura.tier-8{background-position:77.7778% 0}
+.hero-display>.hero-tier-aura.tier-9{background-position:88.8889% 0}
+.hero-display>.hero-tier-aura.tier-10{background-position:100% 0}
+body[data-screen=heroes] .hero-dossier-compact .hero-summary{grid-template-columns:58px 1fr;gap:10px;align-items:center;margin-bottom:2px}
+body[data-screen=heroes] .hero-dossier-compact .hero-description h2{font-size:16px;margin:2px 0}
+body[data-screen=heroes] .hero-dossier-compact .hero-description>small{font-size:10px}
+body[data-screen=heroes] .hero-dossier-compact .hero-stats{margin:4px 0 2px;padding-block:6px}
+.hero-detail-toggle{display:block;width:100%;min-height:30px;padding:4px 0;margin:0;border:0;background:none;color:#78512e;font:700 11px Galmuri11;text-align:center;cursor:pointer}
+.hero-detail-toggle:active{opacity:.7}
+.hero-detail-body{margin:0 0 6px}
+.hero-detail-body>p{font-size:11px;line-height:1.7;color:#69482e;margin:0 0 10px}
+body[data-screen=formation] .hero-tabs [aria-pressed=true] small,body[data-screen=expedition-formation] .hero-tabs [aria-pressed=true] small,body[data-screen=mastery-formation] .hero-tabs [aria-pressed=true] small{color:#476026;font-weight:700}
+body[data-screen=heroes] .hero-tabs [aria-pressed=true] small{color:#3f7a3a}
+/* 도감은 편성과 같은 한 화면 고정을 쓴다 — 상세 카드는 고정, 보유 영웅 라벨+그리드만 내부 스크롤된다. */
+body[data-screen=heroes] .app-chrome{height:100svh;min-height:0;padding-bottom:0;display:flex;flex-direction:column}
+body[data-screen=heroes] #app-content{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+body[data-screen=heroes] .hero-dossier{flex:none}
+body[data-screen=heroes] .owned-heroes{flex:1;min-height:0;display:flex;flex-direction:column;overflow-y:auto;margin-bottom:0;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+body[data-screen=heroes] .hero-tabs{overflow:visible;grid-auto-rows:min-content}
+body[data-screen=heroes] .owned-heroes .world-note{flex:none;margin:14px 18px 0}
+
+/* 가로 전용 생성 에셋: 양끝은 높이에 맞춰 균등 축소하고 가운데만 폭에 맞춘다. */
+html[data-ui-art=ready] :is(.embark,.primary,.btn-primary){
+ --button-height:56px;
+ height:var(--button-height)!important;min-height:var(--button-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;
+ border-image-source:var(--ui-green-wide)!important;
+ border-image-slice:0 var(--ui-green-cap) fill!important;
+ border-image-width:0 calc(var(--button-height) * var(--ui-green-cap) / var(--ui-green-canvas-h))!important;
+ border-image-repeat:stretch;padding:8px calc(var(--ui-green-cap-px) + 8px);box-shadow:none;
+ justify-content:center;text-align:center;
+}
+html[data-ui-art=ready] :is(.embark,.primary,.btn-primary)>span:last-child{margin-left:auto}
+html[data-ui-art=ready] .expedition-plaque .embark{padding:8px calc(var(--ui-green-cap-px) + 8px);grid-template-columns:18px minmax(0,1fr) 18px}
+html[data-ui-art=ready] .result-modal #modal-primary{padding:8px calc(var(--ui-green-cap-px) + 8px)}
+/* 다이얼로그(#modal/dialog) 버튼 스택: 주 버튼(btn-primary)·보조 버튼(btn-secondary)을 같은 높이(52px)로 맞춘다.
+   .embark(지도·상점·편성 등 화면 곳곳의 큰 출발 버튼)는 56px 그대로 유지 — 다이얼로그 밖 버튼은 범위 밖. */
+html[data-ui-art=ready] .btn-primary{--button-height:52px}
+/* 사용자 제보(2026-10-12): "다음 스테이지 →"는 글자가 왼쪽에 붙는데 같은 화면의 "메인으로"·광고
+   버튼은 가운데였다 — 화살표 span의 margin-left:auto가 남은 공간을 전부 가져가 라벨을 왼쪽으로
+   밀어낸 게 원인. .btn-primary만 .expedition-plaque .embark와 같은 3분할 그리드(좌측 패딩-가운데
+   라벨-우측 화살표)로 바꿔 라벨은 항상 가운데, 화살표는 오른쪽 끝에 고정한다(모달 전용 버튼이라
+   지도·상점 등 다른 화면의 .embark는 그대로 둔다). showDialog()가 라벨을 <span>으로 감싼다. */
+html[data-ui-art=ready] .btn-primary{display:grid!important;grid-template-columns:18px minmax(0,1fr) 18px;align-content:center;justify-content:initial!important}
+html[data-ui-art=ready] .btn-primary>span:first-child{grid-column:2;justify-self:center}
+/* 재발 방지(2026-10-19, 안드로이드 스모크에서 발견 — src/android/android.css의 임시 우회를 흡수):
+   라벨이 <span> 하나뿐인 버튼(토스 종료 창 "계속하기", iOS 강제 업데이트 창 등)은 그 span이
+   first-child이자 last-child라 아래 last-child 규칙(오른쪽 끝 정렬)이 위 first-child 규칙(가운데)을
+   덮어써 글자가 오른쪽에 붙었다. last-child 규칙을 "형제가 있을 때만"으로 좁혀 단일 span은 항상
+   first-child 규칙(가운데)만 적용받게 한다. */
+html[data-ui-art=ready] .btn-primary>span:last-child:not(:only-child){grid-column:3;justify-self:end;margin-left:0}
+/* 위 :is(.embark,.primary,.btn-primary)>span:last-child{margin-left:auto}(§line 339)은 only-child에도 걸려
+   가운데 칸(justify-self:center) 안에서도 라벨을 그 칸 오른쪽 끝으로 밀어냈다 — 명시적으로 0으로 되돌린다. */
+html[data-ui-art=ready] .btn-primary>span:only-child{margin-left:0}
+
+/* 동기화 충돌 버튼(사용자 제보 2026-10-16, 총괄 재검수 v2 2026-10-17): 처음엔 버튼을 conflict-option
+   카드 "안"에 뒀는데, 위 공용 .embark 규칙이 화면 전체 폭 버튼(300px+) 기준 --ui-green-cap-px로
+   좌우 padding을 잡다 보니 320px 폭 2열 카드(~135px) 안에서는 그 고정 캡 padding이 라벨 들어갈
+   공간을 거의 다 먹어 "이 기기 기록 유지"가 3줄까지 쪼개졌다(캡처로 확인, --button-height를 줄여도
+   캡 비율 자체가 높이의 ~73%라 한계가 있었다). 버튼을 카드 밖 다이얼로그 하단 전체 폭(.conflict-actions,
+   app-shell.css)으로 옮겨 기본 .embark 치수 그대로 쓴다 — 320px에서도 다이얼로그 전체 폭(~230px)을
+   받아 라벨이 한 줄에 들어간다.
+*/
+/* 총괄 재검수(v4, 2026-10-17): 버튼 라벨에 "이 기기"/"다른 기기"를 다시 붙이자(어느 쪽 기록인지
+   모호하다는 지적) "다른 기기 기록 가져오기"가 320px에서 다시 2줄로 쪼개졌다(캡처로 확인). 공용
+   캡 padding(calc(var(--ui-green-cap-px) + 8px), 위 공용 규칙)을 이 버튼만 더 좁은 고정값으로
+   줄여 라벨 폭을 더 준다. */
+/* 이전 기록 복원 카드의 버튼(2026-10-17)도 카드 폭 안에 들어가야 해서 같은 좁은 padding을 쓴다(320px 2줄 확인 후 적용). */
+.conflict-actions .embark,.restore-list .embark{padding:8px 10px!important}
+
+/* 보상 2배 버튼(.ad-reward-button): 본문 라벨 + "오늘 n/2" 보조 텍스트를 한 줄에 유지한다(사용자
+   제보 2026-10-10 — "(오" / "늘 2/2)"처럼 단어 중간에서 줄바꿈되던 문제). .result-modal .result-reward
+   (두 클래스, font 700 20px)가 .embark(한 클래스, 16px)보다 명시도가 높아 글자가 커지는 게 원인 중
+   하나라 여기서 더 명시적으로 줄인다. 두 span을 flex 행에 두고 nowrap·keep-all로 줄바꿈 지점을
+   없앤다 — 390px 폭에서 scrollWidth<=clientWidth인지 tests/ui-toss/toss-ads.test.mjs가 확인한다.
+   2026-10-12 제보: align-items:baseline이 56px 고정 높이 버튼 안에서 내용 줄을 위로 띄워 아래
+   여백만 남았다 — 안쪽 .ad-reward-text(일반 inline 흐름, 브라우저가 자연히 baseline을 맞춘다)를
+   한 번 더 감싸고, 바깥 버튼은 그 줄 전체를 align-items:center로 세로 중앙에 둔다. */
+.result-modal .result-reward .ad-reward-button{display:flex!important;flex-wrap:nowrap;align-items:center;justify-content:center;font-size:14px;white-space:nowrap}
+.ad-reward-button .ad-reward-text{display:inline-flex;align-items:baseline;gap:6px;white-space:nowrap}
+.ad-reward-button .ad-reward-label,.ad-reward-button .ad-reward-count{white-space:nowrap!important;word-break:keep-all;margin-left:0!important}
+.ad-reward-button .ad-reward-count{font-size:11px!important;opacity:.85}
+
+/* 지도는 제목·지도·출발 정보를 화면 높이에 맞춰 한 장에 배치한다. */
+body[data-screen=map] .app-top{height:46px;}
+body[data-screen=map] .app-brand{font-size:19px}
+/* V36 "액자 안의 액자" 걷어내기(2단계 재작업, 빌드 33): 숙련 도전은 큰 양피지 패널(.mastery-levels-panel,
+   화면당 액자 1장) 안에 난도 카드 10개가 각각 슬롯 액자(--ui-slot-sm 9분할)를 두르고, 그 안의 번호
+   배지도 정사각 문양 액자(--ui-icon-square-sm)라 패널까지 포함하면 3겹이었다(사용자 리포트
+   artifacts/qa/build32-fix/04-mastery-bar-after-dpr3.png). 지역 선택 카드(.mastery-region-card)도
+   개별 9분할 액자(--ui-region-card)를 둘렀다. 원칙(docs/UI-REDESIGN-V36.md §3 "프레임 깊이는 최대
+   2겹")대로 목록 항목의 개별 액자를 없앤다 — 썸네일(.destination-art/.mastery-region-art)이 이미
+   지역을 구분해 주므로 카드 테두리 없이도 서로 구별된다. 무한 원정 목적지 카드(.destination-card)도
+   같은 목록이라 같은 기준으로 정리한다(사용자 지시 "무한 원정 탭 화면도 같은 기준으로 점검").
+   .relic-grid button은 별도 화면(원정 유물 선택 다이얼로그 성격)이라 이번 정리 대상에서 뺀다 —
+   기존 --ui-region-card 9분할을 그대로 쓴다(:269 별도 규칙). */
+html[data-ui-art=ready] :is(.destination-card,.mastery-region-card){
+ background:none;background-clip:padding-box;box-shadow:none;border-radius:0;border:0;position:relative;
+}
+html[data-ui-art=ready] .mastery-region-card[aria-checked=false]{filter:saturate(.7) brightness(.88)}
+/* 선택된 지역 카드 아래 금색 밑줄(탭 밑줄과 같은 에셋, 새 에셋 생성 없음) — 액자 대신 색으로
+   "선택됨"을 표시한다(브리핑 "테두리 대신 밝기나 색 판으로"). ::after를 카드 자체에 둔다 —
+   .mastery-region-art는 overflow:hidden이라 그 안에 두면 밑줄이 잘려 거의 안 보였다(회귀). */
+html[data-ui-art=ready] :is(.mastery-region-card .mastery-region-art,.destination-card .destination-art){border:0;background:#c9b489}
+html[data-ui-art=ready] .mastery-region-card[aria-checked=true]::after{
+ content:'';position:absolute;left:10px;right:10px;bottom:1px;height:4px;
+ border-style:solid;border-color:transparent;border-width:0 var(--ui-tab-underline-cap-px);
+ border-image-source:var(--ui-tab-underline-wide);border-image-slice:0 var(--ui-tab-underline-cap) fill;
+ border-image-width:0 var(--ui-tab-underline-cap-px);border-image-repeat:round;
+}
+/* 원정 유물 선택 카드(.relic-grid button)는 톤이 같은(#f9e9c4≈#f9e5ba) 지역 카드 프레임을 그대로
+   재사용한다(대상 2) — 폭 가변 리스트 카드라 9분할이면 늘어나는 높이에도 왜곡이 없다. */
+html[data-ui-art=ready] .relic-grid button{
+ background:none;box-shadow:none;border-radius:0;
+ border-style:solid;border-color:transparent;border-width:var(--ui-region-card-width);
+ border-image-source:var(--ui-region-card);border-image-slice:var(--ui-region-card-slice) fill;
+ border-image-width:var(--ui-region-card-width);border-image-repeat:round;
+}
+html[data-ui-art=ready] .relic-grid button:hover{filter:brightness(1.04)}
+html[data-ui-art=ready] .relic-grid .core-relic{border-image-source:var(--ui-region-card-selected)}
+/* 난도 카드(.mastery-level)는 큰 양피지 패널(.mastery-levels-panel, 화면당 액자 1장) 안에 놓인
+   목록 항목이라 개별 액자(9분할)를 없앤다(원칙1·원칙3). 항목 사이 구분은 액자 대신 점선(:696의 공유
+   목록 점선 규칙에 2열 그리드 2행부터 포함, .mastery-level:nth-child(n+3))이 맡는다. 선택 상태는
+   틀 교체가 아니라 밝기 필터로만 표현한다(원칙6). */
+html[data-ui-art=ready] .mastery-level{
+ background:none;box-shadow:none;border-radius:0;border:0;
+ padding:8px 6px;min-height:62px;color:#563416;
+}
+/* 선택 상태(브리핑 "지금의 연두색 채움처럼 명확하게 유지... 테두리 대신 밝기나 색 판으로"):
+   filter만으로는 배경이 none이라 거의 안 보였다(회귀) — 틀 없는 옅은 연두색 판으로 되돌린다.
+   액자가 아니라 칠(fill)만 있어 원칙1(프레임 없는 목록 항목)은 유지한다. */
+html[data-ui-art=ready] .mastery-level[aria-pressed=true]{background:#e6efc4}
+/* 번호 배지: 정사각 문양 액자(원 채움 배경 포함)를 없애고 큰 굵은 숫자만 남긴다(액자 안의 액자
+   방지, 원칙4 "위계는 크기·색으로 표현한다, 틀로 표현하지 않는다" — 배경 채움도 새 CSS 표면이라
+   만들지 않는다). */
+html[data-ui-art=ready] .mastery-level-medal{
+ width:28px;aspect-ratio:1;border-radius:0;box-shadow:none;background:none;display:grid;place-items:center;
+}
+html[data-ui-art=ready] .mastery-level-medal i{font:700 17px Galmuri11;color:#8a5a28;text-shadow:0 1px #fff3d5}
+html[data-ui-art=ready] .mastery-level-body b{font:12px/14px Galmuri11}
+html[data-ui-art=ready] .mastery-level-body small{font:10px/12px Galmuri11;color:#78512e}
+html[data-ui-art=ready] .mastery-level-body em{font:10px/12px Galmuri11;color:#5b7735}
+html[data-ui-art=ready] .mastery-level-body em.is-new{color:#97794f}
+html[data-ui-art=ready] .mastery-region-card b{font:11px Galmuri11;color:#563416}
+html[data-ui-art=ready] .mastery-region-line b{font:12px Galmuri11;color:#5e3d22}
+html[data-ui-art=ready] .mastery-region-line small{font:11px/1.6 Galmuri11;color:#7b5732}
+html[data-ui-art=ready] .mastery-note{font:10px/1.7 Galmuri11;color:#7b5732}
+html[data-ui-art=ready] .mastery-bar{
+ background:#4b2918;background-clip:padding-box;box-shadow:none;border-radius:0;
+ border-style:solid;border-color:transparent;border-width:var(--ui-wood-sm-width);
+ border-image-source:var(--ui-wood-sm);border-image-slice:var(--ui-wood-sm-slice);
+ border-image-width:var(--ui-wood-sm-width);border-image-repeat:round;
+ padding:4px 6px calc(4px + env(safe-area-inset-bottom));gap:5px;
+}
+html[data-ui-art=ready] .mastery-bar-summary b{font:13px Galmuri11;color:#fff1ce}
+html[data-ui-art=ready] .mastery-bar-summary small{font:11px Galmuri11;color:#eed6a6}
+body[data-screen=map] .app-chrome{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+body[data-screen=map] #app-content{display:flex;flex-direction:column;height:calc(100svh - 142px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:430px}
+.map-heading{display:flex;align-items:center;justify-content:space-between;flex:none;height:48px;padding:0 16px;gap:10px}
+.map-heading h1{font:700 18px/1.3 Galmuri11;margin:0;color:#52351d}
+.map-heading h1 small{font:11px Galmuri11;color:#947144;margin-right:5px}
+.map-progress{font:12px Galmuri11;color:#805223;white-space:nowrap}
+body[data-screen=map] .forest-map{flex:1;min-height:208px;height:auto;margin:0 8px;border:2px solid #ac874e;box-shadow:0 2px #fff0bf}
+body[data-screen=map] .map-trail{top:20%;height:62%}
+body[data-screen=map] .node-0{bottom:8%;left:5%}
+body[data-screen=map] .node-1{top:42%;right:5%;transform:translateY(-25%)}
+body[data-screen=map] .node-2{top:4%;left:28%}
+body[data-screen=map] .stage-detail{flex:none;margin:8px 8px 10px;padding:18px 20px;}
+.stage-summary{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stage-summary h2{font:700 18px/1.4 Galmuri11;margin:4px 0 0;color:#53331d}
+.stage-reward{text-align:right;flex:none}
+.stage-reward small{font:10px/1.4 Galmuri11;color:#785330}
+.stage-reward b{display:flex;justify-content:end;align-items:center;gap:4px;margin-top:3px;font:700 14px Galmuri11;color:#68411c}
+.stage-detail .stage-boss{font:11px/1.5 Galmuri11;margin:8px 0 0;color:#77542f}
+.stage-boss>span{padding-inline:5px;color:#7c5a30}
+body[data-screen=map] .stage-detail .embark{margin-top:10px}
+@media(max-height:640px){body[data-screen=map] #app-content{min-height:430px}.map-node-icon{width:44px;height:44px}}
+
+/* 2026-09-28(V36 3단계, "소환 무대" C안): 상단은 46px 통일 바, 그 아래 큰 마을 그림(clamp 150~208px,
+   25svh) 위에 뽑기 버튼, 탭(2단계에서 만든 어두운 레일+밝은 판), 목록(액자 없이 점선 구분)이 이어진다.
+   목록은 flex:1로 남는 높이를 모두 차지해 스크롤한다(390×844에서 카드 7장 이상 노출, 문서 §4.1 측정). */
+body[data-screen=shop] .app-top{height:46px;}
+body[data-screen=shop] .app-brand{font-size:19px}
+/* 대표 재피드백(2026-10-19 5차, 실기기): 상점 하단(안내 문구 아래)에 다른 색 빈 띠 — .recruit-offer(크림 배경,
+   flex:1)는 safe-area-inset-bottom만큼 짧게 끝나고(#app-content 높이 계산이 그 영역을 뺀다), 그 아래
+   홈 인디케이터 쪽 여백은 .app-chrome의 줄무늬(스트라이프, body 바탕색 위)라 색이 바뀌어 보인다. 상점 화면만
+   .recruit-offer와 같은 크림으로 깔아 이어 보이게 한다(패딩 영역을 쓰는 다른 화면 로직은 그대로). */
+body[data-screen=shop] .app-chrome{padding-bottom:calc(82px + env(safe-area-inset-bottom));background:#f8e8c7}
+body[data-screen=shop] #app-content{display:flex;flex-direction:column;min-height:460px;height:calc(100svh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overflow:hidden}
+.shop-heading{display:flex;align-items:center;justify-content:space-between;flex:none;height:48px;padding:0 16px;gap:10px}
+.shop-heading h1{font:700 18px/1.3 Galmuri11;margin:0;color:#52351d}
+.shop-heading>span{font:11px Galmuri11;color:#805223}
+body[data-screen=shop] .recruit-banner{flex:none}
+body[data-screen=shop] .recruit-offer{flex:1;min-height:0;overflow-y:auto}
+body[data-screen=shop] .recruit-offer .stage-tip{font:10px/1.6 Galmuri11!important;margin:8px 0 0}
+body[data-screen=shop] .recruit-odds{margin-top:8px;padding-top:0;font-size:11px}
+body[data-screen=shop] .recruit-odds summary{display:list-item;padding-block:12px;min-height:40px;cursor:pointer}
+body[data-screen=shop] .recruit-odds>.odds-list{display:block;max-height:108px;overflow:auto;margin:0;padding:0 3px 4px}
+.odds-list>div{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;font:11px/1.5 Galmuri11;color:#704725}
+/* 확률 목록을 펼친 작은 화면에서는 정상 스크롤로 모든 내용을 읽을 수 있다. */
+body[data-screen=shop]:has(.recruit-odds[open]) #app-content{height:auto;min-height:calc(100svh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+
+/* 스킬 설명은 현재 레벨의 실제 전투 수치를 표시한다. */
+.skill-list>button{display:flex;align-items:center;gap:7px;min-width:0;min-height:44px;padding:3px 0;border:0;border-bottom:1px solid #b9946055;background:transparent;color:#563416;text-align:left;cursor:pointer}
+.skill-list>button:hover{background:#fff7df88}
+.skill-list>button>span{flex:1}
+.skill-list i{float:right;font:700 15px/1 Galmuri11;color:#886036}
+#skill-dialog{width:calc(100vw - 24px);max-width:380px;max-height:calc(100svh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:0 12px 12px;overflow:auto;overscroll-behavior:contain;text-align:left}
+/* GLOSSARY-DICTIONARY-V1 재검수 v3(2026-10-16, 대표 지적 2차): v2에서 배경을 dialog의 "꺼짐"
+   폴백 색(#f8e5bd)에 맞췄는데, 실제로는 html[data-ui-art=ready]에서 dialog가 --frame-fill
+   (.paper,.subpage-heading,dialog{--frame-fill:#f6e1b7}, 위쪽 486행 근처)을 쓴다 — 두 색이
+   달라(#f8e5bd vs #f6e1b7) 프레임 안쪽에 여전히 이음새가 보였다. 색을 하드코딩하지 않고
+   var(--frame-fill)을 그대로 쓴다 — --frame-fill은 커스텀 프로퍼티라 dialog(조상)에서
+   .skill-dialog-head(자손)로 상속되므로 ready 상태에선 자동으로 #f6e1b7, 꺼짐 상태에선
+   폴백 #f8e5bd로 dialog 자신의 배경과 항상 정확히 같아진다. margin:0 -12px로 다이얼로그
+   폭 전체까지 번지게 한다(구분은 기존 border-bottom 선만). #skill-dialog·#glossary-dialog
+   둘 다 이 클래스를 쓴다. */
+.skill-dialog-head{display:flex;gap:10px;align-items:center;position:sticky;top:0;margin:0 -12px;padding:12px 12px 10px;z-index:1;background:var(--frame-fill,#f8e5bd);border-bottom:1px solid #c49b66}
+.skill-dialog-head canvas{flex:none;width:36px;height:40.5px;image-rendering:pixelated}
+.skill-dialog-head>div{flex:1;min-width:0}
+.skill-dialog-head small{font:11px Galmuri11;color:#79512e}
+.skill-dialog-head h2{font:700 20px/1.4 Galmuri11;color:#50311b;margin:4px 0 0}
+.skill-dialog-close{flex:none;width:40px;height:44px;border:0;background:none;color:#725031;font:28px/1 Galmuri11;cursor:pointer}
+/* 도감 스킬 미리보기 배경(브리핑 §3): 기존 어두운 판(--ui-wallet-dark, 상단 지갑과 같은 소스, 신규 생성
+   없음)을 재사용한다. aspect-ratio를 원본(258:120)에 고정해 다이얼로그 폭이 바뀌어도 판이 찌그러지지
+   않게 한다(tests/ui-art-ratio.test.mjs). */
+html[data-ui-art=ready] .skill-preview{background:var(--ui-wallet-dark) center/contain no-repeat;aspect-ratio:258/120;height:auto;border:0;border-radius:0}
+#skill-dialog p{font:12px/1.8 Galmuri11;color:#69462b;margin:10px 0;word-break:keep-all;overflow-wrap:break-word}
+/* 2026-09-28(V36 2단계): 스킬 대화상자(다이얼로그 자체가 1겹)에 판을 하나 더 얹지 않는다.
+   피해량은 이미 큰 강조 글자(strong, 34px)라 판 없이도 위계가 뚜렷하다(원칙2). */
+.skill-damage{margin:12px 0;padding:4px 12px;text-align:center;background:none;border:0}
+.skill-damage>span{display:block;font:11px Galmuri11;color:#77532a}
+.skill-damage strong{display:block;font:700 34px/1.4 Galmuri11;color:#734320}
+.skill-damage small{font:11px/1.5 Galmuri11;color:#72502b}
+.skill-target{display:flex;justify-content:space-between;gap:8px;margin:12px 0;font:12px/1.5 Galmuri11}
+.skill-target dt{color:#886237}.skill-target dd{margin:0;color:#4d351f;text-align:right}
+.skill-detail-section{padding-top:12px;margin-top:12px;border-top:1px dashed #bc945f}
+.skill-detail-section h3{font:700 13px Galmuri11;color:#624021;margin:0 0 7px}
+#skill-dialog .skill-detail-section p{margin:6px 0}
+.term-tap{display:inline;padding:0;border:0;background:none;font:700 12px Galmuri11;color:#8a4a1e;text-decoration:underline dotted;text-underline-offset:2px}
+.term-tap[aria-expanded="true"]{color:#c05a1a}
+.term-caption{display:block;margin:4px 0 0;padding:5px 8px;background:#f6e6c4;border:1px solid #c69c58;font:11px/1.5 Galmuri11;color:#734320}
+#skill-dialog .skill-detail-note{font-size:10px;color:#89623e;padding-top:10px;border-top:1px solid #d5b780;margin-bottom:0}
+
+/* GLOSSARY-DICTIONARY-V1: 용어 사전 다이얼로그. 크기·머리말·구분선은 #skill-dialog/.skill-detail-section과
+   같은 표면을 재사용한다(새 CSS 표면을 만들지 않는다 — CLAUDE.md). 탭 칩도 기존 .formation-filter-chip 재사용. */
+#glossary-dialog{width:calc(100vw - 24px);max-width:380px;max-height:calc(100svh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:0 12px 12px;overflow:auto;overscroll-behavior:contain;text-align:left}
+#glossary-dialog .skill-dialog-head h2{margin:0}
+/* GLOSSARY-DICTIONARY-V1 재검수(2026-10-16): 탭 6개가 320폭 가로 한 줄에서 잘려 보였다(코디네이터
+   지적) — 3×2 그리드 + 짧은 라벨(short)로 바꿔 스크롤 없이 항상 전부 보이게 한다. v3: 탭 칩
+   자체를 CSS 단색 박스(.glossary-tab-chip, 삭제됨)가 아니라 기존 .formation-filter-chip
+   픽셀아트 칩(선택·비선택 두 상태 모두 에셋 소스, 바로 아래 복수 셀렉터 규칙)으로 그린다 —
+   그리드는 그 칩들을 배치하는 레이아웃일 뿐이다. 배경색은 위 .skill-dialog-head와 같은 이유로
+   var(--frame-fill)을 쓴다. */
+.glossary-tabs{position:sticky;top:57px;z-index:1;background:var(--frame-fill,#f8e5bd);margin:0 -12px;padding:8px 12px;border-bottom:1px solid #d5b780;display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.glossary-section{scroll-margin-top:106px}
+.glossary-entry{display:flex;gap:8px;align-items:flex-start;margin:7px 0}
+/* 글리프 크기를 통일한다(재검수 지적 1·2차): 22px로 키우고 박스도 넓힌다. ⚔(평타)는 획이 가는
+   기호라 같은 font-size에서도 ✦◆★⬟보다 작아 보여 scale(1.3)로 한 번 더 키운다(평타 항목에만). */
+.glossary-glyph{flex:none;width:26px;text-align:center;font:22px Galmuri11;line-height:1.3;color:#8a4a1e}
+.glossary-glyph-strike{display:inline-block;transform:scale(1.3)}
+.glossary-entry-body{display:block;flex:1;min-width:0}
+.glossary-entry-body>b{display:block;font:700 12px Galmuri11;color:#624021}
+.glossary-entry-body>span{display:block;font:11px/1.6 Galmuri11;color:#72502b;word-break:keep-all;overflow-wrap:break-word}
+.glossary-entry-fail{color:#a34b2a}
+
+/* 한 번에 한 챕터만 그려 긴 원정도 지도를 가볍게 유지한다. */
+.chapter-select{max-width:94px;min-height:40px;margin-left:auto;border:1px solid #bc965f;border-radius:3px;background:#f7e5bf;color:#63401f;padding:4px 7px;font:12px Galmuri11}
+.map-heading{gap:8px}.map-heading h1{font-size:17px;white-space:nowrap}
+.current-path{position:absolute;right:7px;top:7px;min-height:38px;padding:6px 9px;border:1px solid #a7864f;background:#f6e4bdeb;color:#624220;font:11px Galmuri11;z-index:2}
+body[data-screen=map] .forest-map{min-height:184px}
+.stage-detail .stage-rule{font:11px/1.5 Galmuri11;color:#5e702e;margin:6px 0 0}
+.stage-rule small{display:block;font:10px/1.5 Galmuri11;color:#795533}
+.formation-rule{font-size:11px!important;color:#56622c!important;margin-top:4px!important}
+@media(max-height:670px){body[data-screen=map] .map-node>small{display:none}}
+/* 네 자리 챕터 번호도 프레임 안에서 한 줄로 읽힌다. */
+.stage-number{width:auto;min-width:44px;padding-inline:5px;flex:none;white-space:nowrap;font-size:12px}
+.stage-name{gap:8px;min-width:0}
+
+/* 하위 화면은 상단 뒤로가기로 연결하고 하단 메뉴 공간을 돌려준다. */
+body[data-screen] .app-chrome{padding-bottom:env(safe-area-inset-bottom)}
+/* 2026-09-28(V36 1단계): 액자 없는 글리프라 보이는 크기(20px)보다 터치 영역(44×44)을 padding으로 확보한다. */
+.back-button{flex:none;width:44px;height:44px;margin-left:-12px;padding:0;display:grid;place-items:center;color:#694322;font:26px/1 Galmuri11;cursor:pointer}
+.back-button[hidden]{display:none}
+/* 지도 상단 바: 1줄(지역명·별·설정)은 기존 app-top을, 2줄(챕터 이전/다음·피커)은 그 아래 종이 인셋 띠로 같은 나무 프레임 안에 이어 붙인다. */
+.map-stars-badge{flex:none;font:11px Galmuri11;color:#fff0bb;white-space:nowrap;margin-right:2px}
+.map-stars-badge[hidden]{display:none}
+.map-chapter-strip{display:flex;align-items:center;justify-content:center;gap:8px;height:36px;margin:0 12px;padding:0 4px;background:linear-gradient(#f4e4c1,#e9d4a8);border:2px solid #8b5e34;border-radius:6px;box-shadow:inset 0 1px #fff6dd}
+.map-chapter-strip[hidden]{display:none}
+.map-chapter-nav{flex:none;width:32px;height:32px;padding:0;border:2px solid #4f3327;border-radius:5px;color:#ffedbb;background:linear-gradient(#a76b45,#875139);box-shadow:inset 0 1px #e5b972;font:16px/1 Galmuri11;cursor:pointer}
+.map-chapter-nav:disabled{opacity:.4;cursor:default}
+.map-chapter-nav:not(:disabled):active{background:#875139}
+.chapter-picker{flex:1;min-width:0;text-align:center;font:13px Galmuri11;color:#5a3a1e;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:380px){.app-top{gap:5px}}
+body:not([data-screen=home]) .app-brand{font-size:16px;gap:4px}
+body[data-screen=shop] #app-content{height:calc(100svh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+body[data-screen=shop]:has(.recruit-odds[open]) #app-content{height:auto;min-height:calc(100svh - 46px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+body[data-screen=shop] .recruit-mystery{display:grid;place-items:center;flex:none;width:88px;height:88px;padding:0;font:44px/1 Galmuri11;--frame:var(--ui-slot-sm);--frame-slice:var(--ui-slot-sm-slice);--frame-width:var(--ui-slot-sm-width);--frame-fill:#f6ead3}
+.recruit-mystery>span{display:grid;place-items:center;width:100%;height:100%;transform:none}
+.map-heading{flex-wrap:wrap}.map-heading .map-progress{margin-left:auto}
+.chapter-controls{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:0 12px 6px;color:#634521;font:12px Galmuri11}
+.chapter-controls button,.chapter-dialog-head button{min-width:40px;min-height:40px;padding:4px 8px;color:#624220;font:18px/1 Galmuri11;cursor:pointer}
+.chapter-controls .chapter-picker{flex:1;font:12px Galmuri11;display:flex;justify-content:center;align-items:center;gap:10px}
+.chapter-controls button:disabled{opacity:.4;cursor:default}
+.mode-note{margin:8px 16px 12px;font:10px/1.8 Galmuri11;color:#765332;word-break:keep-all}
+body[data-screen=map] .mode-note{margin:6px 16px 8px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#chapter-dialog{width:calc(100vw - 32px);max-width:390px;max-height:80svh;padding:8px 10px;overflow:auto;color:#634220;text-align:left}
+/* 결과(승리/패배) 모달은 중앙 정렬을 유지하고, 초기화·전투 시작 등 나머지 모달의 #modal-body만 h2와 좌측 정렬을 맞춘다(M1). */
+#modal:not(.result-modal) #modal-body{text-align:left}
+.chapter-dialog-head{display:flex;align-items:center;justify-content:space-between}.chapter-dialog-head h2{font:18px Galmuri11;margin:0}
+#chapter-dialog>p{font:11px/1.7 Galmuri11}.chapter-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+/* 2026-10-11(라운드3c, C단계): CSS 단색 테두리 상자(border:1px solid+flat background) 대신 슬롯 칸
+   패밀리(--ui-slot-sm, bundle4와 같은 에셋)를 재사용한다 — 다이얼로그 안의 작은 목록 항목이라 톤이 맞는다. */
+html[data-ui-art=ready] .chapter-list button{min-height:54px;border-style:solid;border-color:transparent;border-width:var(--ui-slot-sm-width);background:var(--ui-slot-sm-fill,#f6ead3);background-clip:padding-box;border-image-source:var(--ui-slot-sm);border-image-slice:var(--ui-slot-sm-slice) fill;border-image-width:var(--ui-slot-sm-width);border-image-repeat:round;color:#634521;padding:8px;text-align:left;font:11px/1.5 Galmuri11;cursor:pointer}
+.chapter-list small{display:block;margin-top:4px;font:9px/1.5 Galmuri11;color:#8a6749;word-break:keep-all}
+html[data-ui-art=ready] .chapter-list button[aria-current=page]{outline:2px solid #728149;outline-offset:-2px;filter:brightness(1.06) saturate(1.1)}
+.chapter-list b,.chapter-list span{display:block}.chapter-list span{font-size:10px}
+
+body[data-screen=map] #app-content{height:calc(100svh - 92px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding-top:8px}
+body[data-screen=shop] .recruit-mystery{color:#63401f;text-shadow:none;font-weight:700}
+/* 열 개의 경로는 모바일에서 두 줄로 읽히고 선택 상세는 바로 아래에 둔다. */
+body[data-screen=map] .ten-stage-map{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px 2px;height:auto;min-height:248px;padding:18px 8px;background-position:center 44%;}
+.ten-stage-map .map-node{position:static;min-width:0;width:auto;transform:none;gap:4px;padding:0;}
+.ten-stage-map .map-node-icon{width:40px;height:40px;font-size:17px;}
+.ten-stage-map .map-node small{font:9px Galmuri11;display:block!important;}
+.ten-stage-map .map-stars{font-size:10px;white-space:nowrap;}
+.ten-stage-map .boss-node .map-node-icon{color:#b34825;}
+/* 지도 노드 상태 배경(결선): app-shell.mjs가 부여하는 data-node-state(locked|open|clear|elite|boss)별로
+   map-node-bespoke 5칸(locked/open/open-glow/clear/boss) 중 맞는 배경을 40×40 고정 박스에 1:1로 건다.
+   elite 전용 에셋은 없어 open 배경 위에 보라 인셋 테두리로 구분한다. 선택된(.selected) 노드는 open-glow. */
+html[data-ui-art=ready] .map-node[data-node-state] .map-node-icon{background:var(--ui-map-node-open) center/contain no-repeat;aspect-ratio:1}
+html[data-ui-art=ready] .map-node[data-node-state=locked] .map-node-icon{background-image:var(--ui-map-node-locked)}
+html[data-ui-art=ready] .map-node[data-node-state=open] .map-node-icon{background-image:var(--ui-map-node-open)}
+/* 빈 양피지로 보이던 클리어/현재 도전 노드를 채운 아이콘(금별·교차검·왕관)으로 교체한다(map-node-fill-bespoke). */
+html[data-ui-art=ready] .map-node[data-node-state=clear] .map-node-icon{background-image:var(--ui-map-node-clear-fill)}
+html[data-ui-art=ready] .map-node.boss-node[data-node-state=clear] .map-node-icon{background-image:var(--ui-map-node-boss-clear-fill)}
+html[data-ui-art=ready] .map-node[data-node-state=boss] .map-node-icon{background-image:var(--ui-map-node-boss)}
+html[data-ui-art=ready] .map-node[data-node-state=elite] .map-node-icon{background-image:var(--ui-map-node-open);box-shadow:inset 0 0 0 2px #8b5fbf}
+html[data-ui-art=ready] .map-node.selected .map-node-icon{background-image:var(--ui-map-node-current-fill);outline:0}
+/* 2026-09-22 발견: min-height:73px는 아이콘(27)+여백(3)+라벨(15)+보조문구(13)+패딩(24)=82px보다 작아
+   "무한 원정"의 보조문구(특히 잠김 상태 2줄)가 버튼 하단 테두리 밖으로 삐져나왔다. 위 daily-plaque를
+   9분할로 바꿔 확보한 여유만큼 92px로 되돌려 내용이 프레임 안에 들어가게 한다. */
+.refuge-tools{gap:4px!important;top:calc(90px + env(safe-area-inset-top))!important;}
+.refuge-tools button{min-height:96px!important;}
+.refuge-tools .nav-icon,.refuge-tools .refuge-tool-mark{height:27px!important;margin-bottom:3px!important;}
+.camp-stats p{display:flex;justify-content:space-between;gap:14px;padding-block:12px;border-bottom:1px solid #b78d5b66;}
+.camp-upgrade h2 small{font-size:11px;float:right;}
+.camp-upgrade>small{display:block;margin-top:14px;font-size:11px;line-height:1.7;}
+.best-record summary{cursor:pointer;font-weight:bold;}
+.best-record p{font-size:11px;line-height:1.8;}
+.relic-inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;}
+.relic-inventory summary,.relic-inventory>div{font:10px/1.6 Galmuri11;cursor:pointer;}
+.relic-inventory img{width:32px;height:32px;image-rendering:pixelated;vertical-align:middle;margin-right:5px;}
+.relic-inventory small{display:block;color:#8d572b;}
+.relic-inventory p{font-size:10px;line-height:1.7;}
+.relic-inventory .relic-slot-empty{border:1px dashed #c8a06a;border-radius:6px;padding:10px 8px;font:9px Galmuri9;color:#a98a63;text-align:center;}
+.relic-inventory .core-slot{grid-column:1/-1;border:2px solid #b98728;border-radius:6px;padding:6px;background:#fff6df;margin-top:2px;}
+.relic-grid button em{display:block;font:10px Galmuri11;color:#9b531d;margin:6px 0;}
+.relic-grid .core-relic{border-color:#b98728;background:#fff0bc;}
+.relic-replace{display:block;text-align:left;padding:12px;margin-block:8px;width:100%;background:#f7e5ba;border:1px solid #b18752;font:11px/1.7 Galmuri11;}
+#relic-dialog p{font:12px/1.8 Galmuri11;}
+/* 재검수(대표, 2026-10-19): 다이얼로그 하단이 잘리듯 끝났다 — 안전영역을 포함한 여백을 둔다. */
+#relic-dialog{max-height:85svh;overflow:auto;padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+/* 대표 지시(2026-10-19): 제목은 닫기(×)와 관계없이 창 중앙에 — 왼쪽에 닫기 버튼 폭만큼 빈 칸을 둬 균형을 맞춘다. */
+#relic-dialog .skill-dialog-head::before{content:"";flex:none;width:40px}
+/* 재발 방지(대표 제보 2026-10-19): 유물 도감(codexHtml)은 제목과 탭 레일을 .relic-codex-sticky로
+   묶는다 — 각자 sticky였을 때 스크롤 경계에서 겹쳐 제목이 가려지고 바로 아래 "발견 n/36" 줄도
+   그 틈에 잘려 보였다. 묶음 전체가 sticky이므로 안쪽 .skill-dialog-head 자신의 sticky·배경·
+   아래 구분선은 끈다(구분선은 묶음 바깥쪽 끝, 탭 아래로 옮긴다). */
+#relic-dialog .relic-codex-sticky{position:sticky;top:0;z-index:1;background:var(--frame-fill,#f8e5bd);border-bottom:1px solid #c49b66}
+#relic-dialog .relic-codex-sticky .skill-dialog-head{position:static;background:none;border-bottom:0}
+/* 재검수(메인, 2026-10-19 2차): #relic-dialog 자신의 위쪽 padding(기본 dialog{padding:6px...}
+   규칙, border-image 안쪽 6px)은 overflow:auto 스크롤포트에 포함돼 그 틈으로 스크롤되는 그리드
+   내용이 비쳐 보였다(sticky 묶음의 top:0은 패딩 안쪽에서 붙어 패딩 자체는 안 덮는다). 묶음(또는
+   단독 .skill-dialog-head)을 패딩만큼 위로 당기고(margin-top·top:-6px) 같은 높이만큼 안쪽
+   padding-top을 늘려 패딩 자체를 덮으면서 보이는 간격은 그대로 유지한다. 도감 외 다른 유물
+   다이얼로그(상세·교체·요약·귀환 확인 — 전부 #relic-dialog에 직접 꽂히는 .skill-dialog-head를
+   쓴다)도 같은 구조라 함께 고친다. */
+#relic-dialog .relic-codex-sticky,
+#relic-dialog>.skill-dialog-head{margin-top:-6px;top:-6px}
+#relic-dialog>.skill-dialog-head{padding-top:18px}
+#relic-dialog .relic-codex-sticky{padding-top:6px}
+/* EXPEDITION-UX-V2.md 단위 C: 원정 v2 화면(로비·런 허브·도감·상세·교체·런 요약). expeditionV2=0이면
+   기존 레거시 규칙(위)만 쓰인다. 레이아웃·글자색만 CSS로 두고, 표면은 전부 기존 bespoke 에셋
+   변수(--ui-region-card 9분할·.ach-progress wide3·.formation-filter-chip·.btn-primary/.btn-secondary·
+   .embark·.skill-dialog-head)를 재사용한다 — 신규 표면 CSS(단색·border·radius·그라디언트) 없음.
+   관련 신규 에셋(E3-E11, §7)은 아직 없어 모두 재사용으로 대신하고, 각 자리에 "E 병합 후 교체"로
+   표시했다. */
+.dialog-button-row{display:flex;gap:8px;margin-top:10px;}
+.dialog-button-row>button{flex:1;min-width:0;font-size:12px!important;}
+/* 재검수(메인, 2026-10-19 2차): 귀환 확인 다이얼로그에서 보조 버튼(평문 텍스트, 위 font-size:12px
+   그대로)과 주 버튼(.btn-primary, 라벨이 <span>)의 글자 크기가 달라 보였다 — game-ui.css의 범용
+   규칙 .btn-primary>span{font-size:18px}가 span 자체에 더 구체적으로 붙어 버튼의 12px을 덮어쓴
+   게 원인. 다이얼로그 버튼 행 안에서는 라벨 span도 버튼과 같은 크기로 되돌린다. */
+.dialog-button-row>button>span{font-size:inherit!important;}
+.expedition-lobby-actions{margin:14px 10px 0;}
+/* 최고 기록·지난 원정 보조 패널은 기존 .expedition-plaque(wood-lg 9분할, ui-art.css:5-8)를 재사용한다. */
+.best-record-v2 .section-label h2{font-size:14px;}
+.relic-tray-mini{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;align-items:center;}
+.run-plaque-hp{font:10px Galmuri9;margin:4px 0 0;opacity:.92;}
+/* 재검수(대표, 2026-10-19): "전체 ›"·"⋯"·"기록 보기 ›"가 .text-button 기본색(#76502d, 밝은 종이
+   바탕용)이라 어두운 목재 바탕(.expedition-plaque)에서 거의 안 읽혔다(대비 4.5:1 미달) — 밝은
+   금색으로 올린다. run-plaque(원정 허브)·best-record-v2(로비 최고 기록) 둘 다 해당된다. */
+.expedition-plaque .text-button{color:#ffdf9e;}
+.run-plaque-links{display:flex;gap:10px;margin-top:4px;align-items:center;}
+.run-plaque-links .text-button{min-height:26px;padding:0 4px;font-size:11px;}
+.run-plaque-links .text-button:last-child{margin-left:auto;}
+/* 지역 진행 눈금(E10 region-pips-v1.png, 108×36, 3셀×36: 빈·찬·보스). 12pt 표시 기준. */
+.region-pips{display:flex;gap:3px;margin-top:6px;}
+.region-pip{display:inline-block;width:12px;height:12px;flex:none;
+ background-image:url(/blockhero-site/play/assets/final/ui/bespoke/region-pips-v1.png);background-repeat:no-repeat;background-size:300% 100%;}
+.region-pip-empty{background-position:0 0;}
+.region-pip-filled{background-position:50% 0;}
+.region-pip-boss{background-position:100% 0;}
+/* 다음 길의 유물 카드(§3 S3 choice, 대표 재검수 — 카드 폭이 글자 길이에 따라 들쭉날쭉했고 ⓘ가 카드
+   밖에 절대위치로 떠 있던 문제): .relic-grid에 명시적 컬럼을 준다(기존엔 컬럼 지정이 없어 암시적
+   컬럼이 콘텐츠 크기만큼만 생겨 카드마다 폭이 달랐다). 래퍼(.relic-grid-cell-wrap)가 카드 틀(9분할)과
+   "본문+ⓘ" 2열 그리드를 모두 들고, 선택 버튼(.relic-grid-cell)은 틀 없이 본문만 채운다 — 버튼
+   중첩(유효하지 않은 HTML) 없이 둘 다 항상 래퍼 폭 안에 들어간다. */
+.relic-grid{grid-template-columns:1fr;}
+.relic-grid-cell-wrap{
+ display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:stretch;width:100%;
+ background:none;box-shadow:none;border-radius:0;
+ border-style:solid;border-color:#b48a55;border-width:10px;border-image-repeat:round;
+}
+html[data-ui-art=ready] .relic-grid-cell-wrap{
+ border-color:transparent;border-width:var(--ui-region-card-width);
+ border-image-source:var(--ui-region-card);border-image-slice:var(--ui-region-card-slice) fill;
+ border-image-width:var(--ui-region-card-width);
+}
+.relic-grid-cell-wrap.core-relic,.relic-grid-cell-wrap.relic-pick-selected{border-color:#5a8e3b;}
+html[data-ui-art=ready] :is(.relic-grid-cell-wrap.core-relic,.relic-grid-cell-wrap.relic-pick-selected){border-image-source:var(--ui-region-card-selected);}
+.relic-grid-cell-wrap .relic-grid-cell{
+ grid-column:1;border:0!important;background:none!important;box-shadow:none!important;border-image-source:none!important;
+}
+.relic-grid-cell-wrap .relic-info-btn{
+ grid-column:2;width:34px;height:auto;align-self:stretch;padding:0;margin:0;
+ display:flex;align-items:center;justify-content:center;border:0;background:none;color:#8a5a2c;font:16px/1 Galmuri11;
+}
+/* 320폭에서 2줄로 넘치는 효과 문구가 있었다(예: 용기의 리본 "각 영웅의 첫 부활 체력 +15%p").
+   레거시 카드(.relic-grid button small, 11px)와 같은 셀렉터를 바꾸면 레거시 화면에도 영향을 주므로
+   v2 카드 클래스로 좁혀 9px로 줄인다. */
+.relic-grid .relic-grid-cell small{font-size:8px;}
+/* U11(docs/LOCALIZATION-PLAN.md §6-2): 영문 유물 효과 설명("Boss's first pattern warning +2s" 등)이
+   8px에서도 카드 폭을 넘겨 2줄로 꺾였다(button>small은 한 줄 규칙). 영문에서만 한 단계 더 줄인다. */
+:lang(en) .relic-grid .relic-grid-cell small{font-size:6px;letter-spacing:-.2px;}
+/* 계열 배지(E8 relic-family-badges-v1.png, 336×48, 7셀×48: shield·heal·normal·skill·status·puzzle·core).
+   재검수(대표, 2026-10-19): 이름에 딱 붙어 보였다 — 오른쪽 4pt 띄운다. */
+.family-badge{display:inline-block;width:16px;height:16px;margin-right:4px;vertical-align:-3px;flex:none;
+ background-image:url(/blockhero-site/play/assets/final/ui/bespoke/relic-family-badges-v1.png);background-repeat:no-repeat;background-size:700% 100%;}
+.family-badge-shield{background-position:0 0;}
+.family-badge-heal{background-position:16.6667% 0;}
+.family-badge-normal{background-position:33.3334% 0;}
+.family-badge-skill{background-position:50% 0;}
+.family-badge-status{background-position:66.6667% 0;}
+.family-badge-puzzle{background-position:83.3334% 0;}
+.family-badge-core{background-position:100% 0;}
+/* '전체'는 배지가 없어 다이얼로그 close 글리프와 같은 톤의 동그라미 점으로 대신한다(표면 없음). */
+.family-badge-all{background-image:none;position:relative;}
+.family-badge-all::before{content:'◎';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;line-height:1;}
+/* 재검수(대표, 2026-10-19): 진행 요약(§4-2) — "발견 n/36" 막대. 기존 contrib-bar 에셋 재사용,
+   0%에서도 채움이 안 보여야 하므로 min-width:8% 상한을 이 용도에서만 끈다. */
+.relic-codex-progress{margin:2px 0 10px;}
+.relic-codex-progress-head{display:flex;align-items:baseline;font:700 13px Galmuri11;color:#52351d;margin-bottom:5px;}
+.relic-codex-progress-bar{height:8px;}
+.relic-codex-progress-bar .contrib-bar-fill{min-width:0;}
+/* 계열 필터 칩(재검수, 2026-10-19): 가로 스크롤(한 줄 밖 잘림)·flex-wrap(두 줄 들쭉날쭉) 둘 다
+   문제였다 — 4×2 균등폭 그리드로 바꾼다(용어 사전 .glossary-tabs와 같은 해법). 칩 안에 계열별
+   발견 수(seen/total)도 같이 보여준다. 4열 그리드가 아래 유물 칸 그리드와 같은 열 폭이라 정렬선이
+   하나로 맞는다. */
+.relic-codex-families{margin-bottom:10px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+html[data-ui-art=ready] .relic-codex-families .formation-filter-chip{padding:0 4px!important;font-size:9px;gap:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* en(2026-10-20): "Normal 1/6"·"Status 0/4"가 말줄임으로 잘렸다 — 계열 배지를 빼고 글자 간격을 좁힌다(칩 높이·에셋은 그대로). */
+:lang(en) .relic-codex-families .formation-filter-chip .family-badge{display:none}
+html[data-ui-art=ready]:lang(en) .relic-codex-families .formation-filter-chip{padding:0 2px!important;font-size:8px;letter-spacing:-.4px}
+/* ja: "すべて 2/36"·"スキル 0/9"·"パズル 0/4"(3글자 가나 라벨 + 분수)가 320px에서 전부 말줄임으로
+   잘렸다(실측) — en과 같은 해법(배지 제거 + 글자 축소)을 쓴다. */
+:lang(ja) .relic-codex-families .formation-filter-chip .family-badge{display:none}
+html[data-ui-art=ready]:lang(ja) .relic-codex-families .formation-filter-chip{padding:0 2px!important;font-size:8px;letter-spacing:-.3px}
+/* zh(중국어 현지화 2026-10-21): "全部 36/36"(전체 칩)이 390px에서도 ellipsis-cut로 잘렸다(zh-hans-longest.test.mjs
+   실측) — FusionPixel이 같은 font-size에서 더 넓어 en·ja의 축소로도 모자란다. en·ja와 같은 해법(배지 제거 +
+   글자 축소) + letterSpacing을 한 단계 더 좁힌다. */
+:lang(zh) .relic-codex-families .formation-filter-chip .family-badge{display:none}
+html[data-ui-art=ready]:lang(zh) .relic-codex-families .formation-filter-chip{padding:0 2px!important;font-size:8px;letter-spacing:-.5px}
+/* 유물 칸 그리드: 아이콘을 키우고(28→32px) 칸을 4열로 늘린다(브리핑 2026-10-19 — 이전엔 "이름
+   1줄, 말줄임 없음" 제약으로 3열이었지만 이번엔 1줄 말줄임을 명시로 허용해 4열로 더 촘촘하게 간다). */
+.relic-codex-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+.relic-codex-cell{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 2px;border:0;background:none;color:#5c4330;min-height:76px;}
+.relic-codex-icon{width:32px;height:32px;image-rendering:pixelated;}
+/* 못 만난 유물(§4-2 재검수): "？？？" 대신 실루엣(밝기 0) 아이콘 + "미발견" 라벨. */
+.relic-codex-icon-locked{filter:brightness(0) opacity(.5);}
+/* 이름 글자는 발견 여부와 무관하게 하나의 스타일로 통일한다(대표 지적: 보유만 주황이라 규칙이
+   안 보였다) — 상태 구분은 슬롯 틀(금테·보석·빈칸)만으로 한다. 1줄 말줄임(이 화면 폭에선 긴
+   이름이 가려지는 게 허용된 결정, OVERFLOW_PROBE도 text-overflow:ellipsis는 넘침으로 안 본다). */
+.relic-codex-name{display:block;width:100%;font:9px Galmuri9;text-align:center;color:#5c4330;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* en(2026-10-20): 유물 이름("Honeyed Glove")이 칸 폭에서 잘렸다 — 영어는 두 줄까지 접는다. */
+:lang(en) .relic-codex-name{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15}
+@media (max-width:359px){:lang(en) .relic-codex-name{font-size:8px;letter-spacing:-.3px}}
+/* ja(ja 현지화 2차 2026-10-21): 7자짜리 유물 이름("ドングリ留め金" 등, 여러 유물이 이 길이에 걸려 있다)이
+   320px에서 말줄임으로 잘렸다(en-longest 상응 검사 ja-longest.test.mjs에서 실측) — en과 같은 방식으로 두 줄까지 접는다. */
+:lang(ja) .relic-codex-name{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15}
+/* zh(중국어 현지화 2026-10-21): "旅人的万花筒" 등 6자 유물 이름이 320·390px 둘 다 ellipsis-cut로 잘렸다
+   (zh-hans-longest.test.mjs 실측) — en·ja와 같은 방식으로 두 줄까지 접는다. */
+:lang(zh) .relic-codex-name{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.15}
+.relic-codex-name-locked{color:#8a6b4a;opacity:.7;}
+/* 유물 슬롯 틀(E5 relic-slot-v1-lg.png, §7) — 660×132, 5셀×132(기본·보유금테·핵심·빈칸·선택됨).
+   기본 40px 표시 기준으로 셀 폭만큼 background-position을 옮긴다(5칸을 가로 500%로 깐다).
+   .relic-slot-mini는 트레이·활약 목록용 24px 축소판, .relic-slot-sm은 이번/지난 원정·교체 시트
+   행용 32px(같은 스프라이트 재사용, 신규 에셋 없음 — 재검수: 세 탭이 각자 다른 아이콘 틀을 써서
+   "같은 도감인데 디테일이 다르다"는 지적이 있었다). */
+.relic-slot{display:flex;align-items:center;justify-content:center;width:40px;height:40px;flex:none;
+ background-image:url(/blockhero-site/play/assets/final/ui/bespoke/relic-slot-v1-lg.png);background-repeat:no-repeat;
+ background-size:500% 100%;}
+.relic-slot-mini{width:24px;height:24px;}
+.relic-slot-mini-icon{width:16px;height:16px;image-rendering:pixelated;}
+.relic-slot-sm{width:32px;height:32px;}
+.relic-slot-sm-icon{width:24px;height:24px;image-rendering:pixelated;}
+.relic-slot-base{background-position:0 0;}
+.relic-slot-owned{background-position:25% 0;}
+.relic-slot-core{background-position:50% 0;}
+.relic-slot-empty-v2{background-position:75% 0;}
+.relic-slot-selected{background-position:100% 0;}
+/* 상세 시트 큰 아이콘(브리핑 §4-4, 96pt — 헤더는 sticky라 좁게 유지하고 아이콘은 본문 맨 위). */
+.relic-detail-icon-wrap{text-align:center;margin:6px 0 10px;}
+.relic-detail-icon{width:96px;height:96px;image-rendering:pixelated;}
+.relic-detail-icon-locked{filter:brightness(0) opacity(.45);}
+/* 유물 도감 버튼 아이콘(E11 icon-relic-codex-v1.png, 72×72 1:1). */
+.icon-relic-codex{display:inline-block;width:16px;height:16px;vertical-align:-3px;
+ background:url(/blockhero-site/play/assets/final/ui/bespoke/icon-relic-codex-v1.png) center/contain no-repeat;}
+/* 기여 막대(E9 contrib-bar-v1.png, 453×120, 4행×30: 트랙·피해(주황빨강)·회복(초록)·보호막(청록)).
+   4행 스프라이트를 세로 400%로 깔고 행별 position-y로 고른다. 트랙은 캡슐 배경, 채움은 width%로
+   늘어나는 자식 — 둘 다 자기 박스 기준으로 늘려 캡슐 양끝이 적당히 둥글게 유지된다. */
+.contrib-bar{position:relative;height:10px;width:100%;border-radius:5px;overflow:hidden;
+ background-image:url(/blockhero-site/play/assets/final/ui/bespoke/contrib-bar-v1.png);background-size:100% 400%;background-position:0 0;background-repeat:no-repeat;}
+.contrib-bar-fill{position:absolute;top:0;left:0;height:100%;min-width:8%;
+ background-image:url(/blockhero-site/play/assets/final/ui/bespoke/contrib-bar-v1.png);background-size:100% 400%;background-repeat:no-repeat;}
+.contrib-fill-dmg{background-position:0 33.3334%;}
+.contrib-fill-heal{background-position:0 66.6667%;}
+.contrib-fill-block{background-position:0 100%;}
+/* 이번 원정·런 요약 공용 유물 활약 목록(§6-6). */
+.relic-ledger-list{display:flex;flex-direction:column;gap:8px;margin-top:8px;}
+.relic-ledger-row{display:flex;align-items:center;gap:10px;padding:6px 4px;border:0;background:none;text-align:left;width:100%;color:#5c4330;}
+/* 아이콘 크기는 이제 .relic-slot-sm/.relic-slot-mini가 정한다(재검수: 세 탭이 각자 다른 아이콘
+   틀이던 문제를 slot-sm으로 통일 — 여기서 32px로 또 덮어쓰면 다시 깨진다). */
+.relic-ledger-row-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+.relic-ledger-row-body b{font-size:12px;}
+.relic-ledger-row-body small{font:10px Galmuri9;color:#8d572b;}
+.relic-ledger-row.is-dropped{opacity:.55;}
+.relic-ledger-rank-n{flex:none;width:18px;text-align:center;font:700 13px Galmuri11;color:#9b531d;}
+.contrib-panel{margin-top:10px;}
+/* 교체 시트(S4): 행은 .relic-grid와 같은 톤의 --ui-region-card 9분할을 직접 쓴다. */
+.relic-replace-list{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:45svh;overflow:auto;}
+.relic-replace-row{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 10px;width:100%;color:#5c4330;background:none;border:1px solid #b18752;}
+.relic-replace-row.is-selected{border-color:#5a8e3b;}
+html[data-ui-art=ready] .relic-replace-row{
+ border-style:solid;border-color:transparent;border-width:var(--ui-region-card-width);
+ border-image-source:var(--ui-region-card);border-image-slice:var(--ui-region-card-slice) fill;
+ border-image-width:var(--ui-region-card-width);border-image-repeat:round;
+}
+html[data-ui-art=ready] .relic-replace-row.is-selected{border-image-source:var(--ui-region-card-selected);}
+.relic-replace-row-body{display:flex;flex-direction:column;gap:2px;font-size:11px;line-height:1.4;min-width:0;}
+.relic-replace-row-body small{font-size:10px;color:#8d572b;}
+.relic-replace-warn{font:10px Galmuri9;color:#a9472b;margin-top:4px;}
+/* 2026-09-22: min-height:60px도 위와 같은 이유로 보조문구를 잘랐다(패딩 12px 포함 필요 높이 ≈73px).
+   가장 좁은 기기(iPhone SE급, 667px 이하)에서만 패딩을 6px로 더 줄이고 70px로 올려 텍스트가 들어가게 한다. */
+@media(max-height:670px){.refuge-tools{top:80px!important;gap:3px!important;}.refuge-tools button{min-height:80px!important;padding:0!important;border-width:12px 11px;border-image-slice:36 33 fill;border-image-width:12px 11px;}.refuge-tools .nav-icon,.refuge-tools .refuge-tool-mark{height:21px!important;}.refuge-tools b{font-size:10px;}.refuge-tools small{font-size:8px;line-height:1.25}}
+/* 좁은 기기에서는 헤더와 미션 줄만 조금 조인다. 어제 넣었던 `.daily-missions{max-height:40px;overflow-y:auto}`
+   (패널 안 스크롤)는 2026-09-23 사용자 지시로 폐기 — 목록은 오버레이라 세 줄이 항상 스크롤 없이 보인다. */
+@media(max-height:670px){.daily-mission{min-height:34px;padding-block:3px}}
+/* FOLD-V1(2026-10-23): 폭 380 이하인데 키가 큰 화면(Z 폴드 커버 344×882·360×860·373×900, 360×800 안드로이드)은 위 670 이하
+   압축 규칙(테두리 12/11px·글자 10px)을 못 받아 왼쪽 열 83px 카드(테두리 13px×2 → 안쪽 57px)에 "할로윈 축제"·"오늘의 미션"(11px 굵게,
+   약 60px)이 3px 넘쳤고 "새 소식 확인"(10px)이 두 줄로 꺾였다. 이름 10px·보조 9px로 맞춘다. */
+@media(max-width:380px) and (min-height:671px){.refuge-tools b{font-size:10px}.refuge-tools small{font-size:9px}}
+.relic-grid button{grid-template-columns:48px minmax(0,1fr);row-gap:4px;}
+.relic-grid img{grid-column:1;grid-row:1/5;width:46px;height:46px;align-self:start;}
+.relic-grid button b,.relic-grid button em,.relic-grid button small{grid-column:2;}
+.relic-grid button b{font-size:13px;}
+/* U11(docs/LOCALIZATION-PLAN.md §6-2): 영문 유물·지역 이름(Ribbon of Courage·Ember Toy Workshop 등)이
+   13px에서 카드 폭을 넘겨 2줄로 꺾였다(button>b는 한 줄 규칙, text-layout-probe.mjs). 고유명사라 줄여
+   쓸 수 없으니 영문에서만 글자를 줄인다(ko는 그대로 13px). */
+:lang(en) .relic-grid button b{font-size:10px;}
+/* en(2026-10-20 최장 문자열 점검): 320폭 고르기 카드 이름 칸(약 120px)에 20자 영어 유물명이 한 줄로 들도록 한 단계 낮춘다. */
+@media (max-width:359px){:lang(en) .relic-grid button b{font-size:9px;letter-spacing:-.2px}}
+.relic-grid button small{font:11px/1.65 Galmuri11;word-break:keep-all;}
+.relic-grid button em{margin:2px 0;}
+.ten-stage-map .map-node b,.ten-stage-map .map-node small{text-shadow:1px 1px #374023,0 1px #374023;}
+
+/* v22: 아이콘 스프라이트 공용 클래스. 캔버스 = CSS 박스 × DPR(§3.5)로 만들어 박스를 소스 비율에 맞춘다. */
+:is(.ico-back,.ico-forward,.ico-collapse,.ico-lock,.ico-warning,.ico-star){display:inline-block;flex:none;background-position:center;background-repeat:no-repeat;background-size:contain;vertical-align:middle}
+/* 2026-09-28(V36 1단계): 액자 없는 뒤로가기 — icon-btn-bespoke 셀5(금빛 화살표, 이미 외곽선 포함)를 재사용한다. */
+html[data-ui-art=ready] .ico-back{width:20px;height:20px;background-image:var(--ui-icon-back-20)}
+.ico-back{width:15px;height:21px;background-image:var(--icon-back)}
+.ico-forward{width:15px;height:21px;background-image:var(--icon-forward)}
+.ico-collapse{width:16px;height:11px;background-image:var(--icon-collapse);transition:transform .15s ease}
+.ico-lock{width:14px;height:16px;background-image:var(--icon-lock);margin-right:3px;vertical-align:-2px}
+.ico-warning{width:22px;height:24px;background-image:var(--icon-warning);margin-right:5px;vertical-align:-6px}
+.ico-star{width:14px;height:14px;background-image:var(--icon-star-filled);vertical-align:-2px}
+.back-button:not([hidden]){display:grid!important;place-items:center}
+[data-action=toggle-daily][aria-expanded=false] .ico-collapse{transform:rotate(-90deg)}
+
+/* v22: 지도 상단 간판 헤더 — 간판 보드(①) + 매달린 팻말(②) + 화살표 버튼(③). docs/UI-ASSETS-V22.md §3 참고.
+   .app-top 배경(간판)은 이제 모든 화면이 공유하는 상단 통합 규칙(위쪽 html[data-ui-art=ready] .app-top)이 담당한다. */
+body[data-screen=map] .app-brand{display:none}
+body[data-screen=map] .map-stars-badge{display:flex;align-items:center;gap:3px;color:#fff0bb}
+/* 팻말은 밧줄(고리)과 보드를 별도 조각으로 분리해 각자 원본 비율대로 렌더링한다(세로 찌그러짐 방지, docs/UI-ASSETS-V22.md §3). */
+body[data-screen=map] .map-chapter-strip{height:64px;margin:-6px 12px 8px;padding:0;position:relative;display:flex;align-items:flex-end;justify-content:center;gap:0;background:none;border:0;box-shadow:none}
+body[data-screen=map] .map-chapter-strip:before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:80px;height:21px;background:var(--ui-plaque-rope) center/80px 21px no-repeat;pointer-events:none;z-index:1}
+body[data-screen=map] .map-chapter-strip .chapter-picker{min-width:200px;width:max-content;max-width:220px;height:48px;padding:0 16px;display:flex;align-items:center;justify-content:center;border:16px solid transparent;background:transparent;border-image-source:var(--ui-plaque-board)!important;border-image-slice:var(--ui-plaque-board-slice)!important;border-image-width:var(--ui-plaque-board-width)!important;border-image-repeat:round;color:#4a2f18;font:700 13px Galmuri11;text-shadow:none;white-space:nowrap;overflow:visible}
+body[data-screen=map] .map-chapter-nav{width:35px;height:35px;flex:none;padding:0;border:0!important;border-radius:0;background:var(--ui-arrow-prev) center/35px 35px no-repeat;box-shadow:none;font-size:0;margin:0 -2px 8px}
+body[data-screen=map] .map-chapter-nav[data-role=map-next]{background-image:var(--ui-arrow-next)}
+body[data-screen=map] .map-chapter-nav:disabled{opacity:.55}
+/* 2026-09-28(V36 2단계, 사용자 지시: "탭 구분은 더 명확했으면 좋겠음"): 어두운 나무 레일 위에
+   선택된 탭만 밝은 양피지 판이 떠오르는 구성(비교안 C — artifacts/ui-redesign-v36/tab-variants.png).
+   A(연결판)·B(밑줄만)와 비교했을 때 어두운 배경 대비 밝은 판의 명도차가 가장 커서 "한눈에 어느
+   탭인지" 요구를 가장 분명히 만족한다. 활성/비활성 소스 치수가 달라도(topbar-plank는 tab-rail로,
+   tab-plate는 별도 원본으로) 레일이 먼저 배경으로 깔리고 판은 ::before로 얹히므로 글자 위치는
+   고정 padding으로만 정해진다(튐 없음). NEW 배지는 필터 영향을 안 받도록 ::before가 아니라
+   버튼 자체 배경으로 판을 얹지 않고 z-index로 분리했다. */
+html[data-ui-art=ready] :is(.mode-tabs,.lb-tabs){
+ --tab-height:44px;
+ display:flex;gap:2px;padding:2px;margin:0;
+ border-style:solid;border-color:transparent;box-shadow:none;background:transparent;border-radius:0;
+ border-image-source:var(--ui-tab-rail-wide)!important;border-image-slice:0 var(--ui-tab-rail-cap) fill!important;
+ border-image-width:0 var(--ui-tab-rail-cap-px)!important;border-image-repeat:round;
+}
+html[data-ui-art=ready] :is(.mode-tabs,.lb-tabs) button{
+ height:calc(var(--tab-height) - 4px)!important;min-height:calc(var(--tab-height) - 4px)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;box-shadow:none;
+ position:relative;flex:1;
+ color:#c2a075;font-weight:700;font-size:13px;text-shadow:0 1px #2b1c10;filter:none;
+ padding:0 6px;
+}
+html[data-ui-art=ready] :is(.mode-tabs,.lb-tabs) button[aria-selected=true]{
+ color:#41260d;text-shadow:0 1px #f6dfa6;z-index:1;
+}
+html[data-ui-art=ready] :is(.mode-tabs,.lb-tabs) button[aria-selected=true]::before{
+ content:'';position:absolute;inset:0;z-index:-1;
+ border-style:solid;border-color:transparent;
+ border-image-source:var(--ui-tab-plate-wide);border-image-slice:0 var(--ui-tab-plate-cap) fill;
+ border-image-width:0 var(--ui-tab-plate-cap-px);border-image-repeat:round;
+}
+/* NEW 배지는 탭 판 필터와 무관하게 항상 탭 박스 안쪽 우상단에 온다(OVERFLOW_PROBE 수정). */
+:is(.mode-tabs,.lb-tabs,.shop-tabs) button .notification-dot,:is(.mode-tabs,.lb-tabs,.shop-tabs) .notification-dot{right:2px;top:2px}
+/* 재피드백(2026-10-19 5차, 실기기): 탭이 3등분 flex:1이면 탭 박스 우상단(위 규칙)이 가운데 글자에서 멀어
+   "허공에 뜬" 배지로 보였다 — .tab-label(글자를 감싼 inline-block)이 있으면 그 모서리에 바짝 붙인다. */
+:is(.mode-tabs,.lb-tabs,.shop-tabs) button{position:relative}
+:is(.mode-tabs,.lb-tabs,.shop-tabs) .tab-label{position:relative;display:inline-block}
+/* 재피드백(2026-10-20, 실기기 iOS 1.1.17 빌드 90 "구□3"): right:-10px는 점(폭 ≈21px)의 절반이 글자 위에 남아 '매'를
+   덮었다(엔진 무관 — iOS 시뮬레이터 WebKit 실측 10.7px 겹침). 점의 왼쪽 가장자리를 글자 상자 오른쪽 끝(+1px)에 고정한다. */
+:is(.mode-tabs,.lb-tabs,.shop-tabs) .tab-label .notification-dot{position:absolute;left:calc(100% + 1px);right:auto;top:-7px}
+body[data-screen=map] .app-chrome{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
+body[data-screen=map] #app-content{height:calc(100svh - 120px - 8px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:400px}
+/* 지도 하단 이야기 띠: 제목 한 줄 + 문장 한 줄만 남긴 컴팩트 스트립. 지도(flex:1)가 남는 높이를 흡수한다. */
+.map-story-strip{flex:none;margin:0 8px 4px;padding:6px 10px;max-height:60px;overflow:hidden}
+.map-story-strip b{display:block;font:700 10px Galmuri11;color:#52351d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.map-story-strip p{margin:2px 0 0;font:9px/1.4 Galmuri11;color:#8a6749;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* v22: 보조/위험 버튼을 초록 버튼과 동일한 3분할(border-image) 로직으로 새 재질에 입힌다. */
+html[data-ui-art=ready] :is(.btn-secondary,.practice-entry){
+ --button-height:44px;height:var(--button-height)!important;min-height:var(--button-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;
+ border-image-source:var(--ui-parchment-wide)!important;
+ border-image-slice:0 var(--ui-parchment-cap) fill!important;
+ border-image-width:0 calc(var(--button-height) * var(--ui-parchment-cap) / var(--ui-parchment-canvas-h))!important;
+ border-image-repeat:stretch;padding:8px calc(var(--ui-parchment-cap-px) + 8px);box-shadow:none;
+ color:#5a3a1e;font-weight:700;justify-content:center;text-align:center;
+}
+html[data-ui-art=ready] :is(.btn-secondary,.practice-entry)>span:last-child{margin-left:auto}
+html[data-ui-art=ready] :is(.btn-secondary,.practice-entry):not(:disabled):active{filter:brightness(.94)}
+html[data-ui-art=ready] :is(.btn-secondary,.practice-entry):disabled{opacity:.55;filter:none}
+/* 다이얼로그 버튼 스택만 52px로 맞춘다(주 버튼과 동일) — 설정 목록의 보조 버튼(.practice-entry, 44px)은 그대로 둔다. */
+html[data-ui-art=ready] .btn-secondary{--button-height:52px}
+/* R1 회귀 수정: 캡 폭을 18px로 고정했더니 border-image-width가 각 에셋의 원본 비율과 어긋나
+   border-image-repeat:round이 세로로 타일링되어 버튼 아트가 위아래 두 장으로 겹쳐 보였다(치명 버그).
+   캡 폭은 위 각 규칙의 calc(버튼높이×capSrc/assetH)로 에셋별 비례를 유지하고, repeat도 stretch로 바꿔
+   두 에셋의 캡 비율이 달라도 단일 이미지가 버튼 높이에 맞게 늘어나게 한다. 패딩만 다이얼로그 버튼 쌍의
+   x 정렬을 맞추기 위해 공통값으로 고정한다. */
+html[data-ui-art=ready] :is(.btn-primary,.btn-secondary){padding-inline:26px!important}
+html[data-ui-art=ready] :is(.btn-danger,.danger-button){
+ --button-height:44px;height:var(--button-height)!important;min-height:var(--button-height)!important;
+ border-width:0!important;background:transparent!important;border-radius:0!important;
+ border-image-source:var(--ui-red-wide)!important;
+ border-image-slice:0 var(--ui-red-cap) fill!important;
+ border-image-width:0 calc(var(--button-height) * var(--ui-red-cap) / var(--ui-red-canvas-h))!important;
+ border-image-repeat:round;padding:8px calc(var(--ui-red-cap-px) + 8px);box-shadow:none;
+ color:#fff2d2;font-weight:700;text-shadow:1px 1px #4d271c;justify-content:center;text-align:center;
+}
+html[data-ui-art=ready] :is(.btn-danger,.danger-button)>span:last-child{margin-left:auto}
+html[data-ui-art=ready] :is(.btn-danger,.danger-button):not(:disabled):active{filter:brightness(.94)}
+html[data-ui-art=ready] :is(.btn-danger,.danger-button):disabled{opacity:.55;filter:none}
+
+/* gold(train-button/btn-cost): 9분할 불가(§3.2)라 버튼과 동일한 가로 3분할로 입힌다. */
+html[data-ui-art=ready] :is(.train-button,.btn-cost){
+ --button-height:49px;
+ border-width:0!important;background:transparent!important;border-radius:0!important;
+ border-image-source:var(--ui-gold-wide)!important;
+ border-image-slice:0 var(--ui-gold-cap) fill!important;
+ border-image-width:0 calc(var(--button-height) * var(--ui-gold-cap) / var(--ui-gold-canvas-h))!important;
+ border-image-repeat:round;box-shadow:none;
+}
+/* 상점 가격 버튼: 같은 gold 3분할 에셋이지만 컴팩트 행에 맞춘 24px 변형(§3.3 — 캡 배율은 --button-height로 정해지므로
+   실제 렌더 높이와 반드시 같이 바꿔야 캡이 늘어나 보이지 않는다). */
+html[data-ui-art=ready] .shop-hero-price .btn-cost{
+ --button-height:24px;height:24px!important;min-height:24px!important;padding:0 4px;
+}
+
+/* 업적 미달성 라벨 대비 확보(M20): app-shell.css의 연녹색을 어두운 올리브로 덮는다. */
+.achievement-row.locked small{color:#6b7f45}
+/* 일일 미션 한 줄 행의 '받기' 버튼: 주/보조 버튼과 같은 에셋이지만 72×32 컴팩트 변형. */
+html[data-ui-art=ready] .btn-mission.btn-primary,html[data-ui-art=ready] .btn-mission.btn-secondary{
+ --button-height:32px!important;width:72px!important;min-width:72px;flex:none;
+ /* 2026-09-25 사용자 피드백("받기" 텍스트가 삐져나온다): 위 §529 :is(.btn-primary,.btn-secondary)의
+    padding-inline:26px!important가 이 72px 컴팩트 버튼에도 적용돼(padding 단축 속성은 !important가
+    아니라 못 이김) 실제 글자 영역이 72-52=20px로 눌렸다. !important로 명시해 6px로 되돌린다. */
+ padding-inline:6px!important;padding-block:0!important;margin:0;box-shadow:none;font-size:10px;
+ display:grid!important;place-items:center;justify-content:center;gap:0;
+ /* 2026-10-14 대표 제보("받기" 글자가 왼쪽에 붙어 세로 2줄로 깨짐, 활성 행만): §344의
+    .btn-primary 3분할 그리드(grid-template-columns:18px minmax(0,1fr) 18px)가 클래스 결합
+    선택자보다 낮은 특정성이라도 이 속성을 따로 선언하지 않으면 그대로 상속된다. btn-mission은
+    "받기" 텍스트를 <span>으로 감싸지 않은 순수 텍스트 노드라 익명 그리드 아이템이 1번 열(18px)에
+    들어가 좁은 폭에서 줄바꿈됐다. 비활성(.btn-secondary) 행은 flex 레이아웃이라 영향이 없었다.
+    단일 열로 되돌려 place-items:center가 그대로 적용되게 한다. */
+ grid-template-columns:1fr!important;
+}
+/* FTUE-V1 §3-6(2026-10-22 번복): 받을 수 있는 행의 버튼만 13px 진한 글자(예전엔 크림 글자라 "받기"가 안 읽혔다). 진행 중 행은 비활성 버튼(app-shell.css :disabled 필터로 더 어둡게), 받은 행은 "완료" 글자. */
+html[data-ui-art=ready] .daily-mission.ready .btn-mission.btn-primary{font:700 13px Galmuri11!important;color:#3d2410!important;text-shadow:none!important}
+.daily-mission-state{width:72px;text-align:center;font:11px Galmuri11;color:#4f672c}
+
+/* 2026-09-24(묶음 B, docs/UI-CSS-AUDIT-V32.md 대상 3): 전투 상단 웨이브 진행 점(1:1, 3states).
+   game-ui.css의 박스 모델(13×13, border 1px)은 그대로 두고 배경/테두리만 덮는다. */
+html[data-ui-art=ready] .wave-dots span{
+ border:0;box-shadow:none;border-radius:0;background:var(--ui-wave-dot-default) center/contain no-repeat;aspect-ratio:1;
+}
+html[data-ui-art=ready] .wave-dots .active{background-image:var(--ui-wave-dot-active)}
+html[data-ui-art=ready] .wave-dots .done{background-image:var(--ui-wave-dot-done)}
+
+/* 대상 4: 전투 위협 표시(.threat)·씬 위치 라벨(.scene-location) — wide3 목판, 평시/위험 2states. */
+html[data-ui-art=ready] .threat{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background:none;
+ border-width:0 var(--ui-threat-plate-cap-px);
+ border-image-source:var(--ui-threat-plate-wide);border-image-slice:0 var(--ui-threat-plate-cap) fill;
+ border-image-width:0 var(--ui-threat-plate-cap-px);border-image-repeat:round;
+ padding:5px calc(var(--ui-threat-plate-cap-px) + 6px);
+}
+html[data-ui-art=ready] .threat.danger{
+ border-image-source:var(--ui-threat-plate-danger-wide);
+ border-image-slice:0 var(--ui-threat-plate-danger-cap) fill;
+ border-width:0 var(--ui-threat-plate-danger-cap-px);
+ border-image-width:0 var(--ui-threat-plate-danger-cap-px);
+ padding:5px calc(var(--ui-threat-plate-danger-cap-px) + 6px);
+}
+html[data-ui-art=ready] .scene-location{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background:none;
+ border-width:0 var(--ui-scene-plate-cap-px);
+ border-image-source:var(--ui-scene-plate-wide);border-image-slice:0 var(--ui-scene-plate-cap) fill;
+ border-image-width:0 var(--ui-scene-plate-cap-px);border-image-repeat:round;
+ padding:4px calc(var(--ui-scene-plate-cap-px) + 4px);
+}
+/* 대상 4: 스킬 대기열 표시(.cast-queue) — 같은 위협판 소스를 18px 높이로 재구운 판(신규 생성 없음, 재사용). */
+html[data-ui-art=ready] .cast-queue{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background:none;color:#fff1cd;
+ border-width:0 var(--ui-cast-queue-plate-cap-px);
+ border-image-source:var(--ui-cast-queue-plate-wide);border-image-slice:0 var(--ui-cast-queue-plate-cap) fill;
+ border-image-width:0 var(--ui-cast-queue-plate-cap-px);border-image-repeat:round;
+ padding:4px calc(var(--ui-cast-queue-plate-cap-px) + 5px);
+}
+/* 뽑기 결과 등급 명판(브리핑 §4 강화, 2026-09-25): 같은 위협판 소스를 등급색으로 재염색한 판
+   (src/ui-art.mjs wide3Tinted, 신규 생성 없음). 아이콘 배경은 app-shell.css 기본값 그대로 겹친다. */
+html[data-ui-art=ready] .tier-badge.tier-rare{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background-color:transparent;color:#fff3ff;
+ border-width:0 var(--ui-tier-badge-rare-cap-px);
+ border-image-source:var(--ui-tier-badge-rare-wide);border-image-slice:0 var(--ui-tier-badge-rare-cap) fill;
+ border-image-width:0 var(--ui-tier-badge-rare-cap-px);border-image-repeat:round;
+ padding:4px calc(var(--ui-tier-badge-rare-cap-px) + 10px);
+ text-shadow:0 1px 2px #00000088;
+}
+html[data-ui-art=ready] .tier-badge.tier-legendary{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background-color:transparent;color:#3a2410;
+ border-width:0 var(--ui-tier-badge-legendary-cap-px);
+ border-image-source:var(--ui-tier-badge-legendary-wide);border-image-slice:0 var(--ui-tier-badge-legendary-cap) fill;
+ border-image-width:0 var(--ui-tier-badge-legendary-cap-px);border-image-repeat:round;
+ padding:4px calc(var(--ui-tier-badge-legendary-cap-px) + 10px);
+ text-shadow:0 1px 1px #ffffff88;
+}
+
+/* 대상 6·5: 전투 하단 푸터 버튼(.game-footer button)·연습 모드 바 버튼(.practice-bar button) —
+   기존 양피지 버튼 소스(--ui-parchment 소스 재사용, 신규 생성 없음)를 각 높이로 재구운 변형.
+   2026-10-05(빌드 60 버그): color가 밝은 크림(#fff3ca)이던 시절 그대로 남아, 역시 밝은 크림색인
+   양피지 채움(ui-footer-btn-wide@3x.png, fill 키워드로 content box에도 배경으로 깔림) 위에서
+   라벨("? 도움말")이 거의 안 보였다. 같은 양피지 채움 위 다른 버튼(.btn-secondary #5a3a1e,
+   .hero-tabs b #563416, .practice-bar button #7c552f)과 같은 계열의 짙은 갈색으로 맞춘다. */
+html[data-ui-art=ready] .game-footer button{
+ border-style:solid;border-color:transparent;box-shadow:none;border-radius:0;background:none;color:#5a3a1e;
+ border-width:0 var(--ui-footer-btn-cap-px);
+ border-image-source:var(--ui-footer-btn-wide);border-image-slice:0 var(--ui-footer-btn-cap) fill;
+ border-image-width:0 var(--ui-footer-btn-cap-px);border-image-repeat:round;
+ padding:0 calc(var(--ui-footer-btn-cap-px) + 6px);
+}
+html[data-ui-art=ready] .practice-bar button{
+ border-style:solid;border-color:transparent;box-shadow:none;background:none;color:#7c552f;
+ border-width:0 var(--ui-practice-btn-cap-px);
+ border-image-source:var(--ui-practice-btn-wide);border-image-slice:0 var(--ui-practice-btn-cap) fill;
+ border-image-width:0 var(--ui-practice-btn-cap-px);border-image-repeat:round;
+ padding:0 calc(var(--ui-practice-btn-cap-px) + 4px);
+}
+html[data-ui-art=ready] .practice-bar button[aria-pressed=true]{filter:brightness(1.1) saturate(1.15)}
+
+/* 대상 5(2026-09-25, docs/UI-CSS-AUDIT-V32.md): 목록 점선 구분선. border-top/border-block:dashed로
+   그려지던 모든 사용처를 하나의 픽셀 점선 타일(border-image round 반복)로 통일한다. 캡이 없어 좌우 슬라이스는
+   0(엔드캡 없음) — 위/아래 변에만 이미지를 쓰고 가운데 채움(fill)은 필요 없다(목록 항목 배경은 그대로 투명). */
+html[data-ui-art=ready] :is(
+ .stage-facts,.stage-foes,.hero-stats,.recruit-odds,.settings-panel label,.settings-panel .settings-row-graphics,.save-info dl,
+ .relic-choice,.conflict-option dl>div,.daily-mission,.achievement-row,.records-grid,.records-grid>div,
+ .lb-row,.result-stats,.skill-detail-section,.shop-hero-card+.shop-hero-card,.destination-card+.destination-card,.mastery-level:nth-child(n+3)
+){
+ border-color:transparent;border-style:solid;box-shadow:none;
+ border-image-source:var(--ui-divider-dashed-wide);
+ border-image-width:3px;
+ border-image-repeat:round;
+}
+/* 위쪽 변만: 목록 행 사이 구분선. 상점 카드는 첫 장을 제외한 모든 카드 위에 선이 온다(C안, 액자 없는 목록).
+   숙련 도전 난도 카드(2열 그리드)는 3번째 항목부터(=2행부터) 위쪽에 선이 와 행 경계를 표시한다. */
+html[data-ui-art=ready] :is(
+ .stage-foes,.recruit-odds,.settings-panel label,.settings-panel .settings-row-graphics,.conflict-option dl>div,.daily-mission,
+ .achievement-row,.records-grid>div,.lb-row,.skill-detail-section,.shop-hero-card+.shop-hero-card,.destination-card+.destination-card,.mastery-level:nth-child(n+3)
+){
+ border-width:3px 0 0 0;
+ border-image-slice:var(--ui-divider-dashed-slice) 0 0 0;
+}
+/* 위+아래 변: 정보 블록을 감싸는 패널형 구분선. */
+html[data-ui-art=ready] :is(.stage-facts,.hero-stats,.save-info dl,.records-grid,.result-stats,.relic-choice){
+ border-width:3px 0;
+ border-image-slice:var(--ui-divider-dashed-slice) 0 var(--ui-divider-dashed-slice) 0;
+}
+/* 목록 첫 행은 구분선을 감춘다(기존 :first-child{border-top:0} 규칙과 동치, 더 높은 특이성으로 복원). */
+html[data-ui-art=ready] :is(.achievement-row:first-child,.records-grid>div:first-child,.lb-row:first-child,.conflict-option dl>div:first-child){
+ border-width:0;border-image-source:none;
+}
+
+/* FTUE-V1 결과창(docs/FTUE-VISUAL-AUDIT-V1.md §3-3·3-4·3-15). 별은 에셋 칸(N4 result-star 대기 — 그 전엔 지도 별 아이콘 --icon-star-*),
+   보상은 기존 아이콘 에셋 + 글자 칩(표면 없음). 통계는 한 줄로 접고 2배 광고는 금색 보조 버튼(button-gold-bespoke 3분할, 44px)으로 낮춘다. */
+/* §3-12: 쉼터 강화 버튼 안 코인 아이콘(.embark span 글자 규칙이 아이콘 대체 글자 "G"를 다시 키우지 않게). */
+.camp-v47 .embark .camp-cta-label{flex:1;display:inline-flex;align-items:center;justify-content:center;font-size:inherit;line-height:1.2}
+.camp-v47 .embark .coin-icon{display:inline-block;flex:none;font-size:0!important;line-height:0;width:16px;height:14px;margin-inline:4px 3px}
+.result-modal .result-stars{display:flex;justify-content:center;gap:6px;margin:0 0 4px}
+.result-star{display:inline-block;flex:none;width:28px;aspect-ratio:1;background-position:center;background-size:contain;background-repeat:no-repeat;image-rendering:pixelated}
+.result-star.on{background-image:var(--icon-star-filled)}
+.result-star.off{background-image:var(--icon-star-empty);opacity:.5;filter:saturate(.2)}
+:root.ftue-art-star .result-star.on{aspect-ratio:1;background-image:var(--ui-result-star-on)}
+:root.ftue-art-star-off .result-star.off{aspect-ratio:1;background-image:var(--ui-result-star-off);opacity:1;filter:none}
+.result-modal .reward-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px;font:700 15px/1.45 Galmuri11;color:#5a320e}
+.result-modal .reward-chips.grid{display:grid;grid-template-columns:repeat(2,max-content);justify-content:center;column-gap:18px;text-align:left}
+.reward-chip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.reward-chip b{font:inherit}
+.reward-ico{display:inline-block;flex:none;width:20px;aspect-ratio:1;background-position:center;background-size:contain;background-repeat:no-repeat;image-rendering:pixelated}
+.reward-ico.coin{aspect-ratio:1;background-image:var(--icon-coin)}
+.reward-ico.token{aspect-ratio:1;background-image:var(--icon-token)}
+.reward-ico.material{aspect-ratio:1;background-image:url("/blockhero-site/play/assets/final/ui/v47/material-icon-v47.png")}
+.reward-ico.ticket{display:none}
+:root.ftue-art-ticket .reward-ico.ticket{display:inline-block;aspect-ratio:1;background-image:var(--ui-icon-ticket)}
+.result-modal .result-reward>p{margin:4px 0 0;font-size:14px}
+.result-modal .result-stats.compact{padding:7px 4px;margin:4px 0 8px}
+.result-modal .result-stats.compact b{font-size:15px}
+.result-modal .result-stats.compact small{font-size:9px;margin-top:2px}
+html[data-ui-art=ready] .result-modal .result-reward .ad-reward-button.btn-cost{--button-height:44px;display:inline-flex!important;height:44px;min-height:44px!important;width:auto;max-width:100%;margin:8px auto 0;padding:0 22px!important;font:700 13px Galmuri11;color:#512e12}
+.result-modal .result-reward .text-button[data-toss-action]{display:block;margin:6px auto 0;min-height:32px;font-size:12px}
+:root.ftue-art-emblem-boss #modal.result-modal.result-boss .modal-emblem{aspect-ratio:1;background-image:var(--ui-result-emblem-boss)!important}
+/* FTUE-V1 §3-15: 결과창 주버튼이 첫 화면(390×844, 보스 판 포함)에 들어오게 전체 높이를 줄인다(엠블럼·초상·통계·여백). */
+#modal.result-modal{padding:4px 14px 8px}
+.result-modal .modal-art{height:70px;margin:0 0 2px}
+#modal.result-modal .modal-emblem{width:70px;height:70px}
+.result-modal #modal-title{font-size:22px;margin:4px 0}
+.result-modal #modal-body{font-size:11px;line-height:1.65;margin:0 0 4px}
+.result-modal .result-party{margin:2px 0 4px;gap:20px}
+.result-modal .result-party>div{gap:2px}
+.result-modal .result-party canvas{width:34px;height:34px}
+.result-modal .result-party span{font-size:10px}
+.result-modal .result-stats.compact{padding:5px 4px;margin:4px 0 6px}
+.result-modal .result-stats.compact b{font-size:14px}
+.result-modal .result-reward{margin-bottom:6px;padding:2px 0}
+.result-modal .result-reward small{margin-top:3px;line-height:1.6}
+.result-modal .result-star{width:24px}
+.result-modal .reward-chips{font-size:14px;gap:2px 14px}
+.result-modal .reward-ico{width:18px}
+/* 글자 영역이 3분할 양끝 캡(border-image-width와 같은 식) 안쪽에 오게 padding을 캡 폭 + 6px로 둔다. */
+html[data-ui-art=ready] .result-modal .result-reward .ad-reward-button.btn-cost{margin-top:6px;padding:0 calc(var(--button-height) * var(--ui-gold-cap) / var(--ui-gold-canvas-h) + 6px)!important;font-size:12px}
+.result-modal .result-reward .text-button[data-toss-action]{margin-top:2px;min-height:28px;padding:4px 10px}
+.result-modal #modal-primary{min-height:50px}
+.result-modal #modal-secondary{min-height:38px}

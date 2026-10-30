@@ -1,0 +1,29 @@
+/* 굵은 도트 에셋과 맞추는 단색 면·계단형 테두리. 글자는 읽기 좋게 유지한다. */
+:root{--gold:#f4cf83;background:#17243a}
+.ambient{background:#17243a}.ambient:after{opacity:.12;background-size:32px 32px}
+.game{border-radius:3px;border-color:#c3a16b;box-shadow:0 0 0 4px #101b30,0 0 0 6px #66748b,8px 12px 0 #0f1a2d}
+.game-header{background:#293e60}.stage-heading{background:#354f6b}
+.wordmark{letter-spacing:-1px;text-shadow:2px 2px #111d31}
+.brand-mark{transform:none}
+.header-actions button{border-radius:2px;background:#40577b;border:2px solid #8eabc1;box-shadow:inset -2px -2px #263a58,2px 2px #15243c}
+.header-actions button[aria-pressed="true"]{background:#dfb969;border-color:#f7dc96;box-shadow:inset -2px -2px #9a713f,2px 2px #15243c}
+.wave-dots span{border-radius:2px}.wave-dots .active{box-shadow:2px 2px #7c694e}
+.battle-scene{border-color:#b59a70}.battle-scene canvas,.hero-portrait,.tile canvas{image-rendering:pixelated}
+.threat{border-radius:2px;background:#1b2c46;border:2px solid #b6a77e;box-shadow:2px 2px #132139}
+.cast-queue{border-radius:0;background:#1b2c46}
+.heroes{background:#253b5b;border-color:#a58b67}
+.hero-card{border-radius:2px;background:#3a5172;border:1px solid #7e99b1;box-shadow:inset -2px -2px #2a3e5d,2px 2px #192c46}
+.hero-portrait{border-radius:0;background:#263a54;border-color:#bba171}
+.hero-card.casting,.hero-card.charged{box-shadow:0 0 0 2px #ffe1a0,3px 3px #14243e}
+.bar{border-radius:0;box-shadow:none}.bar i{border-radius:0}
+.puzzle-section{background:#233956}.board{border-radius:3px;background:#14263f;border-color:#b39b73;box-shadow:inset 0 0 0 2px #0c1b2e,2px 2px #0c1b2e}
+.tile,.tile canvas{border-radius:0;box-shadow:none;filter:none}.tile.special{outline:2px solid #ffe5a0;outline-offset:0;box-shadow:0 0 0 4px #9d713d}
+.special-mark{border-radius:0;background:#efd58a;border:1px solid #fff0bd;box-shadow:1px 1px #4c3950;font-size:13px}
+.game.skill-focus .battle-scene{box-shadow:inset 0 0 0 2px #ffe4a0}
+.game-footer{background:#1e324d;border-color:#7d795f}
+.practice-bar{background:#ddc58b}.practice-bar button{border-radius:1px;background:#f6e1a2;box-shadow:2px 2px #8d724d}
+dialog{border-radius:3px;background:#2f4666;border-color:#d7b878;box-shadow:0 0 0 4px #16243b,8px 8px #0c1428aa}
+.modal-emblem{border-radius:2px;background:#4d5174;transform:none;box-shadow:inset -4px -4px #363957,4px 4px #1c2c45}
+.modal-rules b{border-radius:1px;background:#405675}
+.primary{border-radius:2px;background:#ebc777;box-shadow:inset -3px -3px #bd944f,3px 4px #79593a}.primary:hover{background:#f3d58d}
+@media(max-width:760px){.game{border-radius:0;box-shadow:none}}

@@ -1,0 +1,186 @@
+/* ── 인앱결제 "특별 상품" 상점(토스·iOS 공용 src/iap/shop.mjs, docs/IAP-HOOK-V3.md) ──
+   표면은 전용 픽셀아트 에셋으로만 그린다(CLAUDE.md UI 표면 규칙, 매핑 docs/UI-BESPOKE-V25.md §9).
+   - 세 카드 모두 같은 판 에셋: assets/final/ui/bespoke/iap-card-featured-bespoke.png — 9분할(재피드백 8차,
+     2026-10-20 재생성), 원본 1984×523(3x), 테두리 34/33/32px(위/좌우/아래). 카드가 내용에 맞춰 세로로
+     커지므로 레일·리벳을 고정 두께 테두리로 둔다(아래 .iap-card). 광고 패스(옛 iap-card-bespoke.png, wide3·
+     border-width 0)는 2026-10-20 6차 대표 재피드백("버튼이 아래 테두리랑 너무 붙어 있다" — 옛 에셋은 테두리가
+     그림으로만 그려져 실제 border 예약이 없어 "레일 안쪽선" 측정이 시각 레일(≈24px)과 안 맞았다)으로 폐기하고
+     1·2번과 같은 새 9분할 에셋으로 교체했다 — 세 카드가 완전히 같은 테두리 시스템을 쓰므로 제목→본문·
+     본문→버튼·버튼→레일 간격이 카드 종류와 무관하게 똑같아진다(아래 .iap-card).
+   - 리본: iap-ribbon-once-bespoke.png("1회 한정")·iap-ribbon-recommend-bespoke.png("추천", 좌우 반전+초록 톤)
+     둘 다 글자를 이미지에 직접 구웠다(대표 재피드백 2026-10-19 5차 — 리본이 대각선 띠라 CSS 회전 글자가
+     실기기에서 계속 삐뚤게/밖으로 넘쳐 보여, scripts/gen-iap-ribbons.py로 게임 폰트(Galmuri9)를 PIL/freetype으로
+     렌더링해 밴드 각도(-18°)·중심선에 맞춰 합성했다. CSS는 배경 이미지만 얹는다, 회전·필터 없음).
+   - 가치 배지: iap-value-badge-bespoke.png(금 메달, 원본 1063×332) — "○○ G 가치" 글자는 CSS로 얹는다.
+   - 아이콘: assets/final/ui/bespoke/iap-icon-{firstpack,starter,adpass}-bespoke.png — 원본 168×168, 표시 56×56(1:1 고정).
+   - 가격 버튼: 기존 금색 버튼(.btn-cost, button-gold-bespoke) 재사용. */
+:root{
+  --iap-card-featured-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-card-featured-bespoke.png");
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke.png");
+  --iap-value-badge-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-value-badge-bespoke.png");
+  --iap-icon-firstpack:url("/blockhero-site/play/assets/final/ui/bespoke/iap-icon-firstpack-bespoke.png");
+  --iap-icon-starter:url("/blockhero-site/play/assets/final/ui/bespoke/iap-icon-starter-bespoke.png");
+  --iap-icon-adpass:url("/blockhero-site/play/assets/final/ui/bespoke/iap-icon-adpass-bespoke.png");
+}
+/* 글자가 구워진 리본의 영어판(src/locale-assets.mjs, scripts/gen-iap-ribbons.py --locale en — "ONE-TIME"/"BEST"). */
+:root:lang(en){
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke-en.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke-en.png");
+}
+/* 일본어판(scripts/gen-iap-ribbons.py --locale ja — "1回限り"/"おすすめ", Galmuri9는 가나를 전부 덮는다). */
+:root:lang(ja){
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke-ja.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke-ja.png");
+}
+/* 아랍어판(scripts/gen-iap-ribbons.py --locale ar — "مرة واحدة"/"الأفضل", BH Handjet Arabic 굵게 + raqm 글자 연결). */
+:root:lang(ar){
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke-ar.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke-ar.png");
+}
+/* 번체·간체 중국어판(2026-10-21, scripts/gen-iap-ribbons.py --locale zh-Hant·zh-Hans — "限購一次"/"推薦"·
+   "限购一次"/"推荐", 앱과 같은 FusionPixel12 zh_tw·zh_cn). :lang(zh-Hant)가 먼저 와야 zh-Hans보다 구체적인
+   매칭이 깨지지 않는다(BCP47 접두사 일치라 순서는 결과에 영향 없지만 다른 :lang(zh-*) 블록과 같은 순서로 둔다). */
+:root:lang(zh-Hant){
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke-zh-Hant.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke-zh-Hant.png");
+}
+:root:lang(zh-Hans){
+  --iap-ribbon-once-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-once-bespoke-zh-Hans.png");
+  --iap-ribbon-recommend-art:url("/blockhero-site/play/assets/final/ui/bespoke/iap-ribbon-recommend-bespoke-zh-Hans.png");
+}
+.iap-shop{display:flex;flex-direction:column;gap:8px}
+.iap-shop .iap-shop-lead{margin:6px 0 0;text-align:center;font:11px/1.6 Galmuri11;color:#69482e;white-space:nowrap}
+.iap-card-list{display:flex;flex-direction:column;gap:10px}
+.iap-card{
+  /* 대표 재피드백(2026-10-19 6차, 390 실측): 26px도 부족해 배지·아이콘이 기둥에 걸쳤다. 대표가 직접 잰
+     기둥 안쪽선(≈x41)+8px 이상(≥49px) 기준으로 작은 카드는 캡 폭 비율(62.5/73.33)만큼 줄여 43px로 키운다.
+     대표 재피드백(2026-10-20, "버튼 위/아래 여백 똑같이"): justify-content:center였을 때 고정 height(150px)보다
+     콘텐츠(136px)가 작아 남는 8px가 위/아래로 4px씩 비대칭으로 나뉘어(상단은 추가로 명시 gap까지 더해짐)
+     버튼 아래쪽 여백(26px, 레일 여백 ≈24px 안쪽)이 위쪽(8px)보다 훨씬 컸다. flex-start로 바꾸고 행 간격을
+     패딩 하단과 같게 맞췄다.
+     height:auto + min-height 제거(2026-10-20 5차, "min-height 때문에 비어 있다"): 카드 높이를 내용에만
+     맡겨 본문 줄 수(카드마다 다름)와 무관하게 행 간격이 한 치도 안 벗어나게 한다.
+     대표 추가 재피드백(2026-10-20 6차, 토스 -38/iOS 93 "버튼이 아래 테두리랑 너무 붙어 있다"): 광고 패스는
+     옛 에셋(wide3, border-width 0 — 테두리가 그림으로만 그려져 실제 예약 공간이 없다)을 썼던 탓에 "레일
+     안쪽선"을 border-width로 재는 기존 측정이 실제 보이는 레일(≈24px 두께)을 반영하지 못했다. 근본 해결:
+     광고 패스도 1·2번과 완전히 같은 9분할 판 에셋·슬라이스(102/99/96 → 34/33/32px)·패딩(8px 상하·10px
+     좌우)·행 간격(8px)을 쓴다 — 이제 세 카드 모두 제목→본문 42px(테두리34+패딩8), 본문→버튼(또는 본문→
+     초상줄→버튼) 8px, 버튼→레일 8px로 완전히 똑같다(카드 종류에 따른 예외가 없어졌다). */
+  box-sizing:border-box;position:relative;height:auto;display:flex;flex-direction:column;
+  justify-content:flex-start;gap:8px;padding:8px 10px;text-align:left;
+  border-style:solid;border-width:34px 33px 32px;
+  border-image-source:var(--iap-card-featured-art);border-image-slice:102 99 96 fill;
+  border-image-width:1;border-image-outset:0;border-image-repeat:round stretch;
+}
+.iap-card-icon{position:absolute;top:0;left:0;width:56px;height:auto;aspect-ratio:1/1;background:var(--iap-icon-art,none) center/contain no-repeat;image-rendering:pixelated}
+.iap-firstpack .iap-card-icon{--iap-icon-art:var(--iap-icon-firstpack)}
+.iap-starter .iap-card-icon{--iap-icon-art:var(--iap-icon-starter)}
+.iap-adpass .iap-card-icon{--iap-icon-art:var(--iap-icon-adpass)}
+/* 대표 추가 지시(2026-10-20 5차, button-gap-compare 직접 확인): 계약서 카드(본문 3줄, 텍스트 열이 56px
+   아이콘보다 낮다)는 아이콘이 행 높이를 56px로 늘려 초상 줄까지의 간격이 꾸러미 카드(본문 4줄, 텍스트가
+   아이콘보다 높음)보다 훨씬 넓어 보였다 — align-items:flex-start여도 행 "박스" 자체가 아이콘 높이에 맞춰
+   늘어나는 건 그대로였다. 아이콘을 행 흐름에서 빼 절대 위치로 올려(위 .iap-card-icon) 본문 행 높이가
+   텍스트 내용만으로 정해지게 한다 — 아이콘은 왼쪽 위 고정, 짧은 본문이어도 아래 간격이 잠식되지 않는다
+   (아이콘이 56px라 짧은 본문에서는 아이콘 아랫변이 간격 안쪽까지 내려올 수 있어 겹침 여부를 단언으로 확인). */
+.iap-card-body{position:relative}
+.iap-card-text{margin-left:64px;display:flex;flex-direction:column;gap:2px}
+.iap-card-name{font:700 12px/1.4 Galmuri11;color:#4a2b12;white-space:nowrap}
+/* 핵심 혜택 줄은 결재된 카피 그대로 쓰면 폭에 따라 한 줄에 안 들어갈 수 있어(§카피 결재안 유지) 2줄 줄바꿈을
+   둘 다 허용한다(대표 재피드백 2026-10-19 5차 — 360폭에서 꾸러미 카드가 가로로 넘쳤다). "바로 받아요"는
+   줄바꿈 없는 공백으로 묶어 고아 단어를 막는다. 카드 높이는 2줄도 세로로 안 잘리게 여유를 둔다(rect 단언 확인). */
+.iap-card-tagline{font:10px/1.3 Galmuri9;color:#8a5a1e;white-space:normal;word-break:keep-all}
+.iap-card-line{font:10px/1.4 Galmuri9;color:#6c4c32;white-space:nowrap}
+.iap-card-note{font:9px/1.4 Galmuri9;color:#8a6440;white-space:nowrap}
+.iap-first-bonus-ribbon{margin:0;text-align:center;font:700 10px/1.6 Galmuri9;color:#4f672c;white-space:nowrap}
+/* 320폭: 긴 이름·카피가 좁은 폼에서 넘친다 — 글자 크기만 살짝 줄인다(v47-cards.css 선례). */
+@media (max-width:359px){
+  .iap-card-name{font-size:11px}.iap-card-tagline,.iap-card-line,.iap-card-note{font-size:9px}
+  /* 320폭 + 재피드백 3차 좌우 패딩 확장 이후엔 큰 카드 핵심 혜택 줄이 한 줄에 못 들어간다 — 좁을 때만 줄바꿈 허용. */
+  .iap-card-featured .iap-card-tagline{white-space:normal;word-break:keep-all}
+}
+/* 하단 행(가치 배지/안내 + 가격 버튼): 세 카드 모두 같은 클래스 — 왼쪽 내용은 가운데 정렬, 버튼은 항상 오른쪽 끝,
+   버튼 폭·높이도 통일(min-width 92px). */
+.iap-card-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%}
+/* 하단 행은 아이콘이 없어 카드 패딩만으로는 왼쪽 장식 기둥(cap)을 못 피한다 — 본문 행 아이콘 폭(56px)만큼
+   왼쪽을 들여써서 텍스트 열과 정렬시키고 장식을 자연히 피한다. */
+.iap-card-footer-note{flex:1;min-width:0;margin-left:21px}
+.iap-card .iap-buy{flex:none;display:inline-flex;align-items:center;width:auto;margin:0 0 0 auto;min-width:92px;font:12px Galmuri11;color:#512e12;white-space:nowrap;justify-content:center}
+html[data-ui-art=ready] .iap-card .btn-cost.iap-buy{--button-height:36px;height:36px!important;min-height:36px!important;padding:0 25px}
+.iap-card .iap-buy:disabled{opacity:.55}
+.iap-owned{flex:none;min-width:92px;text-align:center;font:700 11px Galmuri11;color:#4f672c;white-space:nowrap;margin-left:auto}
+.iap-shop .iap-shop-note{margin:0;text-align:center;font:10px/1.6 Galmuri9;color:#8a6440;white-space:nowrap}
+/* 홈 "특별 상품" 칩(§5 D): 기존 서브 라벨(.영웅 도감 small)과 같은 텍스트 줄, 새 표면 없음. */
+.iap-home-chip{display:block}
+
+/* ── 큰 카드(featured, W6): 이름 > 핵심 혜택 > 영웅 미리보기 > 가치+가격. 세로 쌓기, 전용 타일 에셋. ──
+   재피드백 8차(2026-10-20, 대표 실기기 iOS 1.1.17 빌드 90): 가치 배지·가격 버튼이 아래 나무 레일 위에 겹쳤다.
+   9분할 + 실제 border-width로 바꿔(콘텐츠 상자가 테두리 밖으로 못 나감) 해결 — 슬라이스 102/99/96 →
+   34/33/32 CSS px(gen-iap-card-featured.py 실측). 이 지오메트리는 위 .iap-card로 옮겨 세 카드가 공유한다
+   (2026-10-20 6차, "광고 패스도 같은 9분할 에셋으로"). .iap-card-featured는 이제 리본 위치 계산용
+   --iap-fc-border-top/side 변수(광고 패스엔 리본이 없어 필요 없다)와 폭이 넓은 영웅 미리보기·배지만 더한다. */
+.iap-card-featured{
+  --iap-fc-border-top:34px;--iap-fc-border-side:33px;
+}
+.iap-card-featured .iap-card-text{gap:1px}
+/* 텍스트 열 시작 x(119px = 아이콘 x55 + 56 + gap8)와 맞춘다 — 영웅 미리보기는 카드 패딩 상자 기준 좌측 들여쓰기. */
+.iap-hero-preview{display:flex;align-items:center;gap:3px;padding-left:64px}
+.iap-hero-preview canvas{width:26px;height:30px;flex:none}
+.iap-hero-preview-more{font:700 10px Galmuri11;color:#6c4c32;flex:none}
+.iap-hero-preview-label{margin-left:4px;font:9px/1.4 Galmuri9;color:#8a6440;white-space:nowrap}
+.iap-card-featured .iap-buy{min-width:92px}
+/* 1회 한정/추천 리본: 글자가 에셋에 구워져 있다(대표 재피드백 2026-10-19 5차 — CSS 회전 글자가 실기기에서
+   계속 삐뚤게/밖으로 넘쳐 보였다). CSS는 배경 이미지만 얹는다 — 회전·필터·내부 글자 레이어가 전혀 없다.
+   재피드백 6차: 48px는 제목 첫 글자를 덮을 만큼 거대했다. 재피드백 7차: 그 반작용으로 줄인 29px는 글자가
+   안 보일 만큼 작았다(실효 폰트 ~6px) — 표시 높이를 38px로 다시 키우고, 글자 자체도 에셋에 더 크게
+   구워(gen-iap-ribbons.py FONT_SIZE 100→145) 실효 폰트를 ≈11px로 올린다. 카드 위쪽 패딩(40px)이 리본
+   바닥(top:-4px + 38px ≈ 34px)보다 커서 이름·카피와 안 겹친다(rect 단언으로 확인). */
+/* 재피드백 8차: 표시 크기를 폭·높이 둘 다 명시한다(절대 위치 + width:auto + aspect-ratio 조합을 엔진 해석에 맡기지 않는다).
+   카드가 9분할 테두리(실제 border-width)를 가지면서 절대 위치 기준(패딩 상자)이 테두리 안쪽으로 들어갔다 — 위치는
+   테두리 두께만큼 바깥으로 되돌려 기존처럼 카드 바깥 모서리 기준 -4px에 둔다.
+   글자 크기(8차): 띠 안에 글자 픽셀이 전부 들어가는 최대 크기로 다시 구워 145→129px가 됐다 — 실효 ≈9.6px(38px 표시),
+   좁은 폭 ≈8.6px(34px 표시). 7차 목표(≈11px)보다 작다 — 더 키우려면 띠가 더 굵은 리본 원본이 필요하다. */
+:root{--iap-ribbon-h:38px}
+.iap-ribbon-once{
+  position:absolute;top:calc(-4px - var(--iap-fc-border-top,0px));right:calc(-4px - var(--iap-fc-border-side,0px));width:calc(var(--iap-ribbon-h) * 875 / 508);height:var(--iap-ribbon-h);aspect-ratio:875/508;
+  background:var(--iap-ribbon-once-art) center/contain no-repeat;image-rendering:pixelated;
+}
+.iap-ribbon-recommend{
+  position:absolute;top:calc(-4px - var(--iap-fc-border-top,0px));left:calc(-4px - var(--iap-fc-border-side,0px));width:calc(var(--iap-ribbon-h) * 875 / 508);height:var(--iap-ribbon-h);aspect-ratio:875/508;
+  background:var(--iap-ribbon-recommend-art) center/contain no-repeat;image-rendering:pixelated;
+}
+/* 가치 배지(금 메달, 원본 1063×332): "○○ G 가치" 글자를 얹는다.
+   높이를 가격 버튼과 같은 36px로(대표 지시 2026-10-20 "버튼 높이와 세로 중심을 같게") — 기존 34px는 1px차라
+   거의 안 보이지만 정확히 맞춘다. */
+.iap-value-badge{
+  flex:none;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  width:auto;height:36px;aspect-ratio:1063/332;padding:0 10px;
+  background:var(--iap-value-badge-art) center/contain no-repeat;image-rendering:pixelated;
+}
+.iap-value-badge b{font:700 11px/1.1 Galmuri11;color:#5a3300;white-space:nowrap}
+.iap-value-badge small{font:8px/1.1 Galmuri9;color:#6e4400;white-space:nowrap}
+@media (max-width:359px){
+  /* 좁은 폭은 리본을 34px로 줄인다(구운 글자 129px 기준 실효 ≈8.6px). 카드 위쪽은 테두리 34 + 8 = 42px로 넓은 폭과 같다. */
+  :root{--iap-ribbon-h:34px}
+  /* 320폭은 배지(36px h = 115px w)+버튼(min-width 92px)+gap이 좁아진 하단 행(좌우 패딩 10px 반영)에 안 들어가
+     오른쪽 리벳 위로 넘친다(실측) — 이 폭에서만 34px로 되돌린다(버튼과 2px差, 눈에 안 띄는 수준). */
+  .iap-value-badge{height:34px;padding:0 6px}
+  .iap-value-badge b{font-size:10px}
+  .iap-hero-preview canvas{width:22px;height:26px}
+  /* 꾸러미 카드의 ₩3,300 버튼(98px, 숫자 폭 차이로 ₩1,100 버튼 94px보다 넓다)까지 포함하면 배지+버튼이
+     하단 행 폭(210px)을 넘는다 — 간격을 줄여 자리를 만든다(leftover ≈1-6px, 리벳 안쪽 유지 확인). */
+  .iap-card-featured .iap-card-footer{gap:2px}
+}
+
+/* ── 첫 보스 안내 창(§5 A, #relic-dialog 기존 테두리 재사용): 초상 줄 + 버튼 2개(같은 크기). ── */
+.iap-offer-portraits{display:flex;align-items:center;gap:4px;justify-content:center;margin:8px 0;flex-wrap:wrap}
+.iap-offer-portraits canvas{width:32px;height:36px}
+.iap-offer-more{font:700 11px Galmuri11;color:#6c4c32}
+.relic-offer-actions{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.relic-offer-actions .btn-cost{width:100%}
+/* 2연패 제안(§5 B): 결과창 세부 영역에 들어가는 한 줄 + 작은 링크. 새 표면 없음(.text-button 재사용). */
+.iap-defeat-offer{margin:6px 0 0;text-align:center;font:11px/1.6 Galmuri11;color:#69482e}
+/* 구매 내역 창(#relic-dialog): 확률 정보 창과 같은 행(.odds-row)을 쓰고 여기서는 글자·간격만. */
+#relic-dialog .iap-history-row span{white-space:nowrap}
+#relic-dialog .iap-history-row b{white-space:nowrap;font-weight:400}
+#relic-dialog .iap-history-empty,#relic-dialog .iap-history-note{font:11px/1.8 Galmuri11;color:#75502e;margin:8px 0}

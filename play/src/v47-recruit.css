@@ -1,0 +1,223 @@
+/* V47 WS-B: 영입 화면(src/screens/recruit-view.mjs) — 뽑기(gacha)·구매(shop) 두 화면(§4).
+   표면은 CSS로 새로 그리지 않는다. [뽑기][구매] 탭은 기존 .mode-tabs(탭 레일·판 에셋)를 재사용한다.
+   뽑기 배너 테두리·일러스트, 천장 점, 결과 카드 뒷면·도장·레전더리 리본은 V47-REBUILD 전용 에셋
+   (assets/final/ui/v47/)을 background-image/border-image로 적용한다(슬라이스는 퍼센트, 토스 2/3 사본 대응). */
+
+.recruit-tabs{margin:10px 10px 12px}
+
+/* ── 뽑기(gacha) 배너 ── */
+.gacha-banners-v47{display:flex;flex-direction:column;gap:9px;padding:0 10px 14px}
+/* 등급별 9분할 테두리(gacha-banner-frame-{normal,rare,legendary}-v47 330×330, 코너 66 = 20%, 표시 22px = 3x). */
+.gacha-banner-v47{position:relative;padding:0 2px 2px;
+  border-style:solid;border-color:transparent;border-width:22px;
+  border-image-source:url(/blockhero-site/play/assets/final/ui/v47/gacha-banner-frame-normal-v47.png);border-image-slice:20% fill;
+  border-image-width:22px;border-image-repeat:stretch}
+.gacha-banner-v47.tier-rare{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/gacha-banner-frame-rare-v47.png)}
+.gacha-banner-v47.tier-legendary{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/gacha-banner-frame-legendary-v47.png)}
+/* 등급별 장면(gacha-banner-art-v47 1074×900 = 1074×300 × 3행, 표시 358×100 = 3x) 위 아래쪽 가운데에 초상 3장. */
+.gacha-banner-art{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:6px;aspect-ratio:1074/300;padding-bottom:2px;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/gacha-banner-art-v47.png);background-size:100% 300%;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated}
+.gacha-banner-v47.tier-rare .gacha-banner-art{background-position:0 50%}
+.gacha-banner-v47.tier-legendary .gacha-banner-art{background-position:0 100%}
+.gacha-banner-hero{position:relative;display:block;width:44px;height:50px}
+.gacha-banner-art canvas{width:44px;height:50px;image-rendering:pixelated}
+/* 못 만난 영웅: 같은 초상을 밝기 0(검은 실루엣)으로 + 가운데 "?"(글자). 표면이 아니라 상태 필터다. */
+.gacha-banner-hero.is-mystery canvas{filter:brightness(0) opacity(.42)}
+.gacha-banner-mystery{position:absolute;left:0;right:0;top:46%;transform:translateY(-50%);text-align:center;font:700 18px Galmuri9;color:#fff3d1;text-shadow:1px 1px #3b2110,-1px 0 #3b2110,0 -1px #3b2110,1px 0 #3b2110}
+.gacha-banner-art-empty{display:block;height:50px}
+.gacha-banner-stat{margin:4px 0 2px;text-align:center;font:700 12px Galmuri9;color:#4a2c14}
+.gacha-banner-chance{margin:0 0 6px;display:flex;align-items:center;justify-content:center;gap:6px;font:10px Galmuri9;color:#8a6440}
+/* 천장 점(pity-pip-v47 72×36 = 36 셀 2칸: 빈 홈 / 금 별, 표시 12px = 3x). */
+.pity-label{margin-left:2px;font:10px Galmuri9;color:#8a6440}
+.pity-pips{display:inline-flex;gap:2px}
+.pity-pips span{display:block;width:12px;height:12px;aspect-ratio:1;background-image:url(/blockhero-site/play/assets/final/ui/v47/pity-pip-v47.png);background-size:200% 100%;background-repeat:no-repeat;background-position:0 0}
+.pity-pips span.is-on{background-position:100% 0}
+.gacha-banner-stamp{margin:0 0 6px;text-align:center;font:10px Galmuri9;color:#8a6440}
+.gacha-banner-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;align-items:stretch}
+/* 1회(embark=녹색)·5회(btn-cost=금색) 버튼은 서로 다른 기반 버튼 클래스를 쓴다 — ui-art.css의
+   html[data-ui-art=ready] :is(.embark,...)가 높이를 56px!important로, :is(.train-button,.btn-cost)는
+   글자를 font:12px Galmuri11(얇은 400굵기)로 강제해 둘이 키·굵기가 달라 보였다(대표 캡처 피드백).
+   여기서 두 버튼 모두 같은 높이·글자로 덮어써 시각 무게를 맞춘다. attribute+두 클래스 선택자로
+   ui-art.css 규칙(한 개의 attribute+:is 클래스)보다 명시도를 높여 둘 다 이긴다. */
+html[data-ui-art=ready] .gacha-banner-actions .gacha-button,
+html[data-ui-art=ready] .gacha-banner-actions .gacha-button-5{
+  /* --button-height도 같이 덮어써야 한다 — border-image-width가 이 변수로 캡 폭을 계산하므로
+     (ui-art.css :329,:723), height만 바꾸면 캡이 실제 높이보다 커져 라벨 글자가 캡 밑에 깔려
+     잘린다(1차 수정에서 "1회" 글자가 "회"만 남는 회귀가 났다). */
+  --button-height:42px!important;
+  margin:0;width:100%;min-width:0;
+  height:42px!important;min-height:42px!important;
+  display:flex;align-items:center;justify-content:center;
+  font:700 12px Galmuri9!important;white-space:nowrap;
+}
+/* 좌우 패딩은 캡이 실제로 그려지는 폭(=border-image-width 계산식과 같다, ui-art.css :335·:728)만큼
+   비워야 글자가 캡 밑에 깔리지 않는다. --ui-*-cap-px는 기본 높이(초록 56px·금색 49px) 기준 고정값이라
+   42px로 줄인 여기엔 안 맞는다(패딩 4px 고정으로 시도했을 때 "1회"의 "1"이 캡 밑에 깔려 잘렸다) —
+   같은 계산식을 그대로 써서 42px에서의 실제 캡 폭을 구한다. */
+html[data-ui-art=ready] .gacha-banner-actions .gacha-button{padding:0 calc(var(--button-height) * var(--ui-green-cap) / var(--ui-green-canvas-h) + 6px)!important}
+html[data-ui-art=ready] .gacha-banner-actions .gacha-button-5{padding:0 calc(var(--button-height) * var(--ui-gold-cap) / var(--ui-gold-canvas-h) + 6px)!important}
+/* 대표 캡처 재재피드백(2026-10-14, 3차): 버튼 라벨이 텍스트 노드 3개(라벨 공백 아이콘 공백 가격)라
+   버튼 자체의 flex gap에 간격을 맡겼더니, .embark 기반 1회 버튼은 .embark의 gap:8px를, .btn-cost
+   기반 5회 버튼은 .btn-cost의 gap:normal(0)을 그대로 물려받아 두 버튼의 글자 배치 방식이 서로
+   달라 보였다(1회는 양 끝으로 벌어져 보이고 5회는 다 붙어 보임). 텍스트를 span 3개로 감싼
+   한 inline 그룹(.gacha-btn-row, 안쪽 아이콘+가격은 .gacha-btn-cost)으로 묶어, 버튼은 이 그룹
+   하나만 중앙 정렬하게 한다 — 버튼마다 다른 ambient gap과 완전히 무관해진다. */
+/* .gacha-btn-row가 버튼의 유일한 자식이라 ui-art.css의
+   html[data-ui-art=ready] :is(.embark,.primary,.btn-primary)>span:last-child{margin-left:auto}
+   (화살표를 오른쪽 끝으로 미는 규칙, 보통 아이콘+라벨 2개 중 "마지막" 화살표 span용)에도 그대로
+   걸려 — 유일한 자식 = 항상 :last-child라 group 전체가 오른쪽으로 떠밀렸다(1회 버튼 글자가 "양쪽
+   정렬"처럼 보인 진짜 원인; .btn-cost는 이 선택자 목록에 없어 5회 버튼만 멀쩡했다). margin-left를
+   0으로 되돌려 justify-content:center가 그대로 먹게 한다. */
+/* font-size도 명시해야 한다 — ui-art.css의 .embark>span:last-child{font-size:13px}가 바로 이 span
+   (유일한 자식 = :last-child)을 겨냥해 "font:inherit"보다 이겨, 초록 버튼 글자만 13px로 커져
+   금색(12px)과 또 달라 보였다(대표 피드백 "금색이 더 작다"의 실제 원인은 금색이 작은 게 아니라
+   초록이 컸던 것). */
+.gacha-btn-row{display:inline-flex;align-items:center;gap:6px;font-size:12px!important;font-weight:700!important;font-family:Galmuri9!important;letter-spacing:normal;margin-left:0!important}
+.gacha-btn-cost{display:inline-flex;align-items:center;gap:3px}
+/* 글자 크기·굵기·자간은 버튼 공통 규칙(font:700 12px Galmuri9!important, 위)을 그대로 물려받아
+   항상 같다. 색은 바탕 대비에 맞춰 버튼마다 다르게 하되(초록=밝은 글자+어두운 외곽선, 금색=
+   진갈색 글자+밝은 외곽선), 지금까지는 금색 쪽에 외곽선이 아예 없어 더 얇고 흐리게 보였다
+   (대표 피드백 "금색 버튼 글자가 더 얇고 진한 갈색") — 굵기 자체는 이미 둘 다 700으로 같다. */
+.gacha-banner-actions .gacha-button .gacha-btn-row{color:#fff6d5;text-shadow:1px 1px #25441c}
+.gacha-banner-actions .gacha-button-5 .gacha-btn-row{color:#512e12;text-shadow:0 1px #fff3d1}
+/* 공용 .text-button(app-shell.css) 기본값(min-height:44px·padding:10px·margin-top:9px)이 그대로
+   남아, 글자는 10px인데 박스는 44px나 돼 "확률 정보" 아래로 큰 빈 공간이 생겼다(대표 캡처 재피드백
+   "확률 정보 아래 여백이 넓다"). 버튼 위 간격(margin-top)과 아래 간격(padding-bottom)을 같은 값으로
+   맞춰 글자 기준 위아래가 대칭이 되게 한다. */
+.gacha-banner-actions .gacha-odds-link{grid-column:1/-1;min-height:0;margin:4px 0 0;padding:0 0 4px;text-align:center;font-size:10px}
+
+/* ── 구매(shop) 화면 ── */
+.ticket-strip{margin:0 14px 8px;font:10px Galmuri9;color:#8a6440}
+.ad-free-row{margin:0 14px 10px;padding:0}
+.shop-hero-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;padding:0 10px 14px}
+/* 레거시 app-shell.css @media(max-width:380px)의 .recruit-offer{margin:14px;padding:14px}가 320폭 카드를 75px로 줄였다
+   (390폭과 같은 여백으로 되돌려 320폭 카드 86px). */
+@media (max-width:380px){body[data-screen=shop] .recruit-offer{margin:0;padding:4px 12px 12px}}
+.shop-card-v47{cursor:pointer}
+.shop-card-v47.is-unowned{cursor:pointer}
+.shop-sheet-card.hero-card-v47.hero-card-v47.hero-card-v47,html[data-ui-art] #app-shell .shop-sheet-card.hero-card-v47.hero-card-v47{width:140px;margin:8px auto 2px;pointer-events:none;--cs:1.23}
+.shop-sheet-prices{display:flex;flex-direction:column;gap:8px;margin:10px 0 6px}
+.shop-sheet-prices .embark,.shop-sheet-prices .btn-cost{margin:0}
+
+/* ── 확률 정보 다이얼로그(#relic-dialog 재사용) ── */
+.odds-rows{display:flex;flex-direction:column;gap:0;margin:10px 0;max-height:220px;overflow-y:auto;scrollbar-width:none}
+.odds-rows::-webkit-scrollbar{display:none}
+.odds-rows:focus:not(:focus-visible){outline:none}
+.odds-row{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;font:10px Galmuri9;color:#6c4c32}
+.odds-row.is-owned{color:#a89072}
+.odds-row b{font:700 11px Galmuri9;color:#6b7f3b}
+.odds-rule{font:9px/1.7 Galmuri9;color:#8b684c;margin:0 0 10px}
+
+/* ── 5연속 뽑기 결과(#recruit-dialog 재사용) ── */
+.reveal-multi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:10px 0}
+.reveal-multi-card{display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.reveal-multi-card canvas{width:40px;height:46px;image-rendering:pixelated}
+.reveal-multi-card b{font:9px Galmuri9;color:#6c4c32;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:48px}
+.reveal-multi-card.tier-rare b{color:#7c4bb8}
+.reveal-multi-card.tier-legendary b{color:#8a5a08}
+.reveal-multi-new{font:8px Galmuri9;color:#dca415}
+.reveal-multi-dup{font:8px Galmuri9;color:#8a6440}
+/* 연쇄 공개(§8-3, 2026-10-16 대표 추가요청 #1): 카드마다 --i(0~4)만큼 입장을 늦춰 왼쪽부터 순서대로
+   튀어나오게 한다("빠른 연쇄 공개"). 최고 등급 카드(.is-best)는 모두가 등장한 뒤 한 박자 늦게·더 크게
+   튀어나와(단일 뽑기의 카드 뒤집기와 같은 "의식감") GL 폭발(playReveal bestAnchor)과 박자를 맞춘다. */
+.reveal-multi-card{animation:reveal-multi-pop .32s calc(var(--i, 0) * .09s) cubic-bezier(.2,1.5,.5,1) backwards}
+.reveal-multi-card.is-best{animation:reveal-multi-pop-best .4s .62s cubic-bezier(.2,1.6,.45,1) backwards}
+@keyframes reveal-multi-pop{from{opacity:0;transform:scale(.35) translateY(10px)}to{opacity:1;transform:none}}
+@keyframes reveal-multi-pop-best{0%{opacity:0;transform:scale(.3) translateY(10px)}60%{opacity:1;transform:scale(1.22) translateY(-3px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+.reveal-multi-card.no-motion{animation:none;opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal-multi-card{animation:none;opacity:1;transform:none}}
+
+/* 결과창 "쉼터에서 만나기" 버튼: 320폭에서 라벨이 두 줄로 갈라지던 문제(WS-INT 캡처) — 한 줄 고정. */
+#recruit-dialog .embark{white-space:nowrap;font-size:14px}
+/* ⌂·✦ 글자는 Galmuri 글꼴에 없어 시스템 글꼴로 대체돼 톤이 깨졌다 — 기존 아이콘 에셋(--icon-home·.ico-star)으로. */
+.ico-home{display:inline-block;flex:none;width:16px;height:16px;background-image:var(--icon-home);background-size:contain;background-repeat:no-repeat;background-position:center;vertical-align:middle}
+
+/* 구매 등급 탭(4칸)의 활성 판이 위아래 두 장으로 겹쳐 보이던 문제(V47-ART-AUDIT B3): 공용 탭 판
+   (ui-art.css :is(.mode-tabs,.lb-tabs) button[aria-selected=true]::before)이 border-image-repeat:round라
+   좁은 탭에서는 가운데 판이 세로로도 2번 반복됐다. 가로만 round, 세로는 stretch로 한 장만 깐다. */
+html[data-ui-art=ready] :is(.shop-tabs,.recruit-tabs) button[aria-selected=true]::before{border-image-repeat:round stretch}
+
+/* 결과창 등급 라벨: 어두운 판 위 갈색 글자라 "레전더리"가 안 읽히던 문제(V47-ART-AUDIT P1) — 밝은 글자. */
+#recruit-dialog .tier-badge.tier-legendary{color:#ffd76a;text-shadow:1px 1px #3a1f08}
+#recruit-dialog .tier-badge.tier-rare{color:#e6cfff;text-shadow:1px 1px #2a1640}
+/* 확률창·구매 시트: 다이얼로그 자체 스크롤바(회색 막대)를 숨긴다 — 스크롤은 그대로 된다. */
+#relic-dialog:has(.odds-rows),#relic-dialog:has(.shop-sheet-prices){scrollbar-width:none}
+#relic-dialog:has(.odds-rows)::-webkit-scrollbar,#relic-dialog:has(.shop-sheet-prices)::-webkit-scrollbar{display:none}
+/* 구매 시트 카드: 아직 없는 영웅이라 레벨 배지는 숨긴다(하단 판의 전투력은 Lv.1 기준). 낮은 화면에서는 작게. */
+.shop-sheet-card .hero-card-lv{display:none}
+@media (max-height:700px){html[data-ui-art] #app-shell .shop-sheet-card.hero-card-v47.hero-card-v47{width:104px;margin-top:4px;--cs:.91}}
+
+/* ── 1회 결과 카드(V47-ART-AUDIT §5-3): 뒷면(card-back-v47 1026×456 = 342×456 × 3등급) → 뒤집기 → 앞면(공용 카드).
+   NEW/보유 도장(reveal-stamp-v47 336×168 = 168 셀 2칸, 표시 56px = 3x), 레전더리 리본(legend-ribbon-v47 wide3 h120,
+   캡 175/437 = 40.046%, 표시 40px = 3x). 글자는 CSS 글자다. */
+.reveal-card{position:relative;width:168px;aspect-ratio:3/4;margin:10px auto 8px;perspective:640px}
+.reveal-card-back,.reveal-card-front{position:absolute;inset:0;backface-visibility:hidden}
+.reveal-card-back{display:block;background-image:url(/blockhero-site/play/assets/final/ui/v47/card-back-v47.png);background-size:300% 100%;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;animation:reveal-back-out .8s ease-in forwards}
+.reveal-card.tier-rare .reveal-card-back{background-position:50% 0}
+.reveal-card.tier-legendary .reveal-card-back{background-position:100% 0}
+.reveal-card-front{transform:rotateY(-90deg);animation:reveal-front-in .8s ease-out forwards}
+.reveal-hero-card.hero-card-v47.hero-card-v47.hero-card-v47,html[data-ui-art] #app-shell .reveal-hero-card.hero-card-v47.hero-card-v47{width:100%;margin:0;pointer-events:none;--cs:1.47}
+.reveal-stamp{position:absolute;z-index:2;right:-16px;top:-14px;width:56px;aspect-ratio:1;display:grid;place-items:center;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/reveal-stamp-v47.png);background-size:200% 100%;background-repeat:no-repeat;background-position:0 0;
+  font:700 13px Galmuri9;color:#fff3d1;text-shadow:1px 1px #3a1f08,-1px 0 #3a1f08,0 -1px #3a1f08;transform:rotate(-12deg) scale(0);animation:reveal-stamp-pop .3s .8s cubic-bezier(.2,1.6,.5,1) forwards}
+.reveal-stamp.is-owned{background-position:100% 0}
+.reveal-ribbon{width:max-content;margin:6px auto 0;height:40px;padding:0 4px;display:flex;align-items:center;justify-content:center;
+  border-style:solid;border-color:transparent;border-width:0 58px;border-image-source:url(/blockhero-site/play/assets/final/ui/v47/legend-ribbon-v47.png);
+  border-image-slice:0 40.046% fill;border-image-width:0 58px;border-image-repeat:stretch;
+  font:700 15px Galmuri9;color:#fff3d1;text-shadow:1px 1px #4a0c08,-1px 0 #4a0c08;white-space:nowrap}
+@keyframes reveal-back-out{0%,40%{transform:rotateY(0)}70%,100%{transform:rotateY(90deg)}}
+@keyframes reveal-front-in{0%,70%{transform:rotateY(-90deg)}100%{transform:rotateY(0)}}
+@keyframes reveal-stamp-pop{from{transform:rotate(-12deg) scale(0)}to{transform:rotate(-12deg) scale(1)}}
+.reveal-card.no-motion .reveal-card-back{display:none}
+.reveal-card.no-motion .reveal-card-front{animation:none;transform:none}
+.reveal-card.no-motion .reveal-stamp{animation:none;transform:rotate(-12deg)}
+@media(prefers-reduced-motion:reduce){
+  .reveal-card-back{display:none}
+  .reveal-card-front{animation:none;transform:none}
+  .reveal-stamp{animation:none;transform:rotate(-12deg)}
+}
+
+/* ── 증표 영입 "공개 전 무대"(src/gacha-stage.mjs, 2026-10-16 2차) ──
+   결과 카드 앞에 여는 전체 화면 top layer. 표면을 그리지 않는다 — 전역 dialog 판(ui-art.css frame·app-shell.css 테두리)을
+   지우고, 어둠·빛은 전부 GL 캔버스(gacha-stage-gl.mjs)가 그린다. 위치·배율·밝기는 JS가 매 프레임 인라인으로 준다
+   (CSS 애니메이션 없음 — 가상 시계로 결정적 캡처). 글자만 CSS 글자, 레전더리 리본은 기존 legend-ribbon-v47.
+   top·max-height는 !important: 토스 빌드의 공용 dialog 규칙(src/toss/toss.css, 캡슐 아래로 내리고 높이 제한 !important)이
+   전체 화면 무대까지 줄였다 — 무대는 다이얼로그 판이 아니라 화면 전체 레이어다. */
+html #gacha-stage.gacha-stage,html[data-ui-art] #gacha-stage.gacha-stage{position:fixed;inset:0;top:0!important;width:100vw;height:100vh;height:100dvh;max-width:none;max-height:none!important;margin:0;padding:0;border:0;border-image:none;background:none;box-shadow:none;overflow:hidden;color:#fff3d1;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;outline:none}
+html #gacha-stage.gacha-stage::backdrop{background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+#gacha-stage>canvas.gacha-stage-gl{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;image-rendering:pixelated}
+.gacha-stage-heroes{position:absolute;inset:0;pointer-events:none}
+.gacha-stage-hero{position:absolute;transform-origin:50% 50%}
+.gacha-stage-hero canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+.gacha-stage-mini{position:absolute;width:64px;height:64px;transform-origin:50% 50%}
+.gacha-stage-mini canvas{display:block;width:64px;height:64px;image-rendering:pixelated}
+.gacha-stage-mini-tag{position:absolute;left:50%;top:100%;transform:translate(-50%,1px);font:700 12px Galmuri9;color:#fff3d1;white-space:nowrap;text-shadow:1px 1px #2a1608,-1px 0 #2a1608,0 -1px #2a1608,1px 0 #2a1608}
+.gacha-stage-mini-tag.is-new{color:#ffe27a}
+.gacha-stage-title{position:absolute;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;transform-origin:50% 0}
+.gacha-stage-name{font:700 30px/1.15 Galmuri11;color:#fff6dc;white-space:nowrap;text-shadow:2px 2px #2a1608,-1px -1px #2a1608,1px -1px #2a1608,-1px 1px #2a1608,0 0 14px rgba(255,222,150,.8)}
+.gacha-stage.tier-rare .gacha-stage-name{text-shadow:2px 2px #24103a,-1px -1px #24103a,1px -1px #24103a,-1px 1px #24103a,0 0 14px rgba(196,150,255,.85)}
+.gacha-stage-tier{font:700 14px Galmuri9;color:#f4f6ff;text-shadow:1px 1px #20180f,-1px 0 #20180f,0 -1px #20180f}
+.gacha-stage-tier.tier-rare{color:#e6cfff;text-shadow:1px 1px #2a1640,-1px 0 #2a1640,0 -1px #2a1640}
+.gacha-stage-ribbon{margin:0}
+.gacha-stage-status{font:700 13px Galmuri9;color:#efdcb8;text-shadow:1px 1px #20140a,-1px 0 #20140a}
+.gacha-stage-status.is-new{color:#ffe27a}
+.gacha-stage-skip{position:absolute;right:10px;bottom:calc(14px + env(safe-area-inset-bottom));min-height:44px;margin:0;padding:10px 12px;border:0;background:none;box-shadow:none;font:700 12px Galmuri9;color:#f4e2c0;text-shadow:1px 1px #000;cursor:pointer}
+.gacha-stage-skip:focus:not(:focus-visible){outline:none}
+
+/* 무대에서 이미 공개했으므로 결과 카드는 뒤집기·도장 팝 없이 바로 앞면으로 선다(.from-stage). */
+.reveal-card.from-stage .reveal-card-back{display:none}
+.reveal-card.from-stage .reveal-card-front{animation:none;transform:none}
+.reveal-card.from-stage .reveal-stamp{animation:none;transform:rotate(-12deg)}
+.reveal-multi-card.from-stage,.reveal-multi-card.from-stage.is-best{animation:none;opacity:1;transform:none}
+
+/* 중복 환급 배지: 카드 아래 독립 배지(기존 전투력 판 cp-plate-v47 426×84 wide3, 표시 28px = 3x, 캡 24 = 5.6% → 8px).
+   카드 장식(보유 도장·테두리)과 겹치지 않는 자리다. 5회 카드에서는 18px(캡 5px) 작은 판. */
+.gacha-dup-badge{display:flex;align-items:center;justify-content:center;gap:4px;width:max-content;max-width:100%;height:28px;margin:0 auto 10px;padding:0 4px;
+  border-style:solid;border-color:transparent;border-width:0 8px;border-image-source:url(/blockhero-site/play/assets/final/ui/v47/cp-plate-v47.png);border-image-slice:0 5.6% fill;border-image-width:0 8px;border-image-repeat:stretch;
+  font:700 12px Galmuri9;color:#ffe9b8;text-shadow:1px 1px #3a1f08;white-space:nowrap}
+.gacha-dup-badge .token-icon{width:14px;height:14px}
+.gacha-dup-badge.is-mini{height:18px;margin:1px auto 0;padding:0 1px;border-width:0 5px;border-image-width:0 5px;font-size:8px;gap:2px}
+/* 증표가 재화 칸으로 날아가는 연출(JS가 rAF로 위치를 준다). 유령 칩은 실제 상단 증표 칩과 같은 글자 스타일이다. */
+.gacha-token-fly{position:fixed;left:0;top:0;z-index:5;pointer-events:none;width:22px;height:22px}
+.gacha-wallet-ghost{position:fixed;z-index:5;pointer-events:none;display:inline-flex;align-items:center;gap:5px;font:12px Galmuri11;color:#eadbff;white-space:nowrap}
+.gacha-wallet-ghost .currency-num{color:#e9dcff}

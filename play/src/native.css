@@ -1,0 +1,6 @@
+/* 노치·홈 인디케이터 영역은 기존 게임 화면의 safe-area 규칙으로 확보한다. */
+.native-app{background:#ead09b;overscroll-behavior:none}
+.native-app body{overscroll-behavior:none;-webkit-touch-callout:none}
+#native-save-notice{position:fixed;z-index:10000;bottom:calc(12px + env(safe-area-inset-bottom));left:12px;right:12px;padding:14px;background:#fff1cf;color:#4a3020;border:3px solid #87572c;font:13px/1.6 Galmuri11,sans-serif}
+#native-save-notice button,#native-start-error button{display:block;margin:12px auto 0;padding:12px 18px;background:#557a31;color:#fff6dd;border:2px solid #354e21;font:inherit}
+#native-start-error{position:fixed;inset:0;z-index:10001;padding:calc(80px + env(safe-area-inset-top)) 24px 40px;background:#ead09b;color:#4a3020;text-align:center;font:16px/1.8 Galmuri11,sans-serif}

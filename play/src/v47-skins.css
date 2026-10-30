@@ -1,0 +1,113 @@
+/* HERO-SKINS-HALLOWEEN-V1 v2: 스킨 탭·획득 연출·상점 스킨 칸·카드 배지·축제 아이콘.
+   표면은 전부 전용 에셋으로 그린다(저장소 CLAUDE.md "UI 표면은 맞춤형 에셋으로", tests/v47-surface.test.mjs).
+   - 카드: 공용 영웅 카드(hero-card-frame-a-v47, 선택 행 = 지금 미리보는 카드).
+   - 미리보기 무대 테두리: camp-stage-frame-v47 9분할(편성 무대와 같은 slice 19.19%/10.75%).
+   - 착용 배지: skin-badge-v47 54×54(표시 18px = 3x, 1:1 aspect-ratio 고정).
+   - 새 옷 리본: skin-ribbon-v47 539×120 wide3(표시 40px = 3x, 캡 32% = 57.5px).
+   - 축제 아이콘: event-icon-halloween-v47 114×114(쉼터 도구 열 nav-icon, 표시 38px = 3x).
+   - 2026-10-16 대표 피드백("착용 중 씰 너무 못생겼는데 크기가 왜 이래"): 카드 우상단의 큰 주황
+     원형 "착용 중" 도장(skin-worn-seal-v47)을 없앴다 — 카드 하단 판 "착용 중" 텍스트와 공용
+     금색 선택 테두리(is-selected)만으로 표현한다(hero-card.mjs·skin-view.mjs). */
+
+.icon-halloween{--menu-icon:url(/blockhero-site/play/assets/final/ui/v47/event-icon-halloween-v47.png)}
+/* 수확제 변형(EVENT-NOVEMBER-V1 U1~U3): 에셋은 src/event-art.mjs 표에서 켠 것만 :root 변수로 들어온다. 변수가 없으면 none —
+   할로윈 그림으로 떨어지지 않는다(아이콘 칸은 비고, 리본은 글자만, 배지는 없다). */
+.icon-harvest{--menu-icon:var(--event-icon-harvest,none)}
+
+/* 공용 카드 위 배지·점 */
+.hero-card-v47 .hero-card-skin-badge{
+  position:absolute;right:calc(8.772% + 1px);top:calc(60.526% - 19px * var(--cs));z-index:2;pointer-events:none;
+  width:calc(18px * var(--cs));height:auto;aspect-ratio:1;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/skin-badge-v47.png);background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated;
+}
+.hero-card-v47 .hero-card-skin-badge[data-event=harvest]{background-image:var(--event-badge-harvest,none)}
+.hero-card-v47 .hero-card-dot{right:-4px;top:-6px;z-index:5}
+
+/* 도감 요약 줄 오른쪽 "정보/스킨" 전환. 2026-10-16(대표 피드백 "정보/스킨 탭도 더 이쁜 UI를,
+   지금 너무 투박하고 크게 보인다"): 폭 148px짜리 큰 갈색 세그먼트 두 칸(상점·원정 탭군과 같은
+   .mode-tabs 나무 레일+판)을 작은 아이콘 버튼 2개로 교체했다(시안 비교는 docs/UI-BESPOKE-V25.md).
+   icon-btn-bespoke(이미 상단바 아이콘 프레임으로 쓰이는 리벳 프레임, 40px 셀)을 그대로 재사용해
+   — 범용 프레임을 늘려 쓴 게 아니라 "작은 아이콘 버튼"이라는 이미 확립된 패턴을 그대로 가져온
+   것이라 톤이 어긋나지 않는다. 선택 상태는 같은 프레임의 눌림(pressed) 버전 + brightness/saturate
+   필터로 구분한다(상점/원정 탭의 ::before 판 오버레이 방식과 다름, 프레임 대비만으로 충분).
+   2026-10-16(2차 수정, 대표 지적: "정보/스킨" 글자가 프레임 하단 테두리에 겹쳐 잘려 보인다):
+   리벳 프레임 안쪽 여백은 20px 아이콘 하나 넣기에도 빠듯해 라벨까지 같이 넣으면 항상 밑변에
+   걸렸다. 라벨을 버튼(프레임) 밖으로 빼서 프레임과 3px 띄워 아래에 둔다(기존 작은 라벨 텍스트
+   크기 8px Galmuri9 그대로, `.refuge-tools b`와 같은 패턴). */
+body[data-screen=heroes] .hero-dossier-compact .hero-summary.has-dossier-tabs{grid-template-columns:58px minmax(0,1fr) auto}
+.hero-summary .dossier-tabs{display:flex;gap:8px;margin:0;flex:none}
+.hero-summary .dossier-tabs .dossier-tab{display:flex;flex-direction:column;align-items:center;gap:3px}
+.hero-summary .dossier-tabs button{
+  position:relative;width:40px;height:40px;padding:0;margin:0;
+  display:grid;place-items:center;
+  border:0;border-radius:0;background:none;box-shadow:none;
+}
+html[data-ui-art=ready] .hero-summary .dossier-tabs button{
+  background-image:var(--ui-icon-btn-top-40);background-size:contain;background-repeat:no-repeat;background-position:center;
+}
+html[data-ui-art=ready] .hero-summary .dossier-tabs button[aria-selected=true]{
+  background-image:var(--ui-icon-btn-top-pressed-40);filter:brightness(1.18) saturate(1.25);
+}
+.hero-summary .dossier-tabs button:not([aria-selected=true]){opacity:.72}
+.hero-summary .dossier-tabs .dossier-tab-icon{width:20px;height:20px;background-position:center;background-repeat:no-repeat;background-size:contain;filter:drop-shadow(0 1px #301c1766)}
+.hero-summary .dossier-tabs .dossier-tab-icon-info{background-image:var(--ui-dex-tab-icon-info)}
+.hero-summary .dossier-tabs .dossier-tab-icon-skin{background-image:var(--ui-dex-tab-icon-skin)}
+.hero-summary .dossier-tabs .dossier-tab-label{font:8px Galmuri9;color:#8a6243;font-weight:400;line-height:1}
+.hero-summary .dossier-tabs .notification-dot{right:-3px;top:-5px}
+.hero-summary.has-dossier-tabs .hero-description{min-width:0}
+body[data-screen=heroes] .hero-summary.has-dossier-tabs .hero-description>small{display:block;white-space:normal;word-break:keep-all;line-height:1.35}
+@media (max-width:359px){
+  body[data-screen=heroes] .hero-dossier-compact .hero-summary.has-dossier-tabs{grid-template-columns:48px minmax(0,1fr) auto;gap:6px}
+  .hero-summary .dossier-tabs{gap:6px}
+  .hero-summary .dossier-tabs button{width:36px;height:36px}
+  .hero-summary .dossier-tabs .dossier-tab-icon{width:18px;height:18px}
+  .hero-summary .dossier-tabs .dossier-tab-label{font-size:7px}
+  body[data-screen=heroes] .hero-summary.has-dossier-tabs .hero-description>small{font-size:10px;letter-spacing:-.3px}
+}
+
+/* 스킨 탭 */
+.skin-tab{margin:2px 0 0}
+/* v3(2026-10-16 사용자 제보): 스킨 탭에서 보유 영웅 그리드가 너무 줄었다 — 명성 띠 제거(app-shell.css
+   renown-topbar-chip)와 함께, 미리보기 무대도 답답해지지 않는 선에서 낮춘다(366/196 → 366/160). */
+.skin-stage{position:relative;aspect-ratio:366/160;margin:2px 0 6px;--stage-fw:18px;--celebrate-gl-z:1;--celebrate-gl-x:calc(var(--stage-fw) * .45);--celebrate-gl-y:calc(var(--stage-fw) * .45)}
+.skin-stage-canvas{position:absolute;left:calc(var(--stage-fw) * .45);top:calc(var(--stage-fw) * .45);width:calc(100% - var(--stage-fw) * .9);height:calc(100% - var(--stage-fw) * .9);display:block;image-rendering:pixelated;z-index:0}
+.skin-stage-frame{position:absolute;inset:0;z-index:2;pointer-events:none;
+  border-style:solid;border-width:var(--stage-fw);border-image-source:url(/blockhero-site/play/assets/final/ui/v47/camp-stage-frame-v47.png);
+  border-image-slice:19.19% 10.75%;border-image-width:var(--stage-fw);border-image-repeat:stretch}
+.skin-stage-name{position:absolute;left:calc(var(--stage-fw) + 4px);top:calc(var(--stage-fw) + 2px);z-index:3;
+  font:700 12px/1.2 Galmuri11,monospace;color:#fff6df;white-space:nowrap;text-shadow:1px 1px #2b1708,-1px 0 #2b1708,0 -1px #2b1708,1px 0 #2b1708}
+html[data-ui-art=ready] .skin-stage .skin-attack-button{
+  position:absolute;right:calc(var(--stage-fw) + 2px);bottom:calc(var(--stage-fw) + 2px);z-index:4;
+  --button-height:34px;height:34px!important;min-height:34px!important;width:auto;min-width:104px;margin:0;padding:0 22px!important;
+  font:700 11px Galmuri11,monospace;color:#512e12;white-space:nowrap}
+.skin-cards-v47.hero-tabs-v47{padding:0 0 4px;gap:8px}
+.skin-action-cell{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:6px;min-width:0}
+html[data-ui-art=ready] .skin-action-cell .train-button{--button-height:38px;height:38px!important;min-height:38px!important;margin:0;width:100%;padding:0 4px;display:flex;align-items:center;justify-content:center;white-space:nowrap;font:700 13px/1 Galmuri11,monospace}
+.skin-cond{margin:0;font:11px/1.5 Galmuri11,monospace;color:#73502f;text-align:center;word-break:keep-all}
+.skin-cond small{font:10px/1.5 Galmuri11,monospace;color:#8a6440}
+.skin-cond .token-icon{width:11px;height:11px;vertical-align:-1px;margin:0 1px}
+@media (max-height:700px){
+  .skin-stage{aspect-ratio:366/128;--stage-fw:14px;margin:2px 0 6px}
+  html[data-ui-art=ready] .skin-stage .skin-attack-button{--button-height:28px;height:28px!important;min-height:28px!important;min-width:84px;padding:0 16px!important;font-size:10px}
+}
+
+/* 획득 연출(#recruit-dialog) */
+.skin-reveal-ribbon{width:max-content;margin:6px auto 0;height:40px;padding:0 4px;display:flex;align-items:center;justify-content:center;
+  border-style:solid;border-color:transparent;border-width:0 57px;border-image-source:url(/blockhero-site/play/assets/final/ui/v47/skin-ribbon-v47.png);
+  border-image-slice:0 32% fill;border-image-width:0 57px;border-image-repeat:stretch;
+  font:700 15px Galmuri9,monospace;color:#fff3d1;text-shadow:1px 1px #2a0b3f,-1px 0 #2a0b3f,0 -1px #2a0b3f;white-space:nowrap}
+.reveal-card.skin-reveal .reveal-card-front{transform:scale(.6);opacity:0;animation:skin-reveal-pop .45s .25s cubic-bezier(.2,1.5,.5,1) forwards}
+.skin-reveal-ribbon[data-event=harvest]{border-image-source:var(--event-ribbon-harvest,none)}
+@keyframes skin-reveal-pop{to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.reveal-card.skin-reveal .reveal-card-front{animation:none;transform:none;opacity:1}}
+
+/* 상점 스킨 칸 */
+.skin-shop-note{text-align:center}
+/* W7 4벌 세트 배너: 표면은 바깥 .recruit-offer 판을 그대로 쓰고, 글자 두 줄 + 기존 금색 버튼만 세로로 쌓는다(새 배경·테두리 없음). */
+.skin-set-offer{display:flex;flex-direction:column;align-items:center;gap:4px;padding:6px 10px 12px;text-align:center}
+.skin-set-title{font:700 12px/1.4 Galmuri11,monospace;color:#73502f;word-break:keep-all}
+.skin-set-sub{font:10px/1.5 Galmuri11,monospace;color:#8a6440;word-break:keep-all}
+.skin-set-offer .skin-set-buy{margin:2px 0 0;min-width:120px}
+.reveal-card.no-motion.skin-reveal .reveal-card-front{animation:none;transform:none;opacity:1}
+/* 판매 종료(미보유) 한정판 카드: 살짝 어둡게. 보유 카드는 그대로 둔다. */
+.shop-skin-card-v47.is-ended{filter:brightness(.72)}

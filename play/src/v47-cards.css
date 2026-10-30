@@ -1,0 +1,137 @@
+/* V47 WS-CARD: 공용 카드(src/ui/hero-card.mjs) 실제 모양. 등급 테두리·이름 리본·수치판·포지션 배지·
+   선택 상태는 전용 에셋(assets/final/ui/v47/*-v47.png)의 background-image/border-image로만
+   그린다(저장소 CLAUDE.md "UI 표면은 맞춤형 에셋으로" — 단색 배경·border·box-shadow 금지).
+   시안 A(왕국 수집 카드, 2026-10-14 대표 선택, docs/V47-ART-AUDIT.md §8): 셀 342×456 = 114×152 도트(390폭
+   편성 카드 CSS px, 3배 규칙). 초상 창 x10~104·y10~104 도트, 리본 y92~110(셀 전폭), 수치판 x12~102·y110~140.
+   %는 이 도트 좌표를 셀 크기로 나눈 값이다(가로 114, 세로 152). 왕관·리본 꼬리·선택 링은 셀 여백(4도트) 안이다. */
+
+/* 레거시 .hero-tabs button 규칙(app-shell.css 양피지 칩, ui-art.css 공유 --frame 9분할 액자)이 카드 바깥에
+   액자를 한 겹 더 씌워 카드가 75%로 줄고 흐려지던 문제(V47-ART-AUDIT B2)를 끊는다. 공유 액자 규칙은
+   :is(… #app-toast) 목록 안에 ID가 있어 특이도가 (1,1,1)이다 — 클래스만으로는 못 이긴다. #app-shell 범위를
+   붙여 (1,3,1)로 이긴다. 다이얼로그(#relic-dialog 등)는 #app-shell 안에 있다. */
+.hero-card-v47.hero-card-v47.hero-card-v47,
+html[data-ui-art] #app-shell .hero-card-v47.hero-card-v47{
+  position:relative;display:block;width:100%;height:auto;min-height:0;aspect-ratio:3/4;margin:0;padding:0;
+  border:0;border-image:none;background:none;box-shadow:none;border-radius:0;outline-offset:2px;
+  color:inherit;-webkit-tap-highlight-color:transparent;cursor:pointer;
+}
+/* --cs: 카드 폭 / 114(390폭 편성 카드). 글자·배지 크기를 카드에 맞춰 줄이고 키운다(iOS 15라 cqw를 못 쓴다).
+   카드 폭이 정해지는 그리드·시트마다 아래 미디어 쿼리에서 실측값으로 준다. */
+.hero-card-v47{--cs:1}
+@media (max-width:359px){.shop-hero-grid .hero-card-v47{--cs:.75}.hero-tabs-v47 .hero-card-v47{--cs:.8}}
+@media (min-width:420px){.shop-hero-grid .hero-card-v47{--cs:1.07}.hero-tabs-v47 .hero-card-v47{--cs:1.1}}
+/* 미보유 = is-unowned(Lv 없음, 수치판에 가격·등급). 초상 실루엣은 is-silhouette가 따로 맡는다 — 구매 탭은
+   사려는 영웅이 보여야 해서 실루엣을 끈다(heroCardHtml silhouette:false). 카드 전체를 회색으로 죽이지 않는다
+   (V47-ART-AUDIT §5-4). */
+.hero-card-v47.is-silhouette .hero-card-portrait canvas{filter:brightness(0) opacity(.45)}
+.hero-card-v47.is-selected .hero-card-portrait{filter:brightness(1.08)}
+
+/* hero-card-frame-a-v47.png: 342×456 셀 3열(normal/rare/legendary)×2행(기본/선택), 1026×912. 초상 창·수치판
+   자리는 투명. 선택 행 = 기본 행 프레임 픽셀 그대로 + 바깥 여백에 계단식 링(카드가 들썩이지 않는다). */
+.hero-card-v47 .hero-card-frame{
+  position:absolute;inset:0;pointer-events:none;z-index:1;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/hero-card-frame-a-v47.png);
+  background-repeat:no-repeat;background-size:300% 200%;background-position:0% 0%;
+}
+.hero-card-v47.tier-rare .hero-card-frame{background-position:50% 0%}
+.hero-card-v47.tier-legendary .hero-card-frame{background-position:100% 0%}
+.hero-card-v47.is-selected .hero-card-frame{background-position:0% 100%}
+.hero-card-v47.is-selected.tier-rare .hero-card-frame{background-position:50% 100%}
+.hero-card-v47.is-selected.tier-legendary .hero-card-frame{background-position:right bottom}
+
+/* 초상: 창(94×94 도트)을 폭 기준으로 가득 채운다. 64:72 초상이라 무릎 아래만 리본 뒤로 잘린다. */
+.hero-card-v47 .hero-card-portrait{
+  position:absolute;left:8.772%;top:6.579%;width:82.456%;height:61.842%;overflow:hidden;pointer-events:none;z-index:0;
+}
+.hero-card-v47 .hero-card-portrait canvas{
+  position:absolute;left:0;top:0;display:block;width:100%;height:auto;aspect-ratio:64/72;max-width:none;object-fit:contain;image-rendering:pixelated;
+}
+
+/* 수치판(hero-card-plate-v47.png 810×90 = 270×90 × 3등급, 표시 30px = 3x): 프레임의 수치판 자리를 정확히 덮는다. */
+.hero-card-v47 .hero-card-plate{
+  position:absolute;left:10.526%;top:72.368%;width:78.947%;height:19.737%;z-index:2;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;padding-top:2.6%;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/hero-card-plate-v47.png);background-repeat:no-repeat;
+  background-size:300% 100%;background-position:0% 0%;
+}
+.hero-card-v47.tier-rare .hero-card-plate{background-position:50% 0%}
+.hero-card-v47.tier-legendary .hero-card-plate{background-position:100% 0%}
+.hero-card-v47 .hero-card-cp{
+  display:flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;overflow:hidden;max-width:92%;
+  font:700 max(10px,calc(14px * var(--cs)))/1.2 Galmuri11,monospace;letter-spacing:-.3px;color:#fff3cf;text-shadow:1px 1px #1b0d04;
+}
+.hero-card-v47 .hero-card-cp .token-icon{flex:none;width:calc(12px * var(--cs));height:calc(12px * var(--cs));margin:0}
+
+/* 이름 리본(hero-card-ribbon-v47.png 1026×54 = 342×54 × 3등급, 표시 18px = 3x): 셀 전폭, 초상 아래 끝에 걸친다. */
+.hero-card-v47 .hero-card-ribbon{
+  position:absolute;left:0;right:0;top:60.526%;height:11.842%;z-index:3;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;padding:0 16% 1.3%;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/hero-card-ribbon-v47.png);background-repeat:no-repeat;
+  background-size:300% 100%;background-position:0% 0%;
+}
+.hero-card-v47.tier-rare .hero-card-ribbon{background-position:50% 0%}
+.hero-card-v47.tier-legendary .hero-card-ribbon{background-position:100% 0%}
+.hero-card-v47 .hero-card-name{
+  overflow:hidden;white-space:nowrap;
+  font:700 max(8px,calc(10px * var(--cs)))/1.25 Galmuri11,monospace;letter-spacing:-.2px;color:#4a2a10;text-shadow:0 1px #f6e2b4;
+}
+/* U11(docs/LOCALIZATION-PLAN.md §6-2): 영문 스킨 이름("Pumpkin Knight"·"Default Outfit" 등)이 ko
+   기준 10px에서 카드 폭을 넘겨 잘렸다(scrollWidth, OVERFLOW_PROBE). 영문에서만 살짝 줄인다. */
+:lang(en) .hero-card-v47 .hero-card-name{font:700 max(7px,calc(8.5px * var(--cs)))/1.25 Galmuri11,monospace;}
+.hero-card-v47.tier-rare .hero-card-name{color:#fff6ff;text-shadow:1px 1px #3a1660}
+.hero-card-v47.tier-legendary .hero-card-name{color:#fff4d8;text-shadow:1px 1px #5a0610}
+
+/* 포지션 배지(position-icons-v47.png 54×54 칸, 표시 18px = 3x): 초상 창 좌상단 안쪽. */
+.hero-card-v47 .hero-card-pos{
+  position:absolute;left:calc(8.772% + 1px);top:calc(6.579% + 1px);z-index:2;width:calc(18px * var(--cs));height:calc(18px * var(--cs));pointer-events:none;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/position-icons-v47.png);background-repeat:no-repeat;
+  background-size:400% 100%;
+}
+.hero-card-v47 .hero-card-pos-0{background-position:0% 0%}
+.hero-card-v47 .hero-card-pos-1{background-position:33.3333% 0%}
+.hero-card-v47 .hero-card-pos-2{background-position:66.6667% 0%}
+
+/* 레벨판(wide3 lv-badge-v47.png 96×48, 표시 16px = 3x, 캡 24 = 25%): 포지션 배지 오른쪽, 같은 줄. */
+.hero-card-v47 .hero-card-lv{
+  position:absolute;left:calc(8.772% + 20px * var(--cs));top:calc(6.579% + 2px * var(--cs));z-index:2;height:calc(16px * var(--cs));padding:0;
+  display:flex;align-items:center;justify-content:center;white-space:nowrap;pointer-events:none;
+  border-style:solid;border-color:transparent;border-width:0 calc(8px * var(--cs));
+  border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47.png);border-image-slice:0 25% fill;border-image-width:0 calc(8px * var(--cs));border-image-repeat:stretch;
+  font:max(7px,calc(8px * var(--cs)))/1 Galmuri9,monospace;color:#fff6df;text-shadow:1px 1px #4a2c10;
+}
+/* HERO-LV100-PLAN.md D3(2026-10-22 2차: 10레벨마다 다른 색, 대표 피드백 "레벨별로 오라 색상을 아예
+   다르게"). 10단계(Lv10·20·…·100, docs/UI-BESPOKE-V25.md). 자리·크기·글자 정렬은 위 .hero-card-lv와
+   완전히 같다 — border-image-source만 바뀐다(같은 알파 마스크의 재채색이라 카드 모서리 기준 위치가
+   10단계 모두 같다, tests/ui/hero-badge-tier.test.mjs). */
+.hero-card-v47 .hero-card-lv.tier-1{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier1.png);color:#4a443c;text-shadow:1px 1px #fff8ea}
+.hero-card-v47 .hero-card-lv.tier-2{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier2.png);color:#2b3a12;text-shadow:1px 1px #eaffc8}
+.hero-card-v47 .hero-card-lv.tier-3{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier3.png)}
+.hero-card-v47 .hero-card-lv.tier-4{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier4.png)}
+.hero-card-v47 .hero-card-lv.tier-5{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier5.png)}
+.hero-card-v47 .hero-card-lv.tier-6{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier6.png)}
+.hero-card-v47 .hero-card-lv.tier-7{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier7.png)}
+.hero-card-v47 .hero-card-lv.tier-8{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier8.png)}
+.hero-card-v47 .hero-card-lv.tier-9{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier9.png)}
+.hero-card-v47 .hero-card-lv.tier-10{border-image-source:url(/blockhero-site/play/assets/final/ui/v47/lv-badge-v47-tier10.png)}
+
+/* 오늘의 영웅 별(.ico-star): 초상 창 우상단, 순번 배지(셀 우상단 20px) 아래. */
+.hero-card-v47 .hero-card-featured{position:absolute;right:calc(8.772% + 2px);top:calc(23px * var(--cs));z-index:2;width:calc(12px * var(--cs));height:calc(12px * var(--cs));margin:0;pointer-events:none}
+
+/* 선택 순서 배지(1/2/3, order-badge-v47.png 180×60 = 60 × 3칸, 표시 20px = 3x): 셀 우상단 모서리 캡 위. */
+.hero-card-v47 .hero-card-order{
+  position:absolute;top:0;right:0;width:calc(20px * var(--cs));height:calc(20px * var(--cs));z-index:4;
+  display:flex;align-items:center;justify-content:center;
+  background-image:url(/blockhero-site/play/assets/final/ui/v47/order-badge-v47.png);background-repeat:no-repeat;background-size:300% 100%;
+  font:700 max(8px,calc(11px * var(--cs)))/1 Galmuri9,monospace;color:#3b2110;text-shadow:none;pointer-events:none;
+}
+.hero-card-v47 .hero-card-order-1{background-position:0% 0%}
+.hero-card-v47 .hero-card-order-2{background-position:50% 0%;color:#2a2a2a}
+.hero-card-v47 .hero-card-order-3{background-position:100% 0%;color:#fff1e0}
+
+/* HERO-LV100-PLAN.md D3: 각성 Ⅲ(Lv100) 코너 보석(awaken-gem-v47.png 48×48 = 16px 3x). 카드 프레임 우하단 리벳
+   (342×456 셀 기준 x309·y423 = 카드 114×152의 103·141)을 덮는다. 순번(우상단)·Lv·포지션(좌상단)·추천 별·스킨 배지
+   (초상 창 안)과 자리가 겹치지 않는다(tests/ui/hero-lv-tier.test.mjs D3). */
+.hero-card-v47 .hero-card-gem{
+  position:absolute;right:calc(2.8px*var(--cs));bottom:calc(2.8px*var(--cs));width:calc(16px*var(--cs));aspect-ratio:1/1;z-index:3;pointer-events:none;
+  background:url(/blockhero-site/play/assets/final/ui/v47/awaken-gem-v47.png) 0 0/contain no-repeat;image-rendering:pixelated;
+}

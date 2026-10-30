@@ -1,0 +1,52 @@
+/* 공지사항 게시판(docs/NOTICE-BOARD-PLAN.md W3, 2026-10-20 2차 재설계 — 대표 피드백: "배경 액자 빼 버리는
+   게 나을 것 같아, 너무 조잡하다"). 목록·상세는 액자(9분할 패널) 없이 화면 배경 톤(.recruit-offer·
+   .records-grid와 같은 "화면 배경색" 취급 — 카드·프레임이 아니라 CSS 규칙 범위 밖, docs/UI-CSS-AUDIT-V32.md
+   대상 5) 위에 바로 올린다. 행 구분은 기존 divider-dashed(점선 테두리 이미지, 레퍼런스 패턴 1·2) 하나로만
+   한다. 유형 배지는 formation-filter-chip 재사용(배경은 bespoke 에셋), 홈 진입 타일은 .refuge-tools button
+   기존 표면을 그대로 쓴다. */
+.notice-list-view,.notice-detail-view{background:#f8e8c7;padding:16px 18px 32px;margin:0}
+.notice-row-list{display:flex;flex-direction:column}
+.notice-row{
+ display:flex;flex-direction:column;align-items:flex-start;gap:4px;width:100%;min-height:68px;
+ padding:14px 4px;text-align:left;background:none;border:0;border-radius:0;box-shadow:none;color:#5a3a1e;
+}
+html[data-ui-art=ready] .notice-row+.notice-row{
+ border-color:transparent;border-style:solid;box-shadow:none;
+ border-width:3px 0 0 0;
+ border-image-source:var(--ui-divider-dashed-wide);
+ border-image-slice:var(--ui-divider-dashed-slice) 0 0 0;
+ border-image-repeat:round;
+}
+.notice-row-meta{display:flex;align-items:center;gap:6px}
+.notice-row-title{font:700 15px Galmuri9;word-break:keep-all;overflow-wrap:anywhere;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;width:100%}
+.notice-row-foot{display:flex;align-items:center;gap:6px}
+.notice-row-date{font:10px Galmuri9;color:#8b6a44}
+.notice-active-band{font:10px Galmuri9;color:#8a4a1e;font-weight:700}
+/* 유형 배지: 모든 유형이 같은 .formation-filter-chip 칩 에셋을 그대로 쓴다(hue-rotate 색 변형 금지 —
+   2026-10-20 대표 피드백 "이벤트만 초록으로 바뀐 이미지가 어색하다"). 유형 구분은 글자 색만으로 한다.
+   기본 상태가 formation-filter-chip의 미선택(opacity .62) 특이도를 이겨야 흐려 보이지 않는다
+   (대표 피드백 "유형 배지가 흐릿하게 보인다" — html[data-ui-art=ready] 접두로 특이도를 맞춘다). */
+.notice-type-badge{flex:none}
+html[data-ui-art=ready] .notice-type-badge{opacity:1;font-weight:700;font-size:11px;image-rendering:pixelated}
+html[data-ui-art=ready] .notice-type-badge[data-type=notice],
+html[data-ui-art=ready] .notice-type-badge[data-type=pinned]{color:#ffe9ae}
+html[data-ui-art=ready] .notice-type-badge[data-type=update]{color:#6fb8ff}
+html[data-ui-art=ready] .notice-type-badge[data-type=event]{color:#5fd87a}
+html[data-ui-art=ready] .notice-type-badge[data-type=maintenance]{color:#ff8c7a}
+.notice-row .notification-dot{position:static;flex:none}
+.notice-pin-mark{flex:none;font-size:11px}
+.notice-detail-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.notice-detail-meta{font:10px Galmuri9;color:#8b6a44}
+.notice-detail-title{font:700 17px Galmuri9;word-break:keep-all;overflow-wrap:anywhere;margin:8px 0 16px;line-height:1.5}
+.notice-detail-img{width:100%;height:auto;margin-bottom:16px;display:block}
+.notice-body p{font:12px/1.85 Galmuri9;margin:0 0 16px;word-break:keep-all;overflow-wrap:anywhere}
+.notice-body ul{margin:0 0 16px;padding-left:20px}
+.notice-body li{font:12px/1.75 Galmuri9;word-break:keep-all;overflow-wrap:anywhere;margin-bottom:4px}
+.notice-body .notice-inline-link{display:inline;background:none;border:0;padding:0;margin:0;color:#9a5a24;text-decoration:underline;font:inherit;cursor:pointer}
+.notice-detail-actions{display:flex;flex-direction:column;gap:8px;margin-top:20px}
+.notice-empty{text-align:center;color:#8b6a44;font:11px Galmuri9;padding:24px 0}
+/* 팝업: 전용 프레임을 새로 만들지 않고 다른 모든 다이얼로그와 같은 기본 dialog{} 표면(src/app-shell.css)을
+   그대로 쓴다 — 새 조잡한 액자를 또 만들지 않는다는 원칙(레퍼런스 패턴 1·4)을 팝업에도 적용. */
+#notice-dialog{max-width:min(380px,92vw);width:92vw;max-height:80vh;overflow-y:auto}
+#notice-dialog .notice-detail-title{margin-top:4px}
+.notice-popup-actions{display:flex;justify-content:flex-end;margin-top:18px}

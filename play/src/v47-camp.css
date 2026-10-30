@@ -1,0 +1,75 @@
+/* V47 WS-C: 쉼터 강화 화면(src/screens/camp-view.mjs) 스타일(docs/OVERHAUL-V47.md §6).
+   표면은 전용 에셋(assets/final/ui/v47/{camp-stat-icons,stat-tile,delta-badge,material-icon,
+   camp-stage-frame}-v47.png)뿐이다 — CSS는 레이아웃·글자·에셋 적용·상태 표현만 한다. */
+.camp-v47{display:flex;flex-direction:column;gap:14px;margin:16px}
+
+/* 쉼터 무대: 고정 비율(366:205) 액자 에셋 1장, aspect-ratio로 박스를 고정해 background-size:contain이
+   어떤 폭에서도 찌그러지지 않는다(저장소 ui-art-ratio.test.mjs와 같은 원칙). 액자 안쪽 창(에셋 실측
+   x 10.7~89.3%, y 19.2~80.8%)에는 광장 잔디 조각(plaza-v47-top.png, WS-D)을 깔고, 그 위에 지금 단계와
+   다음 단계 건물 PNG(plaza-building-lv{N}.png, 도트 1배)를 같은 도트 배율로 세운다. */
+.camp-v47-stage{position:relative;--celebrate-gl-z:0;--celebrate-gl-x:10.9%;--celebrate-gl-y:19.4%;aspect-ratio:366/205;background-image:url("/blockhero-site/play/assets/final/ui/v47/camp-stage-frame-v47.png");background-size:contain;background-repeat:no-repeat;background-position:center;image-rendering:pixelated}
+.camp-v47-stage::before{content:"";position:absolute;left:10.9%;right:10.9%;top:19.4%;bottom:19.4%;background-image:url("/blockhero-site/play/assets/final/backgrounds/plaza-v47-top.png");background-size:cover;background-position:50% 62%;image-rendering:pixelated;z-index:0}
+.camp-v47-buildings{position:absolute;left:12%;right:12%;top:21%;bottom:28%;z-index:1;display:flex;align-items:flex-end;justify-content:center;gap:4%}
+.camp-v47-bld{margin:0;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;min-width:0}
+.camp-v47-bld.is-current{flex:0 1 50%}
+.camp-v47-bld.is-next{flex:0 1 40%}
+.camp-v47-buildings.is-single .camp-v47-bld.is-current{flex-basis:70%}
+.camp-v47-bld.is-locked .camp-v47-bld-img{filter:grayscale(.7) brightness(.85)}
+.camp-v47-bld-img{display:block;width:auto;max-width:100%;image-rendering:pixelated;flex:none;object-fit:contain;object-position:50% 100%}
+.camp-v47-bld-arrow{flex:none;align-self:center;margin-bottom:6%;font:700 14px Galmuri9;color:#fff6df;text-shadow:1px 1px #3b2110,-1px 0 #3b2110}
+.camp-v47-stage-label{position:absolute;left:12%;right:12%;top:72.5%;align-items:center;z-index:1;margin:0;display:flex;align-items:baseline;justify-content:center;gap:6px;font:700 11px Galmuri9;color:#fff6df;text-shadow:1px 1px #3b2110,-1px 0 #3b2110,0 -1px #3b2110;white-space:nowrap}
+.camp-v47-stage-label small{font:9px Galmuri9;color:#ffe9b8}
+.camp-v47-stage-label .ico-lock{width:9px;height:10px;margin:0 2px 0 0}
+
+.camp-stat-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.camp-stat-tile{position:relative;aspect-ratio:342/336;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:0;padding:8px 4px 7px;margin:0;cursor:pointer;font:inherit;color:inherit;
+  background-color:transparent;background-image:url("/blockhero-site/play/assets/final/ui/v47/stat-tile-v47.png");background-size:200% 100%;background-position:0 0;background-repeat:no-repeat;image-rendering:pixelated}
+.camp-stat-tile.is-max{background-position:100% 0}
+.camp-stat-icon{width:28px;height:28px;flex:none;aspect-ratio:1;background-image:url("/blockhero-site/play/assets/final/ui/v47/camp-stat-icons-v47.png");background-size:300% 100%;background-repeat:no-repeat;image-rendering:pixelated}
+.camp-stat-icon[data-camp-icon="0"]{background-position:0 0}
+.camp-stat-icon[data-camp-icon="1"]{background-position:50% 0}
+.camp-stat-icon[data-camp-icon="2"]{background-position:100% 0}
+.camp-stat-name{font:9px Galmuri9;color:#8a5a2a;white-space:nowrap}
+.camp-stat-value{font:11px Galmuri9;color:#5a3a1e;white-space:nowrap}
+.camp-max-stamp{font:9px Galmuri9;color:#8a5a2a;letter-spacing:.5px}
+
+/* 증가율 배지: 가로 3분할(wide3) — 좌우 캡만 고정, 위아래는 border-width:0으로 중앙(fill) 이미지가
+   박스 전체 높이를 채운다(button-green-bespoke 등과 같은 패턴, docs/UI-BESPOKE-V25.md §2.2). */
+.camp-delta-badge{display:inline-block;padding:2px 2px;border-style:solid;border-width:0 8px;border-image-source:url("/blockhero-site/play/assets/final/ui/v47/delta-badge-v47.png");border-image-slice:0 16.667% fill;border-image-width:0 8px;border-image-repeat:stretch;color:#eafbe0;font:9px Galmuri9;text-shadow:0 1px #1c3a16}
+
+.camp-cost-row{display:flex;gap:10px;justify-content:center;align-items:center}
+.camp-cost-chip{display:inline-flex;align-items:center;gap:5px;font:11px Galmuri9;color:#6b4b2c}
+.camp-material-icon{display:inline-block;width:18px;height:18px;aspect-ratio:1;background:url("/blockhero-site/play/assets/final/ui/v47/material-icon-v47.png") center/contain no-repeat;image-rendering:pixelated}
+.camp-lock-note{margin:0;display:flex;align-items:center;justify-content:center;font:9px Galmuri9;color:#8a5a2a}
+.camp-lock-note .ico-lock{width:9px;height:10px}
+/* CAMP-LEVEL-EXPANSION C4: 시설 단계 잠금 안내("영웅 3명 평균 Lv.70이 되면 대장간이 열려요")는 길어서 2줄까지 허용(어절 단위). */
+.camp-lock-note{word-break:keep-all;text-align:center;line-height:1.4}
+/* HERO-LV100 L4 보정 한 줄("하트·방패 영웅 Lv 보정 ×1.32") — 글자만(표면 없음). */
+.camp-link-note{margin:-2px 0 0;font:9px Galmuri9;color:#6b4b2c;text-align:center;word-break:keep-all}
+
+/* 다음 단계 혜택 + 7단계 성장 길. 판은 기존 .paper(9분할 종이 에셋), 단계 아이콘은 plaza-building-lv1..7.png(무대와 같은 원본)
+   7칸(120×120, 1:1, WS-D 버튼 아이콘)을 background-size 700%로 고른다. 지난·지금 단계는 그대로,
+   상한 너머는 흑백·어둡게(상태 필터). */
+.camp-v47-perks{margin:0;padding:12px 12px 10px}
+.camp-v47-perks h3{margin:0 0 6px;font:700 11px Galmuri9;color:#5a3a1e}
+.camp-v47-perk-list{margin:0 0 10px;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px}
+.camp-v47-perk-list li{font:10px Galmuri9;color:#6b4b2c}
+.camp-v47-perk-list b{font-weight:700;color:#4f6b2a}
+.camp-v47-steps{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px}
+.camp-v47-step{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.camp-v47-step-icon{display:flex;align-items:flex-end;justify-content:center;width:100%;max-width:40px;aspect-ratio:1}
+.camp-v47-step-icon .camp-v47-bld-img{max-height:100%}
+.camp-v47-step.is-locked .camp-v47-step-icon{filter:grayscale(1) brightness(.75);opacity:.6}
+.camp-v47-step.is-open .camp-v47-step-icon{opacity:.85}
+.camp-v47-cap-note{margin:8px 0 0;font:9px/1.5 Galmuri9;color:#8a6440;text-align:center;word-break:keep-all}
+.camp-v47-step-lv{font:8px Galmuri9;color:#96724a;white-space:nowrap}
+.camp-v47-step.is-current .camp-v47-cap-note{margin:8px 0 0;font:9px/1.5 Galmuri9;color:#8a6440;text-align:center;word-break:keep-all}
+.camp-v47-step-lv{font-weight:700;color:#5a3a1e}
+.camp-v47-step.is-current .camp-v47-step-icon{filter:brightness(1.08)}
+/* 성장 길 2줄(광장 1~7 · 시설 8~12, campExt.maxLevel > 7일 때만). 줄 제목은 글자만. */
+.camp-v47-steps-title{margin:6px 0 3px;font:700 8px Galmuri9;color:#8a6440}
+.camp-v47-steps.is-facility{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+/* 쉼터 강화 연출(celebrate campUpgrade)의 도장·증가 배지를 액자 창 안 건물 위쪽에 띄운다(건물 이름표와 안 겹치게). */
+.camp-v47-stage .celebrate-stamp{top:36%}
+.camp-v47-stage .celebrate-badge{top:52%}
