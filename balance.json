@@ -136,6 +136,11 @@
     "extendDays": 0,
     "startAt": 1792102670606
   },
+  "eventHarvest2026": {
+    "enabled": 1,
+    "extendDays": 0,
+    "startAt": 1793631600000
+  },
   "iapIos": {
     "reviewOpen": 0
   },
