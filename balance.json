@@ -234,5 +234,31 @@
     "tutorial": { "on": 0, "code": "01M5SHFEDCJ05K1QWZHXS1N1CM" },
     "visit3": { "on": 0, "code": "01M5SHKB7BRDCBB69FV36JSHR5" },
     "play5": { "on": 1, "code": "TEST_01M65342HSEMM6KN6HTQGF4NK2" }
-  }
+  },
+  "operatorGiftsIos": [
+    {
+      "id": "g-20261101-ios-thanks",
+      "to": [
+        "*"
+      ],
+      "reward": {
+        "gold": 0,
+        "tokens": 100,
+        "tickets": {
+          "normal": 0,
+          "rare": 0
+        }
+      },
+      "message": "블럭히어로를 즐겨 주셔서 고마워요! 작은 감사 선물이에요.",
+      "expiresAt": "2026-11-15T02:40:42.670Z",
+      "messages": {
+        "ko": "블럭히어로를 즐겨 주셔서 고마워요! 작은 감사 선물이에요.",
+        "en": "Thanks for playing! Here's a small thank-you gift.",
+        "ja": "遊んでくれてありがとう！ささやかなお礼です。",
+        "zh-Hans": "感谢你的游玩！送上一份小小的谢礼。",
+        "zh-Hant": "感謝你的遊玩！送上一份小小的謝禮。",
+        "ar": "شكرًا لأنك تلعب معنا! إليك هدية شكر صغيرة."
+      }
+    }
+  ]
 }
