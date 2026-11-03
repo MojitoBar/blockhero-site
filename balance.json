@@ -263,5 +263,21 @@
         "ar": "شكرًا لأنك تلعب معنا! إليك هدية شكر صغيرة."
       }
     }
+  ],
+  "coupons": [
+    {
+      "id": "c-20261031-launch",
+      "hash": "a11ee4d096770d286218914e75fa69cf8091829cd8dd5c4bc431ef9b7658893c",
+      "reward": {
+        "gold": 3000,
+        "tokens": 100
+      },
+      "expiresAt": "2026-12-31T14:59:59.000Z",
+      "platforms": [
+        "ios",
+        "toss",
+        "android"
+      ]
+    }
   ]
 }
