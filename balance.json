@@ -144,6 +144,9 @@
   "iapIos": {
     "reviewOpen": 0
   },
+  "skinShop": {
+    "offseason": 1
+  },
   "operatorGifts": [
     {
       "id": "g-20261020-830713",
